@@ -29,6 +29,44 @@ export const nyscStatusEnum = pgEnum("nysc_status", [
   "NOT_STARTED",
   "EXEMPTED",
 ]);
+export const accountStatusEnum = pgEnum("account_status", [
+  "pending_activation",
+  "active",
+]);
+
+// Zone Graduates table - Data uploaded by BLW Zones before graduate registration
+export const zoneGraduates = pgTable("zone_graduates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(), // BLW Zone who uploaded
+
+  // Basic graduate information uploaded by zones
+  graduateFirstname: varchar("graduate_firstname", { length: 255 }).notNull(),
+  graduateLastname: varchar("graduate_lastname", { length: 255 }).notNull(),
+  graduateGender: genderEnum("graduate_gender").notNull(),
+  nameOfFellowship: varchar("name_of_fellowship", { length: 255 }).notNull(),
+  nameOfZonalPastor: varchar("name_of_zonal_pastor", { length: 255 }).notNull(),
+  nameOfChapterPastor: varchar("name_of_chapter_pastor", {
+    length: 255,
+  }).notNull(),
+  phoneNumberOfChapterPastor: varchar("phone_number_of_chapter_pastor", {
+    length: 20,
+  }).notNull(),
+  emailOfChapterPastor: varchar("email_of_chapter_pastor", {
+    length: 255,
+  }).notNull(),
+  kingschatIDOfChapterPastor: varchar("kingschat_id_of_chapter_pastor", {
+    length: 100,
+  }),
+
+  // Status tracking
+  isRegistered: boolean("is_registered").default(false), // Has graduate found and registered with this record
+  registeredAt: timestamp("registered_at"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 // Users table - Main authentication and user management
 export const users = pgTable("users", {
@@ -37,7 +75,11 @@ export const users = pgTable("users", {
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).unique().notNull(),
   password: varchar("password", { length: 255 }).notNull(),
-  isActive: boolean("is_active").default(true).notNull(),
+  isDeactivated: boolean("is_deactivated").default(false).notNull(),
+  accountStatus: accountStatusEnum("account_status")
+    .default("pending_activation")
+    .notNull(),
+  createdBy: uuid("created_by"), // Remove the self-reference here
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -48,6 +90,9 @@ export const graduateData = pgTable("graduate_data", {
   userId: uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
+  zoneGraduateId: uuid("zone_graduate_id")
+    .references(() => zoneGraduates.id, { onDelete: "cascade" })
+    .notNull(), // Link to uploaded data
   blwZoneId: uuid("blw_zone_id").references(() => users.id),
   ministryOfficeId: uuid("ministry_office_id").references(() => users.id),
 
@@ -136,6 +181,10 @@ export const graduateData = pgTable("graduate_data", {
   approvedBy: uuid("approved_by").references(() => users.id),
   approvedAt: timestamp("approved_at"),
 
+  // Registration tracking
+  isRegistered: boolean("is_registered").default(false), // Has graduate created their account
+  registeredAt: timestamp("registered_at"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -176,46 +225,48 @@ export const graduateInterviewQuestions = pgTable(
   }
 );
 
-// Additional table for tracking graduate status through the VGSS process
-export const graduateStatus = pgTable("graduate_status", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  graduateDataId: uuid("graduate_data_id")
-    .references(() => graduateData.id, { onDelete: "cascade" })
-    .notNull(),
-
-  // Status flags
-  recordSubmitted: boolean("record_submitted").default(false),
-  recordApproved: boolean("record_approved").default(false),
-  registrationCompleted: boolean("registration_completed").default(false),
-  interviewScheduled: boolean("interview_scheduled").default(false),
-  interviewCompleted: boolean("interview_completed").default(false),
-  trainingCompleted: boolean("training_completed").default(false),
-  placementAssigned: boolean("placement_assigned").default(false),
-  serviceStarted: boolean("service_started").default(false),
-  serviceCompleted: boolean("service_completed").default(false),
-
-  // Dates for tracking
-  submittedAt: timestamp("submitted_at"),
-  approvedAt: timestamp("approved_at"),
-  registeredAt: timestamp("registered_at"),
-  interviewScheduledAt: timestamp("interview_scheduled_at"),
-  interviewCompletedAt: timestamp("interview_completed_at"),
-  trainingCompletedAt: timestamp("training_completed_at"),
-  placementAssignedAt: timestamp("placement_assigned_at"),
-  serviceStartedAt: timestamp("service_started_at"),
-  serviceCompletedAt: timestamp("service_completed_at"),
-
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-// Relations definitions for better querying
-export const usersRelations = relations(users, ({ many }) => ({
-  graduateData: many(graduateData),
-  interviewQuestions: many(graduateInterviewQuestions),
-  submittedGraduates: many(graduateData, { relationName: "blwZone" }),
-  assignedGraduates: many(graduateData, { relationName: "ministryOffice" }),
+// Relations - Updated to include createdBy relationship and zoneGraduates
+export const usersRelations = relations(users, ({ one, many }) => ({
+  // User as graduate
+  ownGraduateData: many(graduateData, { relationName: "userGraduate" }),
+  // User as BLW Zone
+  zoneManagedGraduates: many(graduateData, { relationName: "blwZoneManager" }),
+  // User as Ministry Office
+  officeAssignedGraduates: many(graduateData, {
+    relationName: "ministryOfficeManager",
+  }),
+  // User as approver
+  approvedGraduates: many(graduateData, { relationName: "approver" }),
+  // User as account creator
+  createdAccounts: many(users, { relationName: "accountCreator" }),
+  // User created by
+  createdByUser: one(users, {
+    fields: [users.createdBy],
+    references: [users.id],
+    relationName: "accountCreator",
+  }),
+  // Zone uploaded graduates
+  uploadedGraduates: many(zoneGraduates, { relationName: "zoneUploader" }),
+  // Interview questions
+  interviewQuestions: many(graduateInterviewQuestions, {
+    relationName: "interviewUser",
+  }),
+  reviewedInterviews: many(graduateInterviewQuestions, {
+    relationName: "reviewer",
+  }),
 }));
+
+export const zoneGraduatesRelations = relations(
+  zoneGraduates,
+  ({ one, many }) => ({
+    uploadedByZone: one(users, {
+      fields: [zoneGraduates.userId],
+      references: [users.id],
+      relationName: "zoneUploader",
+    }),
+    graduateData: many(graduateData, { relationName: "linkedZoneGraduate" }),
+  })
+);
 
 export const graduateDataRelations = relations(
   graduateData,
@@ -223,24 +274,31 @@ export const graduateDataRelations = relations(
     user: one(users, {
       fields: [graduateData.userId],
       references: [users.id],
+      relationName: "userGraduate",
+    }),
+    zoneGraduate: one(zoneGraduates, {
+      fields: [graduateData.zoneGraduateId],
+      references: [zoneGraduates.id],
+      relationName: "linkedZoneGraduate",
     }),
     blwZone: one(users, {
       fields: [graduateData.blwZoneId],
       references: [users.id],
-      relationName: "blwZone",
+      relationName: "blwZoneManager",
     }),
     ministryOffice: one(users, {
       fields: [graduateData.ministryOfficeId],
       references: [users.id],
-      relationName: "ministryOffice",
+      relationName: "ministryOfficeManager",
     }),
     approvedByUser: one(users, {
       fields: [graduateData.approvedBy],
       references: [users.id],
       relationName: "approver",
     }),
-    interviewQuestions: many(graduateInterviewQuestions),
-    status: one(graduateStatus),
+    interviewQuestions: many(graduateInterviewQuestions, {
+      relationName: "graduateInterview",
+    }),
   })
 );
 
@@ -250,10 +308,12 @@ export const graduateInterviewQuestionsRelations = relations(
     user: one(users, {
       fields: [graduateInterviewQuestions.userId],
       references: [users.id],
+      relationName: "interviewUser",
     }),
     graduateData: one(graduateData, {
       fields: [graduateInterviewQuestions.graduateDataId],
       references: [graduateData.id],
+      relationName: "graduateInterview",
     }),
     reviewedByUser: one(users, {
       fields: [graduateInterviewQuestions.reviewedBy],
@@ -262,13 +322,6 @@ export const graduateInterviewQuestionsRelations = relations(
     }),
   })
 );
-
-export const graduateStatusRelations = relations(graduateStatus, ({ one }) => ({
-  graduateData: one(graduateData, {
-    fields: [graduateStatus.graduateDataId],
-    references: [graduateData.id],
-  }),
-}));
 
 // Type exports for better TypeScript support
 export type User = typeof users.$inferSelect;
@@ -282,8 +335,8 @@ export type GraduateInterviewQuestions =
 export type NewGraduateInterviewQuestions =
   typeof graduateInterviewQuestions.$inferInsert;
 
-export type GraduateStatus = typeof graduateStatus.$inferSelect;
-export type NewGraduateStatus = typeof graduateStatus.$inferInsert;
+export type ZoneGraduates = typeof zoneGraduates.$inferSelect;
+export type NewZoneGraduates = typeof zoneGraduates.$inferInsert;
 
 export type UserType =
   | "VGSS_OFFICE"
@@ -297,3 +350,4 @@ export type NyscStatus =
   | "IN_PROGRESS"
   | "NOT_STARTED"
   | "EXEMPTED";
+export type AccountStatus = "pending_activation" | "active";

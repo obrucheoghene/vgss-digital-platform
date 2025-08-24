@@ -1,6 +1,6 @@
 {
-  "id": "19a576bc-0b4c-42f6-8276-7f2e4cd82fd7",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "522e315f-d2d0-49fd-96b0-e034894a9561",
+  "prevId": "19a576bc-0b4c-42f6-8276-7f2e4cd82fd7",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -17,6 +17,12 @@
         },
         "user_id": {
           "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zone_graduate_id": {
+          "name": "zone_graduate_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -356,6 +362,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "is_registered": {
+          "name": "is_registered",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "registered_at": {
+          "name": "registered_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -379,6 +398,19 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "graduate_data_zone_graduate_id_zone_graduates_id_fk": {
+          "name": "graduate_data_zone_graduate_id_zone_graduates_id_fk",
+          "tableFrom": "graduate_data",
+          "tableTo": "zone_graduates",
+          "columnsFrom": [
+            "zone_graduate_id"
           ],
           "columnsTo": [
             "id"
@@ -645,12 +677,26 @@
           "primaryKey": false,
           "notNull": true
         },
-        "is_active": {
-          "name": "is_active",
+        "is_deactivated": {
+          "name": "is_deactivated",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": true
+          "default": false
+        },
+        "account_status": {
+          "name": "account_status",
+          "type": "account_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending_activation'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -682,9 +728,139 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.zone_graduates": {
+      "name": "zone_graduates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_firstname": {
+          "name": "graduate_firstname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_lastname": {
+          "name": "graduate_lastname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_gender": {
+          "name": "graduate_gender",
+          "type": "gender",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_fellowship": {
+          "name": "name_of_fellowship",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_zonal_pastor": {
+          "name": "name_of_zonal_pastor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_chapter_pastor": {
+          "name": "name_of_chapter_pastor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone_number_of_chapter_pastor": {
+          "name": "phone_number_of_chapter_pastor",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_of_chapter_pastor": {
+          "name": "email_of_chapter_pastor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kingschat_id_of_chapter_pastor": {
+          "name": "kingschat_id_of_chapter_pastor",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_registered": {
+          "name": "is_registered",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "registered_at": {
+          "name": "registered_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "zone_graduates_user_id_users_id_fk": {
+          "name": "zone_graduates_user_id_users_id_fk",
+          "tableFrom": "zone_graduates",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
+    "public.account_status": {
+      "name": "account_status",
+      "schema": "public",
+      "values": [
+        "pending_activation",
+        "active"
+      ]
+    },
     "public.gender": {
       "name": "gender",
       "schema": "public",

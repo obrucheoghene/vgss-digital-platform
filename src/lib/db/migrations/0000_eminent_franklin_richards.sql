@@ -87,31 +87,6 @@ CREATE TABLE "graduate_interview_questions" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "graduate_status" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"graduate_data_id" uuid NOT NULL,
-	"record_submitted" boolean DEFAULT false,
-	"record_approved" boolean DEFAULT false,
-	"registration_completed" boolean DEFAULT false,
-	"interview_scheduled" boolean DEFAULT false,
-	"interview_completed" boolean DEFAULT false,
-	"training_completed" boolean DEFAULT false,
-	"placement_assigned" boolean DEFAULT false,
-	"service_started" boolean DEFAULT false,
-	"service_completed" boolean DEFAULT false,
-	"submitted_at" timestamp,
-	"approved_at" timestamp,
-	"registered_at" timestamp,
-	"interview_scheduled_at" timestamp,
-	"interview_completed_at" timestamp,
-	"training_completed_at" timestamp,
-	"placement_assigned_at" timestamp,
-	"service_started_at" timestamp,
-	"service_completed_at" timestamp,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"type" "user_type" NOT NULL,
@@ -130,5 +105,4 @@ ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_ministry_office_id_use
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_graduate_data_id_graduate_data_id_fk" FOREIGN KEY ("graduate_data_id") REFERENCES "public"."graduate_data"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_reviewed_by_users_id_fk" FOREIGN KEY ("reviewed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_status" ADD CONSTRAINT "graduate_status_graduate_data_id_graduate_data_id_fk" FOREIGN KEY ("graduate_data_id") REFERENCES "public"."graduate_data"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_reviewed_by_users_id_fk" FOREIGN KEY ("reviewed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
