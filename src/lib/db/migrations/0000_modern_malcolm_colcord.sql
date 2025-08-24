@@ -1,0 +1,134 @@
+CREATE TYPE "public"."gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
+CREATE TYPE "public"."marital_status" AS ENUM('SINGLE', 'MARRIED');--> statement-breakpoint
+CREATE TYPE "public"."nysc_status" AS ENUM('COMPLETED', 'IN_PROGRESS', 'NOT_STARTED', 'EXEMPTED');--> statement-breakpoint
+CREATE TYPE "public"."user_type" AS ENUM('VGSS_OFFICE', 'GRADUATE', 'MINISTRY_OFFICE', 'BLW_ZONE');--> statement-breakpoint
+CREATE TABLE "graduate_data" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"blw_zone_id" uuid,
+	"ministry_office_id" uuid,
+	"graduate_name" varchar(255) NOT NULL,
+	"graduate_gender" "gender" NOT NULL,
+	"marital_status" "marital_status" NOT NULL,
+	"place_of_birth" varchar(255) NOT NULL,
+	"date_of_birth" timestamp NOT NULL,
+	"state_of_origin" varchar(100) NOT NULL,
+	"home_address" text NOT NULL,
+	"graduate_phone_number" varchar(20) NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"preferred_city_of_posting" varchar(255),
+	"accommodation" varchar(100),
+	"where_accommodation" text,
+	"kind_accommodation" varchar(100),
+	"contact_of_person_living_with" varchar(20),
+	"name_of_zone" varchar(255) NOT NULL,
+	"name_of_fellowship" varchar(255) NOT NULL,
+	"name_of_zonal_pastor" varchar(255) NOT NULL,
+	"name_of_chapter_pastor" varchar(255) NOT NULL,
+	"phone_number_of_chapter_pastor" varchar(20) NOT NULL,
+	"email_of_chapter_pastor" varchar(255) NOT NULL,
+	"where_when_christ" text NOT NULL,
+	"where_when_holy_ghost" text NOT NULL,
+	"where_when_baptism" text NOT NULL,
+	"where_when_foundation_school" text NOT NULL,
+	"has_certificate" boolean DEFAULT false NOT NULL,
+	"local_assembly_after_graduation" varchar(255),
+	"father_name" varchar(255) NOT NULL,
+	"father_phone_number" varchar(20) NOT NULL,
+	"father_email_address" varchar(255),
+	"father_occupation" varchar(255) NOT NULL,
+	"name_of_father_church" varchar(255),
+	"mother_name" varchar(255) NOT NULL,
+	"mother_phone_number" varchar(20) NOT NULL,
+	"mother_email_address" varchar(255),
+	"mother_occupation" varchar(255) NOT NULL,
+	"name_of_mother_church" varchar(255),
+	"how_many_in_family" integer NOT NULL,
+	"what_position_in_family" integer NOT NULL,
+	"family_residence" text NOT NULL,
+	"parents_together" boolean NOT NULL,
+	"parents_aware_of_vgss_intention" boolean NOT NULL,
+	"name_of_university" varchar(255) NOT NULL,
+	"course_of_study" varchar(255) NOT NULL,
+	"graduation_year" integer NOT NULL,
+	"grade" varchar(50) NOT NULL,
+	"nysc_status" "nysc_status" NOT NULL,
+	"skills_possessed" text,
+	"leadership_roles_in_ministry_and_fellowship" text,
+	"ministry_programs_attended" text,
+	"photo" varchar(500),
+	"is_approved" boolean DEFAULT false,
+	"approved_by" uuid,
+	"approved_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "graduate_interview_questions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"graduate_data_id" uuid NOT NULL,
+	"vision_mission_purpose" text,
+	"explain_with_examples" text,
+	"partnership_arms" text,
+	"full_meaning" text,
+	"various_tasks_responsible_for" text,
+	"project_proud_of_and_role_played" text,
+	"example_difficult_situation" text,
+	"recent_conflict" text,
+	"convictions" text,
+	"why_vgss" text,
+	"plans_after_vgss" text,
+	"is_completed" boolean DEFAULT false,
+	"completed_at" timestamp,
+	"reviewed_by" uuid,
+	"reviewed_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "graduate_status" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"graduate_data_id" uuid NOT NULL,
+	"record_submitted" boolean DEFAULT false,
+	"record_approved" boolean DEFAULT false,
+	"registration_completed" boolean DEFAULT false,
+	"interview_scheduled" boolean DEFAULT false,
+	"interview_completed" boolean DEFAULT false,
+	"training_completed" boolean DEFAULT false,
+	"placement_assigned" boolean DEFAULT false,
+	"service_started" boolean DEFAULT false,
+	"service_completed" boolean DEFAULT false,
+	"submitted_at" timestamp,
+	"approved_at" timestamp,
+	"registered_at" timestamp,
+	"interview_scheduled_at" timestamp,
+	"interview_completed_at" timestamp,
+	"training_completed_at" timestamp,
+	"placement_assigned_at" timestamp,
+	"service_started_at" timestamp,
+	"service_completed_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"type" "user_type" NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"password" varchar(255) NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_blw_zone_id_users_id_fk" FOREIGN KEY ("blw_zone_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_ministry_office_id_users_id_fk" FOREIGN KEY ("ministry_office_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_graduate_data_id_graduate_data_id_fk" FOREIGN KEY ("graduate_data_id") REFERENCES "public"."graduate_data"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_reviewed_by_users_id_fk" FOREIGN KEY ("reviewed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_status" ADD CONSTRAINT "graduate_status_graduate_data_id_graduate_data_id_fk" FOREIGN KEY ("graduate_data_id") REFERENCES "public"."graduate_data"("id") ON DELETE cascade ON UPDATE no action;
