@@ -142,13 +142,25 @@ export default function GraduateSearchPage() {
     setHasSearched(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/graduate/search?q=${encodeURIComponent(query)}&gender=${genderFilter}&fellowship=${fellowshipFilter}`);
-      // const data = await response.json();
+      // Call the actual API
+      const response = await fetch(
+        `/api/graduate/search?q=${encodeURIComponent(
+          query
+        )}&gender=${genderFilter}&fellowship=${fellowshipFilter}`
+      );
 
-      // Mock search logic
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+      const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to search");
+      }
+
+      setSearchResults(data.results || []);
+    } catch (error) {
+      console.error("Search error:", error);
+      setError("An error occurred while searching. Please try again.");
+
+      // Fallback to mock data for demonstration if API fails
       const filteredResults = mockGraduateRecords.filter((record) => {
         const fullName =
           `${record.graduateFirstname} ${record.graduateLastname}`.toLowerCase();
@@ -171,9 +183,6 @@ export default function GraduateSearchPage() {
       });
 
       setSearchResults(filteredResults);
-    } catch (error) {
-      console.error("Search error:", error);
-      setError("An error occurred while searching. Please try again.");
     } finally {
       setIsLoading(false);
     }
