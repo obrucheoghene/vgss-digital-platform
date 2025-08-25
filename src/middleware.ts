@@ -1,4 +1,4 @@
-// src/middleware.ts
+// src/middleware.ts - Updated to include new routes
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
     "/api/auth/callback",
     "/api/auth/signin",
     "/api/auth/signout",
+    "/api/graduate/search", // Allow public access to graduate search
   ];
 
   // Check if the current route is public
@@ -100,7 +101,28 @@ export async function middleware(request: NextRequest) {
 
   // API route protection
   if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth/")) {
-    // Add any additional API protection logic here
+    // Protected API routes that require authentication
+    const protectedApiRoutes = [
+      "/api/admin/",
+      "/api/zone/",
+      "/api/graduate/register",
+    ];
+
+    const isProtectedApi = protectedApiRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    if (isProtectedApi) {
+      // Additional role-based API protection
+      if (pathname.startsWith("/api/admin/") && userType !== "VGSS_OFFICE") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      if (pathname.startsWith("/api/zone/") && userType !== "BLW_ZONE") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+
     return NextResponse.next();
   }
 

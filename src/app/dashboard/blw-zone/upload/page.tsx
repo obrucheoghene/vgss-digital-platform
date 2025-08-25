@@ -150,14 +150,19 @@ export default function ZoneUploadPage() {
 
       // Check required fields
       requiredColumns.forEach((column) => {
-        if (!row[column as keyof GraduateUploadData] || 
-            (row[column as keyof GraduateUploadData] as string).trim() === "") {
+        if (
+          !row[column as keyof GraduateUploadData] ||
+          (row[column as keyof GraduateUploadData] as string).trim() === ""
+        ) {
           rowErrors.push(`${column} is required`);
         }
       });
 
       // Validate gender
-      if (row.graduateGender && !["MALE", "FEMALE"].includes(row.graduateGender)) {
+      if (
+        row.graduateGender &&
+        !["MALE", "FEMALE"].includes(row.graduateGender)
+      ) {
         rowErrors.push("Gender must be MALE or FEMALE");
       }
 
@@ -189,7 +194,9 @@ export default function ZoneUploadPage() {
     });
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -239,8 +246,9 @@ export default function ZoneUploadPage() {
       setUploadData(validatedData);
 
       const errors = validatedData
-        .map((row, index) => 
-          row.errors?.map(error => `Row ${index + 1}: ${error}`) || []
+        .map(
+          (row, index) =>
+            row.errors?.map((error) => `Row ${index + 1}: ${error}`) || []
         )
         .flat();
 
@@ -248,13 +256,19 @@ export default function ZoneUploadPage() {
       setPreviewMode(true);
 
       if (errors.length === 0) {
-        setSuccess(`File processed successfully! ${validatedData.length} records ready for upload.`);
+        setSuccess(
+          `File processed successfully! ${validatedData.length} records ready for upload.`
+        );
       } else {
-        setError(`File processed with ${errors.length} validation errors. Please review and fix before uploading.`);
+        setError(
+          `File processed with ${errors.length} validation errors. Please review and fix before uploading.`
+        );
       }
     } catch (error) {
       console.error("File processing error:", error);
-      setError(error instanceof Error ? error.message : "Failed to process file");
+      setError(
+        error instanceof Error ? error.message : "Failed to process file"
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -266,9 +280,11 @@ export default function ZoneUploadPage() {
       return;
     }
 
-    const validRecords = uploadData.filter(row => row.isValid);
+    const validRecords = uploadData.filter((row) => row.isValid);
     if (validRecords.length === 0) {
-      setError("No valid records to upload. Please fix validation errors first.");
+      setError(
+        "No valid records to upload. Please fix validation errors first."
+      );
       return;
     }
 
@@ -280,7 +296,7 @@ export default function ZoneUploadPage() {
     try {
       // Simulate upload progress
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
+        setUploadProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return 90;
@@ -310,7 +326,9 @@ export default function ZoneUploadPage() {
       }
 
       setSuccess(
-        `Upload completed successfully! ${result.successCount} records uploaded, ${result.duplicateCount || 0} duplicates skipped.`
+        `Upload completed successfully! ${
+          result.successCount
+        } records uploaded, ${result.duplicateCount || 0} duplicates skipped.`
       );
 
       // Reset form
@@ -346,8 +364,10 @@ export default function ZoneUploadPage() {
 
     const csvContent = [
       headers.join(","),
-      ...sampleData.map(row =>
-        headers.map(header => `"${row[header as keyof typeof row] || ""}"`).join(",")
+      ...sampleData.map((row) =>
+        headers
+          .map((header) => `"${row[header as keyof typeof row] || ""}"`)
+          .join(",")
       ),
     ].join("\n");
 
@@ -417,4 +437,372 @@ export default function ZoneUploadPage() {
                   <Upload className="w-5 h-5 mr-2" />
                   Upload File
                 </CardTitle>
-                <Car
+                <CardDescription>
+                  Select a CSV or Excel file containing graduate information
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="file">Select File *</Label>
+                    <Input
+                      id="file"
+                      type="file"
+                      accept=".csv,.xlsx,.xls"
+                      onChange={handleFileSelect}
+                      disabled={isProcessing || isUploading}
+                      ref={fileInputRef}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Supported formats: CSV, Excel (.xlsx, .xls) - Max size:
+                      5MB
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>File Information</Label>
+                    {selectedFile ? (
+                      <div className="p-3 border rounded-lg bg-muted/50">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium">
+                            {selectedFile.name}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Size: {(selectedFile.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-3 border border-dashed rounded-lg text-center text-muted-foreground">
+                        <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No file selected</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {isProcessing && (
+                  <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                    <span className="text-blue-800">Processing file...</span>
+                  </div>
+                )}
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Uploading records...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <Progress value={uploadProgress} />
+                  </div>
+                )}
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {success && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      {success}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Data Preview */}
+            {previewMode && uploadData.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center">
+                        <Eye className="w-5 h-5 mr-2" />
+                        Data Preview
+                      </CardTitle>
+                      <CardDescription>
+                        Review the data before uploading - {uploadData.length}{" "}
+                        records found
+                      </CardDescription>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={clearData}
+                        variant="outline"
+                        size="sm"
+                        disabled={isUploading}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Clear
+                      </Button>
+                      <Button
+                        onClick={handleUpload}
+                        disabled={
+                          isUploading ||
+                          uploadData.filter((row) => row.isValid).length === 0
+                        }
+                      >
+                        {isUploading && (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        )}
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload {
+                          uploadData.filter((row) => row.isValid).length
+                        }{" "}
+                        Records
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {validationErrors.length > 0 && (
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        <div className="font-medium mb-2">
+                          {validationErrors.length} validation error(s) found:
+                        </div>
+                        <ul className="text-xs space-y-1 max-h-32 overflow-y-auto">
+                          {validationErrors.slice(0, 10).map((error, index) => (
+                            <li key={index}>• {error}</li>
+                          ))}
+                          {validationErrors.length > 10 && (
+                            <li>
+                              • ... and {validationErrors.length - 10} more
+                              errors
+                            </li>
+                          )}
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="rounded-lg border overflow-hidden">
+                    <div className="max-h-96 overflow-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12">#</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Gender</TableHead>
+                            <TableHead>Fellowship</TableHead>
+                            <TableHead>Chapter Pastor</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Errors</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {uploadData.slice(0, 50).map((row, index) => (
+                            <TableRow
+                              key={index}
+                              className={!row.isValid ? "bg-red-50" : ""}
+                            >
+                              <TableCell className="font-medium">
+                                {index + 1}
+                              </TableCell>
+                              <TableCell>
+                                {row.isValid ? (
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Valid
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="destructive">
+                                    <AlertCircle className="w-3 h-3 mr-1" />
+                                    Invalid
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {row.graduateFirstname} {row.graduateLastname}
+                              </TableCell>
+                              <TableCell>{row.graduateGender}</TableCell>
+                              <TableCell>{row.nameOfFellowship}</TableCell>
+                              <TableCell>{row.nameOfChapterPastor}</TableCell>
+                              <TableCell>
+                                {row.phoneNumberOfChapterPastor}
+                              </TableCell>
+                              <TableCell>{row.emailOfChapterPastor}</TableCell>
+                              <TableCell>
+                                {row.errors && row.errors.length > 0 && (
+                                  <div className="text-xs text-red-600">
+                                    {row.errors.slice(0, 2).join(", ")}
+                                    {row.errors.length > 2 && "..."}
+                                  </div>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {uploadData.length > 50 && (
+                      <div className="p-3 bg-muted/50 text-center text-sm text-muted-foreground">
+                        Showing first 50 of {uploadData.length} records
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {uploadData.length}
+                      </div>
+                      <div className="text-sm text-blue-800">Total Records</div>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        {uploadData.filter((row) => row.isValid).length}
+                      </div>
+                      <div className="text-sm text-green-800">
+                        Valid Records
+                      </div>
+                    </div>
+                    <div className="p-3 bg-red-50 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">
+                        {uploadData.filter((row) => !row.isValid).length}
+                      </div>
+                      <div className="text-sm text-red-800">
+                        Invalid Records
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Upload Instructions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Instructions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <h4 className="font-medium mb-2">Required Columns</h4>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      {requiredColumns.map((column) => (
+                        <li key={column}>• {column}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Optional Columns</h4>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      <li>• kingschatIDOfChapterPastor</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">
+                    Important Notes
+                  </h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>
+                      • Gender must be either {`"MALE" or "FEMALE"`} (case
+                      sensitive)
+                    </li>
+                    <li>• Email addresses must be valid format</li>
+                    <li>
+                      • Phone numbers should include country code (+234 for
+                      Nigeria)
+                    </li>
+                    <li>• Duplicate records will be automatically skipped</li>
+                    <li>• Maximum file size is 5MB</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Upload History
+                </CardTitle>
+                <CardDescription>
+                  Previous graduate data uploads from your zone
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-lg border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Filename</TableHead>
+                        <TableHead>Upload Date</TableHead>
+                        <TableHead>Total Records</TableHead>
+                        <TableHead>Successful</TableHead>
+                        <TableHead>Failed</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {uploadHistory.map((upload) => (
+                        <TableRow key={upload.id}>
+                          <TableCell className="font-medium">
+                            {upload.filename}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(upload.uploadDate).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>{upload.totalRecords}</TableCell>
+                          <TableCell>
+                            <span className="text-green-600 font-medium">
+                              {upload.successfulRecords}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-red-600 font-medium">
+                              {upload.failedRecords}
+                            </span>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(upload.status)}</TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Download className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {uploadHistory.length === 0 && (
+                  <div className="text-center py-8">
+                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      No Upload History
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Upload your first batch of graduates to see history here.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DashboardLayout>
+  );
+}
