@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
+  House,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -38,7 +39,7 @@ export default function VGSSOfficeDashboard() {
       bgColor: "bg-blue-100",
     },
     {
-      title: "Active Zones",
+      title: "BLW Zones",
       value: "45",
       change: "+3",
       trend: "up",
@@ -47,11 +48,11 @@ export default function VGSSOfficeDashboard() {
       bgColor: "bg-green-100",
     },
     {
-      title: "Ministry Offices",
+      title: "Service Departments",
       value: "28",
       change: "+2",
       trend: "up",
-      icon: Users,
+      icon: House,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
     },

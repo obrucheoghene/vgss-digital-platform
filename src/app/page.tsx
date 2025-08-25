@@ -121,7 +121,7 @@ export default function HomePage() {
 
   const stats = [
     { label: "Graduates Served", value: "1,200+", icon: GraduationCap },
-    { label: "Ministry Offices", value: "45+", icon: Building },
+    { label: "Service Deparments", value: "45+", icon: Building },
     { label: "Countries", value: "25+", icon: Globe },
     { label: "Success Rate", value: "98%", icon: Target },
   ];
@@ -268,7 +268,7 @@ export default function HomePage() {
               designed by Rev Dr. Chris Oyakhilome PhD, giving young graduates
               from {`Believers'`} LoveWorld Campus Fellowships the opportunity
               to give their first working year to God as first fruit through
-              service in ministry offices, departments, or churches.
+              service in Service Deparments, departments, or churches.
             </p>
           </div>
 
@@ -393,7 +393,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold mb-4">Begin Service</h3>
               <p className="text-muted-foreground">
-                Get assigned to a ministry office and start your year of
+                Get assigned to a Service Deparment and start your year of
                 dedicated service to God.
               </p>
             </div>
@@ -567,7 +567,7 @@ export default function HomePage() {
                     href="/admin/ministries"
                     className="hover:text-foreground"
                   >
-                    Ministry Offices
+                    Service Deparments
                   </Link>
                 </li>
                 <li>

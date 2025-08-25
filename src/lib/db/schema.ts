@@ -228,7 +228,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ownGraduateData: many(graduateData, { relationName: "userGraduate" }),
   // User as BLW Zone
   zoneManagedGraduates: many(graduateData, { relationName: "blwZoneManager" }),
-  // User as Ministry Office
+  // User as Service Deparment
   officeAssignedGraduates: many(graduateData, {
     relationName: "ministryOfficeManager",
   }),

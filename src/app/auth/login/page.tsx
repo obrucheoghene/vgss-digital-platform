@@ -237,7 +237,7 @@ export default function LoginPage() {
           </div>
           <div className="flex items-center justify-center p-3 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
             <Building className="w-4 h-4 mr-2 text-primary" />
-            <span className="text-muted-foreground">Ministry Office</span>
+            <span className="text-muted-foreground">Service Deparment</span>
           </div>
           <div className="flex items-center justify-center p-3 rounded-lg bg-card/40 backdrop-blur-sm border border-border/20">
             <GraduationCap className="w-4 h-4 mr-2 text-primary" />

@@ -61,7 +61,7 @@ export default function CreateAccountPage() {
     },
     {
       value: "MINISTRY_OFFICE",
-      label: "Ministry Office",
+      label: "Service Deparment",
       description: "Can request and manage VGSS staff",
       icon: Users,
       color: "text-green-600",
@@ -139,7 +139,7 @@ export default function CreateAccountPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold">Create New User Account</h2>
           <p className="text-muted-foreground mt-2">
-            Create accounts for BLW Zones, Ministry Offices, or other VGSS
+            Create accounts for BLW Zones, Service Deparments, or other VGSS
             Office users
           </p>
         </div>

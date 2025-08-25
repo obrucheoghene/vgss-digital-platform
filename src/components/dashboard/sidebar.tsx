@@ -61,7 +61,7 @@ const navigationItems = {
       badge: null,
     },
     {
-      title: "Ministry Office Management",
+      title: "Service Deparment Management",
       icon: HouseIcon,
       href: "/dashboard/vgss-office/ministry-office",
       badge: "12", // Pending reviews

@@ -227,14 +227,14 @@ export default function MinistryOfficeDashboard() {
   };
 
   return (
-    <DashboardLayout title="Ministry Office Dashboard">
+    <DashboardLayout title="Service Deparment Dashboard">
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-green-600 to-green-500 rounded-xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold mb-2">
-                Welcome, Ministry Office!
+                Welcome, Service Deparment!
               </h2>
               <p className="opacity-90">
                 Manage your VGSS staff assignments and track their service
@@ -518,7 +518,7 @@ export default function MinistryOfficeDashboard() {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>
-              Commonly used ministry office functions
+              Commonly used Service Deparment functions
             </CardDescription>
           </CardHeader>
           <CardContent>
