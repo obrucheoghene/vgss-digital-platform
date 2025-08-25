@@ -231,7 +231,7 @@ export default function ZoneUploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/zone/parse-upload", {
+      const response = await fetch("/api/blw-zone/parse-upload", {
         method: "POST",
         body: formData,
       });
@@ -305,7 +305,7 @@ export default function ZoneUploadPage() {
         });
       }, 200);
 
-      const response = await fetch("/api/zone/upload-graduates", {
+      const response = await fetch("/api/blw-zone/upload-graduates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -104,7 +104,7 @@ export async function middleware(request: NextRequest) {
     // Protected API routes that require authentication
     const protectedApiRoutes = [
       "/api/admin/",
-      "/api/zone/",
+      "/api/blw-zone/",
       "/api/graduate/register",
     ];
 
@@ -118,7 +118,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
-      if (pathname.startsWith("/api/zone/") && userType !== "BLW_ZONE") {
+      if (pathname.startsWith("/api/blw-zone/") && userType !== "BLW_ZONE") {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
     }

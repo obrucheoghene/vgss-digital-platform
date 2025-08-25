@@ -43,6 +43,7 @@ import {
   Loader2,
   AlertCircle,
   Upload,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -114,6 +115,19 @@ interface RegistrationFormData {
   leadershipRolesInMinistryAndFellowship: string;
   ministryProgramsAttended: string;
 
+  // Test Questions (formerly interview questions)
+  visionMissionPurpose: string;
+  explainWithExamples: string;
+  partnershipArms: string;
+  fullMeaning: string;
+  variousTasksResponsibleFor: string;
+  projectProudOfAndRolePlayed: string;
+  exampleDifficultSituation: string;
+  recentConflict: string;
+  convictions: string;
+  whyVgss: string;
+  plansAfterVgss: string;
+
   // Password for account creation
   password: string;
   confirmPassword: string;
@@ -166,6 +180,17 @@ export default function GraduateRegisterPage() {
     skillsPossessed: "",
     leadershipRolesInMinistryAndFellowship: "",
     ministryProgramsAttended: "",
+    visionMissionPurpose: "",
+    explainWithExamples: "",
+    partnershipArms: "",
+    fullMeaning: "",
+    variousTasksResponsibleFor: "",
+    projectProudOfAndRolePlayed: "",
+    exampleDifficultSituation: "",
+    recentConflict: "",
+    convictions: "",
+    whyVgss: "",
+    plansAfterVgss: "",
     password: "",
     confirmPassword: "",
   });
@@ -185,6 +210,7 @@ export default function GraduateRegisterPage() {
     { id: "family", label: "Family Info", icon: Users, fields: 14 },
     { id: "education", label: "Education", icon: GraduationCap, fields: 5 },
     { id: "skills", label: "Skills & Experience", icon: User, fields: 3 },
+    { id: "test", label: "Test Questions", icon: MessageSquare, fields: 11 },
     { id: "account", label: "Create Account", icon: User, fields: 2 },
   ];
 
@@ -448,7 +474,11 @@ export default function GraduateRegisterPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <p>
-                      <strong>Name:</strong> {graduateRecord.graduateFirstname}{" "}
+                      <strong>First Name:</strong>{" "}
+                      {graduateRecord.graduateFirstname}
+                    </p>
+                    <p>
+                      <strong>Last Name:</strong>{" "}
                       {graduateRecord.graduateLastname}
                     </p>
                     <p>
@@ -490,7 +520,7 @@ export default function GraduateRegisterPage() {
             onValueChange={setCurrentTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-1">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -839,7 +869,7 @@ export default function GraduateRegisterPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Father's Information */}
+                  {/* {`Father's`} Information */}
                   <div>
                     <h4 className="font-medium mb-4">
                       {`Father's`} Information
@@ -853,7 +883,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("fatherName", e.target.value)
                           }
-                          placeholder="Enter father's full name"
+                          placeholder="Enter {`Father's`} full name"
                         />
                       </div>
 
@@ -897,7 +927,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("fatherOccupation", e.target.value)
                           }
-                          placeholder="Enter father's occupation"
+                          placeholder="Enter {`Father's`} occupation"
                         />
                       </div>
 
@@ -917,10 +947,10 @@ export default function GraduateRegisterPage() {
                     </div>
                   </div>
 
-                  {/* Mother's Information */}
+                  {/* {`Mother's`} Information */}
                   <div>
                     <h4 className="font-medium mb-4">
-                      {`Mother's `}Information
+                      {`Mother's`} Information
                     </h4>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
@@ -931,7 +961,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("motherName", e.target.value)
                           }
-                          placeholder="Enter mother's full name"
+                          placeholder="Enter {`mother's`} full name"
                         />
                       </div>
 
@@ -975,7 +1005,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("motherOccupation", e.target.value)
                           }
-                          placeholder="Enter mother's occupation"
+                          placeholder="Enter {`mother's`} occupation"
                         />
                       </div>
 
@@ -1246,6 +1276,223 @@ export default function GraduateRegisterPage() {
                       placeholder="List ministry programs, conferences, and training you've attended"
                       rows={4}
                     />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Test Questions */}
+            <TabsContent value="test" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Test Questions
+                  </CardTitle>
+                  <CardDescription>
+                    Answer these questions to help us understand your ministry
+                    knowledge and vision
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="visionMissionPurpose">
+                      What is the Vision, Mission and Purpose of Christ Embassy?
+                      *
+                    </Label>
+                    <Textarea
+                      id="visionMissionPurpose"
+                      value={formData.visionMissionPurpose}
+                      onChange={(e) =>
+                        updateFormData("visionMissionPurpose", e.target.value)
+                      }
+                      placeholder="Explain the Vision, Mission and Purpose of Christ Embassy"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="explainWithExamples">
+                      Explain with examples what it means to{" "}
+                      {`"Take the Divine
+                      Presence of God to your world"`}{" "}
+                      *
+                    </Label>
+                    <Textarea
+                      id="explainWithExamples"
+                      value={formData.explainWithExamples}
+                      onChange={(e) =>
+                        updateFormData("explainWithExamples", e.target.value)
+                      }
+                      placeholder="Provide detailed explanation with practical examples"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="partnershipArms">
+                      What are the 5 partnership arms? *
+                    </Label>
+                    <Textarea
+                      id="partnershipArms"
+                      value={formData.partnershipArms}
+                      onChange={(e) =>
+                        updateFormData("partnershipArms", e.target.value)
+                      }
+                      placeholder="List and briefly explain the 5 partnership arms"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fullMeaning">
+                      What is the full meaning of {"Rehoboth"}? *
+                    </Label>
+                    <Textarea
+                      id="fullMeaning"
+                      value={formData.fullMeaning}
+                      onChange={(e) =>
+                        updateFormData("fullMeaning", e.target.value)
+                      }
+                      placeholder="Provide the complete meaning and significance of Rehoboth"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="variousTasksResponsibleFor">
+                      What are the various tasks you have been responsible for
+                      in your local assembly? *
+                    </Label>
+                    <Textarea
+                      id="variousTasksResponsibleFor"
+                      value={formData.variousTasksResponsibleFor}
+                      onChange={(e) =>
+                        updateFormData(
+                          "variousTasksResponsibleFor",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Describe your roles and responsibilities in your local church"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="projectProudOfAndRolePlayed">
+                      What is one project you are proud of and what role did you
+                      play? *
+                    </Label>
+                    <Textarea
+                      id="projectProudOfAndRolePlayed"
+                      value={formData.projectProudOfAndRolePlayed}
+                      onChange={(e) =>
+                        updateFormData(
+                          "projectProudOfAndRolePlayed",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Describe a meaningful project and your specific contribution"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="exampleDifficultSituation">
+                      Give an example of a difficult situation you have
+                      encountered and how you handled it *
+                    </Label>
+                    <Textarea
+                      id="exampleDifficultSituation"
+                      value={formData.exampleDifficultSituation}
+                      onChange={(e) =>
+                        updateFormData(
+                          "exampleDifficultSituation",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Share a challenging situation and your approach to resolving it"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="recentConflict">
+                      Describe a recent conflict you have had and how you
+                      resolved it *
+                    </Label>
+                    <Textarea
+                      id="recentConflict"
+                      value={formData.recentConflict}
+                      onChange={(e) =>
+                        updateFormData("recentConflict", e.target.value)
+                      }
+                      placeholder="Explain a recent conflict and the steps you took to resolve it"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="convictions">
+                      What are your convictions? *
+                    </Label>
+                    <Textarea
+                      id="convictions"
+                      value={formData.convictions}
+                      onChange={(e) =>
+                        updateFormData("convictions", e.target.value)
+                      }
+                      placeholder="Share your core beliefs and principles"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="whyVgss">
+                      Why do you want to join VGSS? *
+                    </Label>
+                    <Textarea
+                      id="whyVgss"
+                      value={formData.whyVgss}
+                      onChange={(e) =>
+                        updateFormData("whyVgss", e.target.value)
+                      }
+                      placeholder="Explain your motivation for joining the Volunteer Graduate Service Scheme"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="plansAfterVgss">
+                      What are your plans after VGSS? *
+                    </Label>
+                    <Textarea
+                      id="plansAfterVgss"
+                      value={formData.plansAfterVgss}
+                      onChange={(e) =>
+                        updateFormData("plansAfterVgss", e.target.value)
+                      }
+                      placeholder="Describe your plans and goals after completing your VGSS service year"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-900 mb-2">
+                      Important Notes
+                    </h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• ALL questions are required for registration</li>
+                      <li>• Please provide thoughtful and detailed answers</li>
+                      <li>
+                        • Your responses will be reviewed by the VGSS Office
+                      </li>
+                      <li>• Be honest and authentic in your answers</li>
+                      <li>
+                        • Incomplete answers may result in registration
+                        rejection
+                      </li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>

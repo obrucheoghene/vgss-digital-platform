@@ -1,4 +1,4 @@
-// src/lib/db/schema.ts
+// src/lib/db/schema.ts - UPDATED SCHEMA
 import {
   pgTable,
   uuid,
@@ -32,6 +32,14 @@ export const nyscStatusEnum = pgEnum("nysc_status", [
 export const accountStatusEnum = pgEnum("account_status", [
   "pending_activation",
   "active",
+]);
+export const graduateStatusEnum = pgEnum("graduate_status", [
+  "Under Review",
+  "Invited For Interview",
+  "Interviewed",
+  "Sighting",
+  "Serving",
+  "Not Accepted",
 ]);
 
 // Zone Graduates table - Data uploaded by BLW Zones before graduate registration
@@ -79,12 +87,12 @@ export const users = pgTable("users", {
   accountStatus: accountStatusEnum("account_status")
     .default("pending_activation")
     .notNull(),
-  createdBy: uuid("created_by"), // Remove the self-reference here
+  createdBy: uuid("created_by"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Graduate/VGSS staff comprehensive data table
+// Graduate/VGSS staff comprehensive data table (UPDATED)
 export const graduateData = pgTable("graduate_data", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
@@ -93,11 +101,15 @@ export const graduateData = pgTable("graduate_data", {
   zoneGraduateId: uuid("zone_graduate_id")
     .references(() => zoneGraduates.id, { onDelete: "cascade" })
     .notNull(), // Link to uploaded data
-  blwZoneId: uuid("blw_zone_id").references(() => users.id),
+  blwZoneId: uuid("blw_zone_id")
+    .references(() => users.id)
+    .notNull(), // BLW Zone who uploaded - REQUIRED
   ministryOfficeId: uuid("ministry_office_id").references(() => users.id),
 
-  // Personal Information
-  graduateName: varchar("graduate_name", { length: 255 }).notNull(),
+  // Personal Information (split name from zone data)
+  graduateFirstname: varchar("graduate_firstname", { length: 255 }).notNull(),
+  graduateLastname: varchar("graduate_lastname", { length: 255 }).notNull(),
+  graduateName: varchar("graduate_name", { length: 255 }).notNull(), // Full name for display
   graduateGender: genderEnum("graduate_gender").notNull(),
   maritalStatus: maritalStatusEnum("marital_status").notNull(),
   placeOfBirth: varchar("place_of_birth", { length: 255 }).notNull(),
@@ -176,56 +188,41 @@ export const graduateData = pgTable("graduate_data", {
   ministryProgramsAttended: text("ministry_programs_attended"),
   photo: varchar("photo", { length: 500 }), // URL to photo storage
 
-  // Status tracking
+  // TEST QUESTIONS (formerly interview questions) - REQUIRED FIELDS
+  visionMissionPurpose: text("vision_mission_purpose").notNull(),
+  explainWithExamples: text("explain_with_examples").notNull(),
+  partnershipArms: text("partnership_arms").notNull(),
+  fullMeaning: text("full_meaning").notNull(),
+  variousTasksResponsibleFor: text("various_tasks_responsible_for").notNull(),
+  projectProudOfAndRolePlayed: text(
+    "project_proud_of_and_role_played"
+  ).notNull(),
+  exampleDifficultSituation: text("example_difficult_situation").notNull(),
+  recentConflict: text("recent_conflict").notNull(),
+  convictions: text("convictions").notNull(),
+  whyVgss: text("why_vgss").notNull(),
+  plansAfterVgss: text("plans_after_vgss").notNull(),
+
+  // Status tracking and management (UPDATED)
+  status: graduateStatusEnum("status").default("Under Review").notNull(),
+  comments: text("comments"), // VGSS Office comments
   isApproved: boolean("is_approved").default(false),
   approvedBy: uuid("approved_by").references(() => users.id),
   approvedAt: timestamp("approved_at"),
 
-  // Registration tracking
-  isRegistered: boolean("is_registered").default(false), // Has graduate created their account
-  registeredAt: timestamp("registered_at"),
+  // Service tracking (NEW)
+  serviceStartedDate: timestamp("service_started_date"),
+  serviceCompletedDate: timestamp("service_completed_date"),
+
+  // REMOVED: isRegistered and registeredAt (registration is implied by record existence)
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Graduate interview/project questions table
-export const graduateInterviewQuestions = pgTable(
-  "graduate_interview_questions",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
-    graduateDataId: uuid("graduate_data_id")
-      .references(() => graduateData.id, { onDelete: "cascade" })
-      .notNull(),
+// REMOVED: graduateInterviewQuestions table - now part of graduateData
 
-    // Interview Questions
-    visionMissionPurpose: text("vision_mission_purpose"),
-    explainWithExamples: text("explain_with_examples"),
-    partnershipArms: text("partnership_arms"),
-    fullMeaning: text("full_meaning"),
-    variousTasksResponsibleFor: text("various_tasks_responsible_for"),
-    projectProudOfAndRolePlayed: text("project_proud_of_and_role_played"),
-    exampleDifficultSituation: text("example_difficult_situation"),
-    recentConflict: text("recent_conflict"),
-    convictions: text("convictions"),
-    whyVgss: text("why_vgss"),
-    plansAfterVgss: text("plans_after_vgss"),
-
-    // Status tracking
-    isCompleted: boolean("is_completed").default(false),
-    completedAt: timestamp("completed_at"),
-    reviewedBy: uuid("reviewed_by").references(() => users.id),
-    reviewedAt: timestamp("reviewed_at"),
-
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  }
-);
-
-// Relations - Updated to include createdBy relationship and zoneGraduates
+// Relations - Updated to remove interview questions relationships
 export const usersRelations = relations(users, ({ one, many }) => ({
   // User as graduate
   ownGraduateData: many(graduateData, { relationName: "userGraduate" }),
@@ -239,7 +236,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   approvedGraduates: many(graduateData, { relationName: "approver" }),
   // User as account creator
   createdAccounts: many(users, { relationName: "accountCreator" }),
-  // User created by
+  // User created by - Fixed self-reference
   createdByUser: one(users, {
     fields: [users.createdBy],
     references: [users.id],
@@ -247,13 +244,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   // Zone uploaded graduates
   uploadedGraduates: many(zoneGraduates, { relationName: "zoneUploader" }),
-  // Interview questions
-  interviewQuestions: many(graduateInterviewQuestions, {
-    relationName: "interviewUser",
-  }),
-  reviewedInterviews: many(graduateInterviewQuestions, {
-    relationName: "reviewer",
-  }),
 }));
 
 export const zoneGraduatesRelations = relations(
@@ -268,60 +258,33 @@ export const zoneGraduatesRelations = relations(
   })
 );
 
-export const graduateDataRelations = relations(
-  graduateData,
-  ({ one, many }) => ({
-    user: one(users, {
-      fields: [graduateData.userId],
-      references: [users.id],
-      relationName: "userGraduate",
-    }),
-    zoneGraduate: one(zoneGraduates, {
-      fields: [graduateData.zoneGraduateId],
-      references: [zoneGraduates.id],
-      relationName: "linkedZoneGraduate",
-    }),
-    blwZone: one(users, {
-      fields: [graduateData.blwZoneId],
-      references: [users.id],
-      relationName: "blwZoneManager",
-    }),
-    ministryOffice: one(users, {
-      fields: [graduateData.ministryOfficeId],
-      references: [users.id],
-      relationName: "ministryOfficeManager",
-    }),
-    approvedByUser: one(users, {
-      fields: [graduateData.approvedBy],
-      references: [users.id],
-      relationName: "approver",
-    }),
-    interviewQuestions: many(graduateInterviewQuestions, {
-      relationName: "graduateInterview",
-    }),
-  })
-);
-
-export const graduateInterviewQuestionsRelations = relations(
-  graduateInterviewQuestions,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [graduateInterviewQuestions.userId],
-      references: [users.id],
-      relationName: "interviewUser",
-    }),
-    graduateData: one(graduateData, {
-      fields: [graduateInterviewQuestions.graduateDataId],
-      references: [graduateData.id],
-      relationName: "graduateInterview",
-    }),
-    reviewedByUser: one(users, {
-      fields: [graduateInterviewQuestions.reviewedBy],
-      references: [users.id],
-      relationName: "reviewer",
-    }),
-  })
-);
+export const graduateDataRelations = relations(graduateData, ({ one }) => ({
+  user: one(users, {
+    fields: [graduateData.userId],
+    references: [users.id],
+    relationName: "userGraduate",
+  }),
+  zoneGraduate: one(zoneGraduates, {
+    fields: [graduateData.zoneGraduateId],
+    references: [zoneGraduates.id],
+    relationName: "linkedZoneGraduate",
+  }),
+  blwZone: one(users, {
+    fields: [graduateData.blwZoneId],
+    references: [users.id],
+    relationName: "blwZoneManager",
+  }),
+  ministryOffice: one(users, {
+    fields: [graduateData.ministryOfficeId],
+    references: [users.id],
+    relationName: "ministryOfficeManager",
+  }),
+  approvedByUser: one(users, {
+    fields: [graduateData.approvedBy],
+    references: [users.id],
+    relationName: "approver",
+  }),
+}));
 
 // Type exports for better TypeScript support
 export type User = typeof users.$inferSelect;
@@ -329,11 +292,6 @@ export type NewUser = typeof users.$inferInsert;
 
 export type GraduateData = typeof graduateData.$inferSelect;
 export type NewGraduateData = typeof graduateData.$inferInsert;
-
-export type GraduateInterviewQuestions =
-  typeof graduateInterviewQuestions.$inferSelect;
-export type NewGraduateInterviewQuestions =
-  typeof graduateInterviewQuestions.$inferInsert;
 
 export type ZoneGraduates = typeof zoneGraduates.$inferSelect;
 export type NewZoneGraduates = typeof zoneGraduates.$inferInsert;
@@ -351,3 +309,10 @@ export type NyscStatus =
   | "NOT_STARTED"
   | "EXEMPTED";
 export type AccountStatus = "pending_activation" | "active";
+export type GraduateStatus =
+  | "Under Review"
+  | "Invited For Interview"
+  | "Interviewed"
+  | "Sighting"
+  | "Serving"
+  | "Not Accepted";

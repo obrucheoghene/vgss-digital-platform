@@ -1,4 +1,4 @@
-// src/app/api/zone/upload-graduates/route.ts
+// src/app/api/blw-zone/upload-graduates/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
