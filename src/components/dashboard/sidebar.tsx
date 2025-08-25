@@ -21,6 +21,7 @@ import {
   BarChart3,
   MessageSquare,
   LogOut,
+  UserCog,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,7 +37,7 @@ const navigationItems = {
     },
     {
       title: "User Management",
-      icon: Users,
+      icon: UserCog,
       href: "/dashboard/vgss-office/users",
       badge: null,
     },
