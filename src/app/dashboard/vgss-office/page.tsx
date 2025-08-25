@@ -22,9 +22,11 @@ import {
   Clock,
   ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function VGSSOfficeDashboard() {
   // Mock data - replace with real data from your database
+
   const stats = [
     {
       title: "Total Graduates",
@@ -194,14 +196,17 @@ export default function VGSSOfficeDashboard() {
                 central dashboard.
               </p>
             </div>
+
             <div className="hidden md:block">
-              <Button
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/20"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Create New Account
-              </Button>
+              <Link href={"/dashboard/vgss-office/create-account"}>
+                <Button
+                  variant="secondary"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create New Account
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
