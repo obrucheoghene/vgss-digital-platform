@@ -22,6 +22,7 @@ import {
   MessageSquare,
   LogOut,
   UserCog,
+  HouseIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -56,8 +57,14 @@ const navigationItems = {
     {
       title: "Zone Management",
       icon: Building,
-      href: "/dashboard/vgss-office/zones",
+      href: "/dashboard/vgss-office/blw-zones",
       badge: null,
+    },
+    {
+      title: "Ministry Office Management",
+      icon: HouseIcon,
+      href: "/dashboard/vgss-office/ministry-office",
+      badge: "12", // Pending reviews
     },
     {
       title: "Reports & Analytics",
@@ -65,12 +72,7 @@ const navigationItems = {
       href: "/dashboard/vgss-office/reports",
       badge: null,
     },
-    {
-      title: "Interview Management",
-      icon: MessageSquare,
-      href: "/dashboard/vgss-office/interviews",
-      badge: "12", // Pending reviews
-    },
+
     {
       title: "Settings",
       icon: Settings,
