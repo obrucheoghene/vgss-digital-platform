@@ -554,7 +554,7 @@ export default function OptimizedUserManagementPage() {
                             onCheckedChange={handleSelectAll}
                             ref={(ref) => {
                               if (ref) {
-                                ref.indeterminate = isSomeSelected;
+                                // ref.indeterminate = isSomeSelected;
                               }
                             }}
                           />

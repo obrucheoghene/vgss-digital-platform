@@ -269,12 +269,12 @@ export function Sidebar({ className, isCollapsed = false }: SidebarProps) {
           </div>
         </div>
 
+        {/* || pathname.startsWith(item.href + "/") */}
         {/* Navigation */}
         <div className="px-3">
           <div className="space-y-1">
             {navigation.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
+              const isActive = pathname === item.href;
               return (
                 <Button
                   key={item.href}
