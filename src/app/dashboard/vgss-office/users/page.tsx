@@ -325,9 +325,9 @@ export default function OptimizedUserManagementPage() {
     <DashboardLayout title="User Management">
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">User Management</h1>
+        <div className="flex flex-col gap-2 md:flex-row items-center justify-between">
+          <div className=" text-center md:text-left">
+            <h1 className="text-2xl font-bold ">User Management</h1>
             <p className="text-muted-foreground">
               Manage all users across the VGSS platform
             </p>
@@ -343,12 +343,12 @@ export default function OptimizedUserManagementPage() {
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button onClick={refetch} disabled={isRefreshing}>
+            {/* <Button onClick={refetch} disabled={isRefreshing}>
               <RefreshCw
                 className={`w-4 h-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
               />
               Refresh
-            </Button>
+            </Button> */}
             <Link href="/dashboard/vgss-office/create-account">
               <Button>
                 <UserPlus className="w-4 h-4 mr-2" />
@@ -364,14 +364,14 @@ export default function OptimizedUserManagementPage() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Failed to load user data. Please try refreshing the page.
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 onClick={refetch}
                 className="ml-2"
               >
                 Retry
-              </Button>
+              </Button> */}
             </AlertDescription>
           </Alert>
         )}
@@ -398,7 +398,7 @@ export default function OptimizedUserManagementPage() {
           onValueChange={setSelectedUserType}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 flex-col sm:flex-row h-fit">
             <TabsTrigger value="all">
               All Users ({stats?.total || 0})
             </TabsTrigger>
