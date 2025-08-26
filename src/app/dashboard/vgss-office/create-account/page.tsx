@@ -61,7 +61,7 @@ export default function CreateAccountPage() {
     },
     {
       value: "MINISTRY_OFFICE",
-      label: "Service Deparment",
+      label: "Service Department",
       description: "Can request and manage VGSS staff",
       icon: Users,
       color: "text-green-600",
@@ -81,7 +81,6 @@ export default function CreateAccountPage() {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
-
     try {
       const response = await fetch("/api/admin/create-account", {
         method: "POST",
@@ -139,7 +138,7 @@ export default function CreateAccountPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold">Create New User Account</h2>
           <p className="text-muted-foreground mt-2">
-            Create accounts for BLW Zones, Service Deparments, or other VGSS
+            Create accounts for BLW Zones, Service Departments, or other VGSS
             Office users
           </p>
         </div>
@@ -197,14 +196,18 @@ export default function CreateAccountPage() {
             {message && (
               <Alert
                 variant={message.type === "error" ? "destructive" : "default"}
-                className="mb-6"
+                className="mb-6 "
               >
                 {message.type === "success" ? (
                   <CheckCircle2 className="h-4 w-4" />
                 ) : (
                   <AlertCircle className="h-4 w-4" />
                 )}
-                <AlertDescription>{message.text}</AlertDescription>
+                <AlertDescription
+                  className={message.type === "error" ? "" : "text-primary"}
+                >
+                  {message.text}
+                </AlertDescription>
               </Alert>
             )}
 

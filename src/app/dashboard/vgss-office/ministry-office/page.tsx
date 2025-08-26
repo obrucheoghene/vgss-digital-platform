@@ -208,7 +208,7 @@ export default function MinistryOfficeManagementPage() {
   //   const loadData = async () => {
   //     setIsLoading(true);
   //     try {
-  //       // Fetch Service Deparments (users with type MINISTRY_OFFICE)
+  //       // Fetch Service Departments (users with type MINISTRY_OFFICE)
   //       const ministryUsers = await db
   //         .select()
   //         .from(users)
@@ -358,8 +358,8 @@ export default function MinistryOfficeManagementPage() {
 
   //       setStats(calculatedStats);
   //     } catch (error) {
-  //       toast.error("Failed to load Service Deparment data");
-  //       console.error("Error loading Service Deparment data:", error);
+  //       toast.error("Failed to load Service Department data");
+  //       console.error("Error loading Service Department data:", error);
   //     } finally {
   //       setIsLoading(false);
   //     }
@@ -519,14 +519,17 @@ export default function MinistryOfficeManagementPage() {
   );
 
   return (
-    <DashboardLayout title="Service Deparment Management">
+    <DashboardLayout title="Service Department Management">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Service Deparment Management</h1>
+            <h1 className="text-2xl font-bold">
+              Service Department Management
+            </h1>
             <p className="text-muted-foreground">
-              Manage Service Deparments, staff requests, and service assignments
+              Manage Service Departments, staff requests, and service
+              assignments
             </p>
           </div>
           <div className="flex space-x-2">
@@ -671,7 +674,7 @@ export default function MinistryOfficeManagementPage() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Building className="w-5 h-5 mr-2" />
-                  Service Deparment Directory
+                  Service Department Directory
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -732,7 +735,7 @@ export default function MinistryOfficeManagementPage() {
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-8">
                             <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                            Loading Service Deparments...
+                            Loading Service Departments...
                           </TableCell>
                         </TableRow>
                       ) : paginatedOffices.length === 0 ? (
@@ -1035,7 +1038,7 @@ export default function MinistryOfficeManagementPage() {
                   Staff Requests Management
                 </CardTitle>
                 <CardDescription>
-                  Review and manage staff requests from Service Deparments
+                  Review and manage staff requests from Service Departments
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1047,7 +1050,8 @@ export default function MinistryOfficeManagementPage() {
                         No staff requests found
                       </h3>
                       <p className="text-muted-foreground">
-                        Staff requests from Service Deparments will appear here.
+                        Staff requests from Service Departments will appear
+                        here.
                       </p>
                     </div>
                   ) : (
@@ -1189,7 +1193,7 @@ export default function MinistryOfficeManagementPage() {
                   Current Staff Assignments
                 </CardTitle>
                 <CardDescription>
-                  Monitor active VGSS staff across all Service Deparments
+                  Monitor active VGSS staff across all Service Departments
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1198,7 +1202,7 @@ export default function MinistryOfficeManagementPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Graduate</TableHead>
-                        <TableHead>Service Deparment</TableHead>
+                        <TableHead>Service Department</TableHead>
                         <TableHead>Position</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Performance</TableHead>
@@ -1216,7 +1220,7 @@ export default function MinistryOfficeManagementPage() {
                             </h3>
                             <p className="text-muted-foreground">
                               Staff assignments will appear here when graduates
-                              are assigned to Service Deparments.
+                              are assigned to Service Departments.
                             </p>
                           </TableCell>
                         </TableRow>
@@ -1497,7 +1501,7 @@ export default function MinistryOfficeManagementPage() {
                 Office Details: {selectedOffice?.name}
               </DialogTitle>
               <DialogDescription>
-                Comprehensive Service Deparment information and performance
+                Comprehensive Service Department information and performance
                 metrics
               </DialogDescription>
             </DialogHeader>
