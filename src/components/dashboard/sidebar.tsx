@@ -49,19 +49,19 @@ const navigationItems = {
       badge: null,
     },
     {
-      title: "Graduate Management",
+      title: "Graduates",
       icon: GraduationCap,
       href: "/dashboard/vgss-office/graduates",
       badge: "234", // Example count
     },
     {
-      title: "Zone Management",
+      title: "BLW Zones",
       icon: Building,
       href: "/dashboard/vgss-office/blw-zones",
       badge: null,
     },
     {
-      title: "Service Deparment Management",
+      title: "Service Deparments",
       icon: HouseIcon,
       href: "/dashboard/vgss-office/ministry-office",
       badge: "12", // Pending reviews

@@ -26,6 +26,8 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import { Avatar } from "../ui/avatar";
+import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -95,7 +97,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
           </Button>
 
           {/* Title */}
-          <div>
+          <div className=" hidden md:flex flex-col">
             <h1 className="text-lg font-semibold text-foreground">
               {title || "Dashboard"}
             </h1>
@@ -106,7 +108,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
         </div>
 
         {/* Center Section - Search (hidden on mobile) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
+        {/* <div className="hidden md:flex flex-1 max-w-md mx-8">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -114,7 +116,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
               className="pl-10 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Right Section */}
         <div className="flex items-center space-x-4">
@@ -125,7 +127,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
           </Badge>
 
           {/* Notifications */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="h-5 w-5" />
@@ -160,10 +162,10 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
                 </div>
               </div>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
           {/* Theme Toggle */}
-          {mounted && (
+          {/* {mounted && (
             <Button
               variant="ghost"
               size="sm"
@@ -175,17 +177,26 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
                 <Sun className="h-5 w-5" />
               )}
             </Button>
-          )}
+          )} */}
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-primary-foreground text-sm font-medium">
+                <Avatar>
+                  <AvatarImage
+                    src="https://github.com/shadcn.png"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>
                     {session.user.name?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {/* <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-primary-foreground text-sm font-medium">
+                   
                   </span>
-                </div>
+                </div> */}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

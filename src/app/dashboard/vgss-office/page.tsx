@@ -88,12 +88,16 @@ export default function VGSSOfficeDashboard() {
     {
       title: "Pending Reviews",
       value: stats?.pendingReviews || 0,
-      change: stats?.pendingReviews > 20 ? "High Priority" : "Normal",
+      change: (stats?.pendingReviews || 0) > 20 ? "High Priority" : "Normal",
       trend:
-        stats?.pendingReviews > 20 ? ("up" as const) : ("neutral" as const),
+        (stats?.pendingReviews || 0) > 20
+          ? ("up" as const)
+          : ("neutral" as const),
       icon: AlertCircle,
-      color: stats?.pendingReviews > 20 ? "text-red-600" : "text-orange-600",
-      bgColor: stats?.pendingReviews > 20 ? "bg-red-100" : "bg-orange-100",
+      color:
+        (stats?.pendingReviews || 0) > 20 ? "text-red-600" : "text-orange-600",
+      bgColor:
+        (stats?.pendingReviews || 0) > 20 ? "bg-red-100" : "bg-orange-100",
       description: "Applications awaiting review",
     },
   ];
@@ -124,7 +128,9 @@ export default function VGSSOfficeDashboard() {
       color: "text-purple-600",
       bgColor: "bg-purple-50",
       badge:
-        stats?.pendingReviews > 0 ? stats.pendingReviews.toString() : undefined,
+        (stats?.pendingReviews || 0) > 0
+          ? stats?.pendingReviews.toString()
+          : undefined,
     },
     {
       title: "Generate Reports",
@@ -159,7 +165,7 @@ export default function VGSSOfficeDashboard() {
               </p>
 
               {/* Quick Stats in Welcome */}
-              <div className="flex items-center space-x-6 mt-4">
+              {/* <div className="flex items-center space-x-6 mt-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold">
                     {stats?.totalGraduates || 0}
@@ -178,7 +184,7 @@ export default function VGSSOfficeDashboard() {
                   </div>
                   <div className="text-xs opacity-80">Pending Reviews</div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="hidden md:block">
