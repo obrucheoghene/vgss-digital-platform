@@ -1,5 +1,10 @@
 // src/app/dashboard/vgss-office/page.tsx
+"use client";
+
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { StatsCard } from "@/components/dashboard/stats-card";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { TasksCard } from "@/components/dashboard/tasks-card";
 import {
   Card,
   CardContent,
@@ -9,339 +14,285 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Users,
   GraduationCap,
   Building,
-  TrendingUp,
+  AlertCircle,
   UserPlus,
   FileText,
-  Calendar,
-  AlertCircle,
-  CheckCircle,
+  BarChart3,
+  RefreshCw,
+  TrendingUp,
   Clock,
-  ArrowRight,
+  CheckCircle,
   House,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  useDashboardOverview,
+  useRefreshDashboard,
+} from "@/hooks/use-dashboard";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function VGSSOfficeDashboard() {
-  // Mock data - replace with real data from your database
+  const { stats, activities, tasks, isLoading, isError, error, refetch } =
+    useDashboardOverview();
+  const refreshMutation = useRefreshDashboard();
 
-  const stats = [
+  const handleRefresh = () => {
+    refreshMutation.mutate();
+  };
+
+  // Show error toast if there's an error
+  useEffect(() => {
+    if (isError && error) {
+      toast.error(`Dashboard Error: ${error.message}`);
+    }
+  }, [isError, error]);
+
+  const statsCards = [
     {
       title: "Total Graduates",
-      value: "1,234",
-      change: "+12%",
-      trend: "up",
+      value: stats?.totalGraduates || 0,
+      change: stats?.graduatesTrend,
+      trend: stats?.graduatesTrendDirection,
       icon: GraduationCap,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
+      description: "Registered VGSS graduates",
     },
     {
       title: "BLW Zones",
-      value: "45",
+      value: stats?.totalBLWZones || 0,
       change: "+3",
-      trend: "up",
+      trend: "up" as const,
       icon: Building,
       color: "text-green-600",
       bgColor: "bg-green-100",
+      description: "Active zone accounts",
     },
     {
       title: "Service Departments",
-      value: "28",
+      value: stats?.totalMinistryOffices || 0,
       change: "+2",
-      trend: "up",
+      trend: "up" as const,
       icon: House,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
+      description: "Ministry office accounts",
     },
     {
       title: "Pending Reviews",
-      value: "67",
-      change: "-5%",
-      trend: "down",
+      value: stats?.pendingReviews || 0,
+      change: stats?.pendingReviews > 20 ? "High Priority" : "Normal",
+      trend:
+        stats?.pendingReviews > 20 ? ("up" as const) : ("neutral" as const),
       icon: AlertCircle,
+      color: stats?.pendingReviews > 20 ? "text-red-600" : "text-orange-600",
+      bgColor: stats?.pendingReviews > 20 ? "bg-red-100" : "bg-orange-100",
+      description: "Applications awaiting review",
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: "Create Account",
+      description: "Add new user accounts",
+      icon: UserPlus,
+      href: "/dashboard/vgss-office/create-account",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    {
+      title: "Manage Users",
+      description: "View and manage users",
+      icon: Users,
+      href: "/dashboard/vgss-office/users",
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      badge: stats?.totalUsers.toString(),
+    },
+    {
+      title: "Review Graduates",
+      description: "Review applications",
+      icon: GraduationCap,
+      href: "/dashboard/vgss-office/graduates",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      badge:
+        stats?.pendingReviews > 0 ? stats.pendingReviews.toString() : undefined,
+    },
+    {
+      title: "Generate Reports",
+      description: "View analytics & reports",
+      icon: BarChart3,
+      href: "/dashboard/vgss-office/reports",
       color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      bgColor: "bg-orange-50",
     },
   ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: "registration",
-      user: "John Doe",
-      action: "completed registration",
-      time: "2 minutes ago",
-      status: "pending",
-    },
-    {
-      id: 2,
-      type: "approval",
-      user: "Jane Smith",
-      action: "was approved by Lagos Zone",
-      time: "15 minutes ago",
-      status: "approved",
-    },
-    {
-      id: 3,
-      type: "interview",
-      user: "Mike Johnson",
-      action: "completed interview questions",
-      time: "1 hour ago",
-      status: "completed",
-    },
-    {
-      id: 4,
-      type: "upload",
-      user: "Abuja Zone",
-      action: "uploaded 23 new graduate records",
-      time: "2 hours ago",
-      status: "completed",
-    },
-    {
-      id: 5,
-      type: "placement",
-      user: "Sarah Wilson",
-      action: "was placed in Ministry of Music",
-      time: "3 hours ago",
-      status: "completed",
-    },
-  ];
-
-  const upcomingTasks = [
-    {
-      id: 1,
-      title: "Review Graduate Applications",
-      count: 12,
-      priority: "high",
-      dueDate: "Today",
-    },
-    {
-      id: 2,
-      title: "Schedule Interviews",
-      count: 8,
-      priority: "medium",
-      dueDate: "Tomorrow",
-    },
-    {
-      id: 3,
-      title: "Ministry Placement Review",
-      count: 5,
-      priority: "medium",
-      dueDate: "This Week",
-    },
-    {
-      id: 4,
-      title: "Monthly Reports",
-      count: 1,
-      priority: "low",
-      dueDate: "Next Week",
-    },
-  ];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "pending":
-        return (
-          <Badge
-            variant="outline"
-            className="text-orange-600 border-orange-200"
-          >
-            Pending
-          </Badge>
-        );
-      case "approved":
-        return (
-          <Badge variant="outline" className="text-green-600 border-green-200">
-            Approved
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge variant="outline" className="text-blue-600 border-blue-200">
-            Completed
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "text-red-600 bg-red-50 border-red-200";
-      case "medium":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
-      case "low":
-        return "text-green-600 bg-green-50 border-green-200";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
-    }
-  };
 
   return (
     <DashboardLayout title="VGSS Office Dashboard">
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-xl p-6 text-primary-foreground">
-          <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-xl p-6 text-primary-foreground relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-4 right-4 w-32 h-32 border border-white rounded-full"></div>
+            <div className="absolute bottom-4 left-4 w-24 h-24 border border-white rounded-full"></div>
+            <div className="absolute top-1/2 right-1/3 w-16 h-16 border border-white rounded-full"></div>
+          </div>
+
+          <div className="relative flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold mb-2">
                 Welcome back, Administrator!
               </h2>
-              <p className="opacity-90">
+              <p className="opacity-90 text-base">
                 Manage the VGSS platform and oversee all operations from your
                 central dashboard.
               </p>
+
+              {/* Quick Stats in Welcome */}
+              <div className="flex items-center space-x-6 mt-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">
+                    {stats?.totalGraduates || 0}
+                  </div>
+                  <div className="text-xs opacity-80">Total Graduates</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">
+                    {stats?.activeUsers || 0}
+                  </div>
+                  <div className="text-xs opacity-80">Active Users</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">
+                    {stats?.pendingReviews || 0}
+                  </div>
+                  <div className="text-xs opacity-80">Pending Reviews</div>
+                </div>
+              </div>
             </div>
 
             <div className="hidden md:block">
-              <Link href={"/dashboard/vgss-office/create-account"}>
+              <div className="flex flex-col space-y-2">
+                <Link href="/dashboard/vgss-office/create-account">
+                  <Button
+                    variant="secondary"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Create New Account
+                  </Button>
+                </Link>
                 <Button
-                  variant="secondary"
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={refreshMutation.isPending}
+                  className="text-white/80 hover:text-white hover:bg-white/10"
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Create New Account
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${
+                      refreshMutation.isPending ? "animate-spin" : ""
+                    }`}
+                  />
+                  Refresh Data
                 </Button>
-              </Link>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Error Alert */}
+        {isError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load dashboard data. Please try refreshing the page.
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card
-                key={stat.title}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${stat.bgColor}`}
-                  >
-                    <Icon className={`w-4 h-4 ${stat.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <TrendingUp
-                      className={`w-3 h-3 mr-1 ${
-                        stat.trend === "up" ? "text-green-500" : "text-red-500"
-                      }`}
-                    />
-                    <span
-                      className={
-                        stat.trend === "up" ? "text-green-600" : "text-red-600"
-                      }
-                    >
-                      {stat.change}
-                    </span>
-                    <span className="ml-1">from last month</span>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {statsCards.map((stat) => (
+            <StatsCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              change={stat.change}
+              trend={stat.trend}
+              icon={stat.icon}
+              color={stat.color}
+              bgColor={stat.bgColor}
+              description={stat.description}
+              loading={isLoading}
+            />
+          ))}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Recent Activity */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="w-5 h-5 mr-2" />
-                Recent Activity
-              </CardTitle>
-              <CardDescription>
-                Latest activities across the VGSS platform
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">
-                        {activity.user}
-                      </span>
-                      <span className="text-muted-foreground text-sm">
-                        {activity.action}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {activity.time}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(activity.status)}
-                  </div>
-                </div>
-              ))}
-              <div className="pt-4 border-t">
-                <Button variant="ghost" className="w-full justify-between">
-                  View All Activity
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Tasks */}
+        {/* Status Distribution */}
+        {stats?.statusDistribution && !isLoading && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2" />
-                Upcoming Tasks
+                <BarChart3 className="w-5 h-5 mr-2" />
+                Graduate Status Overview
               </CardTitle>
               <CardDescription>
-                Tasks that require your attention
+                Current distribution of graduate statuses across the platform
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingTasks.map((task) => (
-                <div key={task.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-sm">{task.title}</h4>
-                    <Badge
-                      variant="secondary"
-                      className={getPriorityColor(task.priority)}
-                    >
-                      {task.priority}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{task.count} items</span>
-                    <span>{task.dueDate}</span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+                {Object.entries(stats.statusDistribution).map(
+                  ([status, count]) => (
                     <div
-                      className="h-full bg-primary rounded-full"
-                      style={{ width: `${Math.random() * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className="pt-4 border-t">
-                <Button variant="ghost" className="w-full justify-between">
-                  View All Tasks
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                      key={status}
+                      className="text-center p-3 bg-muted/30 rounded-lg"
+                    >
+                      <div className="text-2xl font-bold text-primary">
+                        {count}
+                      </div>
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {status.replace(/_/g, " ")}
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Main Dashboard Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Recent Activity - Takes 2 columns */}
+          <ActivityFeed
+            activities={activities}
+            loading={isLoading}
+            onRefresh={refetch}
+            refreshing={refreshMutation.isPending}
+          />
+
+          {/* Upcoming Tasks */}
+          <TasksCard tasks={tasks} loading={isLoading} />
         </div>
 
         {/* Quick Actions */}
@@ -354,22 +305,80 @@ export default function VGSSOfficeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <UserPlus className="w-6 h-6" />
-                <span>Create Account</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <Users className="w-6 h-6" />
-                <span>Manage Users</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <GraduationCap className="w-6 h-6" />
-                <span>Review Graduates</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <FileText className="w-6 h-6" />
-                <span>Generate Reports</span>
-              </Button>
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link key={action.title} href={action.href}>
+                    <Button
+                      variant="outline"
+                      className="h-20 flex-col space-y-2 w-full relative group hover:shadow-md transition-all"
+                    >
+                      <div
+                        className={`w-12 h-12 rounded-lg ${action.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                      >
+                        <Icon className={`w-6 h-6 ${action.color}`} />
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium text-sm">
+                          {action.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {action.description}
+                        </div>
+                      </div>
+                      {action.badge && (
+                        <Badge
+                          variant="secondary"
+                          className="absolute -top-2 -right-2 h-6 w-6 p-0 flex items-center justify-center text-xs"
+                        >
+                          {action.badge}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Platform Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Info className="w-5 h-5 mr-2" />
+              Platform Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-blue-900">
+                  {stats?.usersByType.BLW_ZONE || 0}
+                </div>
+                <div className="text-sm text-blue-700">BLW Zones Connected</div>
+              </div>
+
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <House className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-900">
+                  {stats?.usersByType.MINISTRY_OFFICE || 0}
+                </div>
+                <div className="text-sm text-green-700">
+                  Service Departments
+                </div>
+              </div>
+
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <GraduationCap className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-purple-900">
+                  {stats?.usersByType.GRADUATE || 0}
+                </div>
+                <div className="text-sm text-purple-700">
+                  Registered Graduates
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
