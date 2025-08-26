@@ -791,7 +791,7 @@ export default function GraduateManagementPage() {
                             checked={isAllSelected}
                             onCheckedChange={handleSelectAll}
                             ref={(ref) => {
-                              if (ref) ref.indeterminate = isSomeSelected;
+                              // if (ref) ref.indeterminate = isSomeSelected;
                             }}
                           />
                         </TableHead>

@@ -52,7 +52,7 @@ const navigationItems = {
       title: "Graduates",
       icon: GraduationCap,
       href: "/dashboard/vgss-office/graduates",
-      badge: "234", // Example count
+      badge: null, // Example count
     },
     {
       title: "BLW Zones",
@@ -64,7 +64,7 @@ const navigationItems = {
       title: "Service Departments",
       icon: HouseIcon,
       href: "/dashboard/vgss-office/ministry-office",
-      badge: "12", // Pending reviews
+      badge: null, // Pending reviews
     },
     {
       title: "Reports & Analytics",
