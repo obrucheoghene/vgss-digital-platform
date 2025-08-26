@@ -88,6 +88,7 @@ export const users = pgTable("users", {
     .default("pending_activation")
     .notNull(),
   createdBy: uuid("created_by"),
+  lastLoginAt: timestamp("last_login_at"), // NEW FIELD
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

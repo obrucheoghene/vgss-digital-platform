@@ -25,3 +25,4 @@ ALTER TABLE "users" ADD COLUMN "account_status" "account_status" DEFAULT 'pendin
 ALTER TABLE "users" ADD COLUMN "created_by" uuid;--> statement-breakpoint
 ALTER TABLE "zone_graduates" ADD CONSTRAINT "zone_graduates_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_zone_graduate_id_zone_graduates_id_fk" FOREIGN KEY ("zone_graduate_id") REFERENCES "public"."zone_graduates"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP;

@@ -63,6 +63,7 @@ export async function GET(req: NextRequest) {
           type: users.type,
           accountStatus: users.accountStatus,
           isDeactivated: users.isDeactivated,
+          lastLoginAt: users.lastLoginAt,
           createdAt: users.createdAt,
           updatedAt: users.updatedAt,
         })

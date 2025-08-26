@@ -1,8 +1,10 @@
+// src/app/dashboard/vgss-office/users/page.tsx - OPTIMIZED with React Query
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { UserDetailModal } from "@/components/admin/user-detail-modal";
+import { StatsCard } from "@/components/dashboard/stats-card";
 import {
   Card,
   CardContent,
@@ -39,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +53,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Users,
   Search,
@@ -60,157 +64,117 @@ import {
   Building,
   GraduationCap,
   Eye,
-  Edit,
   Key,
   UserX,
   UserCheck,
   Download,
   RefreshCw,
   Loader2,
+  AlertCircle,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
+import {
+  useUserManagement,
+  useUser,
+  type User,
+} from "@/hooks/use-user-management";
+// import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  type: "VGSS_OFFICE" | "BLW_ZONE" | "MINISTRY_OFFICE" | "GRADUATE";
-  accountStatus: "pending_activation" | "active";
-  isDeactivated: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastLogin?: string;
+// Custom debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }
 
-interface UserStats {
-  total: number;
-  active: number;
-  pending: number;
-  deactivated: number;
-  byType: {
-    VGSS_OFFICE: number;
-    BLW_ZONE: number;
-    MINISTRY_OFFICE: number;
-    GRADUATE: number;
-  };
-}
-
-export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function OptimizedUserManagementPage() {
+  // State for filters and selections
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserType, setSelectedUserType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [stats, setStats] = useState<UserStats>({
-    total: 0,
-    active: 0,
-    pending: 0,
-    deactivated: 0,
-    byType: { VGSS_OFFICE: 0, BLW_ZONE: 0, MINISTRY_OFFICE: 0, GRADUATE: 0 },
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Debounce search query to avoid too many API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  // Use the optimized hook
+  const {
+    users,
+    stats,
+    pagination,
+    isLoading,
+    isRefreshing,
+    isError,
+    error,
+    refetch,
+    performUserAction,
+    performBulkAction,
+    isPerformingAction,
+    isPerformingBulkAction,
+  } = useUserManagement({
+    search: debouncedSearchQuery,
+    type: selectedUserType,
+    status: selectedStatus,
+    page: currentPage,
+    limit: 50,
   });
 
-  // Load users from API
-  const loadUsers = async () => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append("search", searchQuery);
-      if (selectedUserType !== "all") params.append("type", selectedUserType);
-      if (selectedStatus !== "all") params.append("status", selectedStatus);
-
-      const response = await fetch(`/api/admin/users?${params.toString()}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to load users");
-      }
-
-      setUsers(data.users);
-      setStats(data.stats);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load users"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Reset page when filters change
   useEffect(() => {
-    loadUsers();
-  }, []);
+    setCurrentPage(1);
+    setSelectedUsers([]);
+  }, [debouncedSearchQuery, selectedUserType, selectedStatus]);
 
-  useEffect(() => {
-    // Filter users locally for immediate UI response
-    let filtered = users;
+  // Memoized user type configurations
+  const userTypeConfigs = useMemo(
+    () => ({
+      VGSS_OFFICE: {
+        icon: Shield,
+        color: "text-purple-600",
+        bgColor: "bg-purple-100",
+        badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+      },
+      BLW_ZONE: {
+        icon: Building,
+        color: "text-blue-600",
+        bgColor: "bg-blue-100",
+        badgeColor: "bg-blue-100 text-blue-800 border-blue-200",
+      },
+      MINISTRY_OFFICE: {
+        icon: Building,
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        badgeColor: "bg-green-100 text-green-800 border-green-200",
+      },
+      GRADUATE: {
+        icon: GraduationCap,
+        color: "text-orange-600",
+        bgColor: "bg-orange-100",
+        badgeColor: "bg-orange-100 text-orange-800 border-orange-200",
+      },
+    }),
+    []
+  );
 
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (selectedUserType !== "all") {
-      filtered = filtered.filter((user) => user.type === selectedUserType);
-    }
-
-    if (selectedStatus !== "all") {
-      if (selectedStatus === "active") {
-        filtered = filtered.filter(
-          (user) => user.accountStatus === "active" && !user.isDeactivated
-        );
-      } else if (selectedStatus === "pending") {
-        filtered = filtered.filter(
-          (user) => user.accountStatus === "pending_activation"
-        );
-      } else if (selectedStatus === "deactivated") {
-        filtered = filtered.filter((user) => user.isDeactivated);
-      }
-    }
-
-    setFilteredUsers(filtered);
-    setSelectedUsers([]); // Clear selections when filters change
-  }, [users, searchQuery, selectedUserType, selectedStatus]);
-
-  const handleSearch = () => {
-    loadUsers(); // Reload with API search
-  };
-
-  const getUserTypeIcon = (type: string) => {
-    switch (type) {
-      case "VGSS_OFFICE":
-        return Shield;
-      case "BLW_ZONE":
-        return Building;
-      case "MINISTRY_OFFICE":
-        return Building;
-      case "GRADUATE":
-        return GraduationCap;
-      default:
-        return Users;
-    }
-  };
-
-  const getUserTypeBadge = (type: string) => {
-    const colors = {
-      VGSS_OFFICE: "bg-purple-100 text-purple-800 border-purple-200",
-      BLW_ZONE: "bg-blue-100 text-blue-800 border-blue-200",
-      MINISTRY_OFFICE: "bg-green-100 text-green-800 border-green-200",
-      GRADUATE: "bg-orange-100 text-orange-800 border-orange-200",
-    };
-
-    return (
-      <Badge className={colors[type as keyof typeof colors] || ""}>
-        {type.replace("_", " ")}
-      </Badge>
-    );
-  };
+  const getUserTypeIcon = (type: string) =>
+    userTypeConfigs[type as keyof typeof userTypeConfigs]?.icon || Users;
+  const getUserTypeBadge = (type: string) =>
+    userTypeConfigs[type as keyof typeof userTypeConfigs]?.badgeColor || "";
 
   const getStatusBadge = (user: User) => {
     if (user.isDeactivated) {
@@ -226,7 +190,7 @@ export default function UserManagementPage() {
       return (
         <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
           <Key className="w-3 h-3 mr-1" />
-          Pending Activation
+          Pending
         </Badge>
       );
     }
@@ -239,82 +203,70 @@ export default function UserManagementPage() {
     );
   };
 
-  const handleUserAction = async (action: string, userId: string) => {
-    try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to update user");
-      }
-
-      // Update user in local state
-      setUsers((prev) =>
-        prev.map((user) => (user.id === userId ? data.user : user))
-      );
-
-      const actionMessages = {
-        toggle_activation: data.user.isDeactivated
-          ? "User account deactivated"
-          : "User account activated",
-        reset_password: "Password reset successfully",
+  const formatLastLogin = (lastLoginAt?: string) => {
+    if (!lastLoginAt) {
+      return {
+        text: "Never",
+        className: "text-muted-foreground",
+        relative: "Never logged in",
       };
-
-      toast.success(
-        actionMessages[action as keyof typeof actionMessages] ||
-          "Action completed"
-      );
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update user"
-      );
     }
+
+    const lastLogin = new Date(lastLoginAt);
+    const now = new Date();
+    const diffInMs = now.getTime() - lastLogin.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    let relative = "";
+    let className = "";
+
+    if (diffInMinutes < 60) {
+      relative = `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""} ago`;
+      className = "text-green-600";
+    } else if (diffInHours < 24) {
+      relative = `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
+      className = "text-green-600";
+    } else if (diffInDays < 7) {
+      relative = `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
+      className = "text-blue-600";
+    } else if (diffInDays < 30) {
+      relative = `${Math.floor(diffInDays / 7)} week${
+        Math.floor(diffInDays / 7) !== 1 ? "s" : ""
+      } ago`;
+      className = "text-yellow-600";
+    } else {
+      relative = `${Math.floor(diffInDays / 30)} month${
+        Math.floor(diffInDays / 30) !== 1 ? "s" : ""
+      } ago`;
+      className = "text-red-600";
+    }
+
+    return {
+      text: lastLogin.toLocaleDateString(),
+      time: lastLogin.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      className,
+      relative,
+    };
+  };
+
+  const handleUserAction = async (action: string, userId: string) => {
+    performUserAction({ userId, action });
   };
 
   const handleBulkAction = async (action: string) => {
-    if (selectedUsers.length === 0) {
-      toast.error("Please select users first");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/admin/users/bulk-actions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, userIds: selectedUsers }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Bulk action failed");
-      }
-
-      await loadUsers(); // Reload users
-      setSelectedUsers([]);
-      toast.success(`${data.message} - ${data.updatedCount} users updated`);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Bulk action failed"
-      );
-    }
-  };
-
-  const handleUserUpdated = (updatedUser: User) => {
-    setUsers((prev) =>
-      prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
-    );
-    setSelectedUser(updatedUser); // Update modal data
+    if (selectedUsers.length === 0) return;
+    performBulkAction({ action, userIds: selectedUsers });
+    setSelectedUsers([]);
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedUsers(filteredUsers.map((user) => user.id));
+      setSelectedUsers(users.map((user) => user.id));
     } else {
       setSelectedUsers([]);
     }
@@ -329,10 +281,45 @@ export default function UserManagementPage() {
   };
 
   const isAllSelected =
-    filteredUsers.length > 0 && selectedUsers.length === filteredUsers.length;
-
+    users.length > 0 && selectedUsers.length === users.length;
   const isSomeSelected =
-    selectedUsers.length > 0 && selectedUsers.length < filteredUsers.length;
+    selectedUsers.length > 0 && selectedUsers.length < users.length;
+
+  // Stats cards data
+  const statsCards = [
+    {
+      title: "Total Users",
+      value: stats?.total || 0,
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+      description: "All user accounts",
+    },
+    {
+      title: "Active Users",
+      value: stats?.active || 0,
+      icon: UserCheck,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+      description: "Currently active",
+    },
+    {
+      title: "Pending Activation",
+      value: stats?.pending || 0,
+      icon: Key,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+      description: "Awaiting activation",
+    },
+    {
+      title: "Deactivated",
+      value: stats?.deactivated || 0,
+      icon: UserX,
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+      description: "Deactivated accounts",
+    },
+  ];
 
   return (
     <DashboardLayout title="User Management">
@@ -346,13 +333,19 @@ export default function UserManagementPage() {
             </p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                /* Export functionality */
+              }}
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button onClick={loadUsers} disabled={isLoading}>
+            <Button onClick={refetch} disabled={isRefreshing}>
               <RefreshCw
-                className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                className={`w-4 h-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
               />
               Refresh
             </Button>
@@ -365,55 +358,38 @@ export default function UserManagementPage() {
           </div>
         </div>
 
+        {/* Error Alert */}
+        {isError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load user data. Please try refreshing the page.
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refetch}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Stats Overview */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Users className="w-5 h-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <UserCheck className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Active</p>
-                  <p className="text-2xl font-bold">{stats.active}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Key className="w-5 h-5 text-yellow-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold">{stats.pending}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <UserX className="w-5 h-5 text-red-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Deactivated</p>
-                  <p className="text-2xl font-bold">{stats.deactivated}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {statsCards.map((stat) => (
+            <StatsCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+              color={stat.color}
+              bgColor={stat.bgColor}
+              description={stat.description}
+              loading={isLoading}
+            />
+          ))}
         </div>
 
         {/* User Type Tabs */}
@@ -423,22 +399,24 @@ export default function UserManagementPage() {
           className="space-y-6"
         >
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="all">All Users ({stats.total})</TabsTrigger>
+            <TabsTrigger value="all">
+              All Users ({stats?.total || 0})
+            </TabsTrigger>
             <TabsTrigger value="VGSS_OFFICE">
               <Shield className="w-4 h-4 mr-2" />
-              VGSS Office ({stats.byType.VGSS_OFFICE})
+              VGSS Office ({stats?.byType.VGSS_OFFICE || 0})
             </TabsTrigger>
             <TabsTrigger value="BLW_ZONE">
               <Building className="w-4 h-4 mr-2" />
-              BLW Zones ({stats.byType.BLW_ZONE})
+              BLW Zones ({stats?.byType.BLW_ZONE || 0})
             </TabsTrigger>
             <TabsTrigger value="MINISTRY_OFFICE">
               <Building className="w-4 h-4 mr-2" />
-              Ministries ({stats.byType.MINISTRY_OFFICE})
+              Ministries ({stats?.byType.MINISTRY_OFFICE || 0})
             </TabsTrigger>
             <TabsTrigger value="GRADUATE">
               <GraduationCap className="w-4 h-4 mr-2" />
-              Graduates ({stats.byType.GRADUATE})
+              Graduates ({stats?.byType.GRADUATE || 0})
             </TabsTrigger>
           </TabsList>
 
@@ -461,7 +439,11 @@ export default function UserManagementPage() {
                     <div className="flex space-x-2">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isPerformingBulkAction}
+                          >
                             <UserCheck className="w-4 h-4 mr-2" />
                             Activate Selected ({selectedUsers.length})
                           </Button>
@@ -490,7 +472,11 @@ export default function UserManagementPage() {
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isPerformingBulkAction}
+                          >
                             <UserX className="w-4 h-4 mr-2" />
                             Deactivate Selected
                           </Button>
@@ -535,15 +521,9 @@ export default function UserManagementPage() {
                           placeholder="Search by name or email..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          onKeyPress={(e) =>
-                            e.key === "Enter" && handleSearch()
-                          }
                           className="pl-10"
                         />
                       </div>
-                      <Button onClick={handleSearch} disabled={isLoading}>
-                        Search
-                      </Button>
                     </div>
                   </div>
 
@@ -589,13 +569,38 @@ export default function UserManagementPage() {
                     </TableHeader>
                     <TableBody>
                       {isLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8">
-                            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                            Loading users...
-                          </TableCell>
-                        </TableRow>
-                      ) : filteredUsers.length === 0 ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell>
+                              <Skeleton className="h-4 w-4" />
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <Skeleton className="w-8 h-8 rounded-full" />
+                                <div>
+                                  <Skeleton className="h-4 w-32 mb-1" />
+                                  <Skeleton className="h-3 w-48" />
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Skeleton className="h-6 w-20" />
+                            </TableCell>
+                            <TableCell>
+                              <Skeleton className="h-6 w-20" />
+                            </TableCell>
+                            <TableCell>
+                              <Skeleton className="h-4 w-24" />
+                            </TableCell>
+                            <TableCell>
+                              <Skeleton className="h-4 w-24" />
+                            </TableCell>
+                            <TableCell>
+                              <Skeleton className="h-8 w-8 ml-auto" />
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : users.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-8">
                             <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -608,9 +613,12 @@ export default function UserManagementPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredUsers.map((user) => {
+                        users.map((user) => {
                           const TypeIcon = getUserTypeIcon(user.type);
                           const isSelected = selectedUsers.includes(user.id);
+                          const lastLoginInfo = formatLastLogin(
+                            user.lastLoginAt
+                          );
 
                           return (
                             <TableRow
@@ -642,7 +650,9 @@ export default function UserManagementPage() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                {getUserTypeBadge(user.type)}
+                                <Badge className={getUserTypeBadge(user.type)}>
+                                  {user.type.replace("_", " ")}
+                                </Badge>
                               </TableCell>
                               <TableCell>{getStatusBadge(user)}</TableCell>
                               <TableCell>
@@ -655,34 +665,36 @@ export default function UserManagementPage() {
                                   <p className="text-muted-foreground">
                                     {new Date(
                                       user.createdAt
-                                    ).toLocaleTimeString()}
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
                                   </p>
                                 </div>
                               </TableCell>
                               <TableCell>
-                                {user.lastLogin ? (
-                                  <div className="text-sm">
-                                    <p>
-                                      {new Date(
-                                        user.lastLogin
-                                      ).toLocaleDateString()}
-                                    </p>
+                                <div className="text-sm">
+                                  <p className={lastLoginInfo.className}>
+                                    {lastLoginInfo.text}
+                                  </p>
+                                  {lastLoginInfo.time && (
                                     <p className="text-muted-foreground">
-                                      {new Date(
-                                        user.lastLogin
-                                      ).toLocaleTimeString()}
+                                      {lastLoginInfo.time}
                                     </p>
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground text-sm">
-                                    Never
-                                  </span>
-                                )}
+                                  )}
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {lastLoginInfo.relative}
+                                  </p>
+                                </div>
                               </TableCell>
                               <TableCell className="text-right">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      disabled={isPerformingAction}
+                                    >
                                       <MoreHorizontal className="w-4 h-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
@@ -747,11 +759,104 @@ export default function UserManagementPage() {
                   </Table>
                 </div>
 
-                {filteredUsers.length > 0 && (
+                {/* Pagination */}
+                {pagination && pagination.totalPages > 1 && (
                   <div className="flex items-center justify-between pt-4">
                     <p className="text-sm text-muted-foreground">
-                      Showing {filteredUsers.length} user
-                      {filteredUsers.length !== 1 ? "s" : ""}
+                      Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                      {Math.min(
+                        pagination.page * pagination.limit,
+                        pagination.total
+                      )}{" "}
+                      of {pagination.total} users
+                      {selectedUsers.length > 0 && (
+                        <span className="ml-2 font-medium">
+                          ({selectedUsers.length} selected)
+                        </span>
+                      )}
+                    </p>
+
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
+                        disabled={currentPage === 1 || isLoading}
+                      >
+                        Previous
+                      </Button>
+
+                      <div className="flex items-center space-x-1">
+                        {Array.from(
+                          { length: Math.min(5, pagination.totalPages) },
+                          (_, i) => {
+                            const pageNumber = i + 1;
+                            return (
+                              <Button
+                                key={pageNumber}
+                                variant={
+                                  currentPage === pageNumber
+                                    ? "default"
+                                    : "outline"
+                                }
+                                size="sm"
+                                onClick={() => setCurrentPage(pageNumber)}
+                                disabled={isLoading}
+                                className="w-8 h-8 p-0"
+                              >
+                                {pageNumber}
+                              </Button>
+                            );
+                          }
+                        )}
+
+                        {pagination.totalPages > 5 && (
+                          <>
+                            <span className="px-2 text-muted-foreground">
+                              ...
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setCurrentPage(pagination.totalPages)
+                              }
+                              disabled={
+                                isLoading ||
+                                currentPage === pagination.totalPages
+                              }
+                              className="w-8 h-8 p-0"
+                            >
+                              {pagination.totalPages}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCurrentPage(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
+                        disabled={
+                          currentPage === pagination.totalPages || isLoading
+                        }
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {users.length > 0 && !pagination && (
+                  <div className="pt-4">
+                    <p className="text-sm text-muted-foreground">
+                      Showing {users.length} user{users.length !== 1 ? "s" : ""}
                       {selectedUsers.length > 0 && (
                         <span className="ml-2 font-medium">
                           ({selectedUsers.length} selected)
@@ -770,7 +875,10 @@ export default function UserManagementPage() {
           user={selectedUser}
           isOpen={!!selectedUser}
           onClose={() => setSelectedUser(null)}
-          onUserUpdated={handleUserUpdated}
+          onUserUpdated={(updatedUser) => {
+            // The React Query cache will be updated automatically by the mutation
+            setSelectedUser(updatedUser);
+          }}
         />
       </div>
     </DashboardLayout>

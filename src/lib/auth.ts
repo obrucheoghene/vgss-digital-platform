@@ -1,4 +1,4 @@
-// src/lib/auth.ts
+// src/lib/auth.ts - Updated with last login tracking
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
@@ -53,6 +53,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
 
+          // Update last login timestamp
+          await db
+            .update(users)
+            .set({
+              lastLoginAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, foundUser.id));
+
           // Return user data for session
           return {
             id: foundUser.id,
@@ -61,6 +70,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             type: foundUser.type,
             accountStatus: foundUser.accountStatus,
             isDeactivated: foundUser.isDeactivated,
+            lastLoginAt: new Date(), // Include in session
           };
         } catch (error) {
           console.error("Authentication error:", error);
@@ -81,6 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.type = user.type;
         token.accountStatus = user.accountStatus;
         token.isDeactivated = user.isDeactivated;
+        token.lastLoginAt = user.lastLoginAt;
       }
       return token;
     },
@@ -91,6 +102,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.type = token.type as string;
         session.user.accountStatus = token.accountStatus as string;
         session.user.isDeactivated = token.isDeactivated as boolean;
+        session.user.lastLoginAt = token.lastLoginAt as Date;
       }
       return session;
     },
@@ -124,7 +136,7 @@ export const isDefaultPassword = async (
 // Auth helper functions
 export const getServerSession = () => auth();
 
-// Type definitions for NextAuth
+// Type definitions for NextAuth - UPDATED
 declare module "next-auth" {
   interface Session {
     user: {
@@ -134,6 +146,7 @@ declare module "next-auth" {
       type: string;
       accountStatus: string;
       isDeactivated: boolean;
+      lastLoginAt?: Date;
     };
   }
 
@@ -144,5 +157,6 @@ declare module "next-auth" {
     type: string;
     accountStatus: string;
     isDeactivated: boolean;
+    lastLoginAt?: Date;
   }
 }
