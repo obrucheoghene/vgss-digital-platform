@@ -1,4 +1,4 @@
-// src/app/dashboard/vgss-office/ministry-office/page.tsx
+// src/app/dashboard/vgss-office/service-department/page.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -208,11 +208,11 @@ export default function MinistryOfficeManagementPage() {
   //   const loadData = async () => {
   //     setIsLoading(true);
   //     try {
-  //       // Fetch Service Departments (users with type MINISTRY_OFFICE)
+  //       // Fetch Service Departments (users with type SERVICE_DEPARTMENT)
   //       const ministryUsers = await db
   //         .select()
   //         .from(users)
-  //         .where(eq(users.type, "MINISTRY_OFFICE"))
+  //         .where(eq(users.type, "SERVICE_DEPARTMENT"))
   //         .execute();
 
   //       // Fetch related graduate data for staff assignments

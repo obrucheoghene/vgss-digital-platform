@@ -15,7 +15,7 @@ import { relations } from "drizzle-orm";
 export const userTypeEnum = pgEnum("user_type", [
   "VGSS_OFFICE",
   "GRADUATE",
-  "MINISTRY_OFFICE",
+  "SERVICE_DEPARTMENT",
   "BLW_ZONE",
 ]);
 export const genderEnum = pgEnum("gender", ["MALE", "FEMALE"]);
@@ -109,7 +109,7 @@ export const graduateData = pgTable("graduate_data", {
   blwZoneId: uuid("blw_zone_id")
     .references(() => users.id)
     .notNull(), // BLW Zone who uploaded - REQUIRED
-  ministryOfficeId: uuid("ministry_office_id").references(() => users.id),
+  serviceDepartmentId: uuid("service_department_id").references(() => users.id),
 
   // Personal Information (split name from zone data)
   graduateFirstname: varchar("graduate_firstname", { length: 255 }).notNull(),
@@ -234,7 +234,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   zoneManagedGraduates: many(graduateData, { relationName: "blwZoneManager" }),
   // User as Service Department
   officeAssignedGraduates: many(graduateData, {
-    relationName: "ministryOfficeManager",
+    relationName: "serviceDepartmentManager",
   }),
   // User as approver
   approvedGraduates: many(graduateData, { relationName: "approver" }),
@@ -278,10 +278,10 @@ export const graduateDataRelations = relations(graduateData, ({ one }) => ({
     references: [users.id],
     relationName: "blwZoneManager",
   }),
-  ministryOffice: one(users, {
-    fields: [graduateData.ministryOfficeId],
+  serviceDepartment: one(users, {
+    fields: [graduateData.serviceDepartmentId],
     references: [users.id],
-    relationName: "ministryOfficeManager",
+    relationName: "serviceDepartmentManager",
   }),
   approvedByUser: one(users, {
     fields: [graduateData.approvedBy],
@@ -303,7 +303,7 @@ export type NewZoneGraduates = typeof zoneGraduates.$inferInsert;
 export type UserType =
   | "VGSS_OFFICE"
   | "GRADUATE"
-  | "MINISTRY_OFFICE"
+  | "SERVICE_DEPARTMENT"
   | "BLW_ZONE";
 export type Gender = "MALE" | "FEMALE";
 export type MaritalStatus = "SINGLE" | "MARRIED";

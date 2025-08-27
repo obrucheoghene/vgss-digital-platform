@@ -67,8 +67,8 @@ export default function LoginPage() {
           case "BLW_ZONE":
             router.push("/dashboard/blw-zone");
             break;
-          case "MINISTRY_OFFICE":
-            router.push("/dashboard/ministry-office");
+          case "SERVICE_DEPARTMENT":
+            router.push("/dashboard/service-department");
             break;
           case "GRADUATE":
             router.push("/dashboard/graduate");

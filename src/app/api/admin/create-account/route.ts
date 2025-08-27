@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate account type
-    const validTypes = ["BLW_ZONE", "MINISTRY_OFFICE", "VGSS_OFFICE"];
+    const validTypes = ["BLW_ZONE", "SERVICE_DEPARTMENT", "VGSS_OFFICE"];
     if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: "Invalid account type" },

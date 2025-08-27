@@ -155,7 +155,7 @@ export default function OptimizedUserManagementPage() {
         bgColor: "bg-blue-100",
         badgeColor: "bg-blue-100 text-blue-800 border-blue-200",
       },
-      MINISTRY_OFFICE: {
+      SERVICE_DEPARTMENT: {
         icon: Building,
         color: "text-green-600",
         bgColor: "bg-green-100",
@@ -410,9 +410,9 @@ export default function OptimizedUserManagementPage() {
               <Building className="w-4 h-4 mr-2" />
               BLW Zones ({stats?.byType.BLW_ZONE || 0})
             </TabsTrigger>
-            <TabsTrigger value="MINISTRY_OFFICE">
+            <TabsTrigger value="SERVICE_DEPARTMENT">
               <Building className="w-4 h-4 mr-2" />
-              Ministries ({stats?.byType.MINISTRY_OFFICE || 0})
+              Ministries ({stats?.byType.SERVICE_DEPARTMENT || 0})
             </TabsTrigger>
             <TabsTrigger value="GRADUATE">
               <GraduationCap className="w-4 h-4 mr-2" />

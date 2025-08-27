@@ -60,7 +60,7 @@ export default function CreateAccountPage() {
       bgColor: "bg-blue-100",
     },
     {
-      value: "MINISTRY_OFFICE",
+      value: "SERVICE_DEPARTMENT",
       label: "Service Department",
       description: "Can request and manage VGSS staff",
       icon: Users,
@@ -348,7 +348,7 @@ export default function CreateAccountPage() {
                         <li>• Manage fellowship information</li>
                       </ul>
                     )}
-                    {selectedAccountType.value === "MINISTRY_OFFICE" && (
+                    {selectedAccountType.value === "SERVICE_DEPARTMENT" && (
                       <ul className="space-y-1">
                         <li>• Request VGSS staff assignments</li>
                         <li>• Manage assigned graduates</li>

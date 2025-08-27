@@ -2,14 +2,13 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StatsCardProps {
   title: string;
   value: string | number;
-  change?: string;
+  change?: number;
   trend?: "up" | "down" | "neutral";
   icon: React.ComponentType<{ className?: string }>;
   color: string;
@@ -92,11 +91,15 @@ export function StatsCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value.toLocaleString()}</div>
-        {change && (
+        {change ? (
           <div className="flex items-center text-xs text-muted-foreground mt-1">
             {getTrendIcon()}
-            <span className={cn("ml-1", getTrendColor())}>{change}</span>
-            <span className="ml-1">from last month</span>
+            <span className={cn("ml-1", getTrendColor())}> +{change}</span>
+            <span className="ml-1"> this month</span>
+          </div>
+        ) : (
+          <div className="flex items-center text-xs text-muted-foreground mt-1">
+            {getTrendIcon()}
           </div>
         )}
         {description && (

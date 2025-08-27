@@ -54,8 +54,8 @@ export default function ActivateAccountPage() {
         case "BLW_ZONE":
           router.push("/dashboard/blw-zone");
           break;
-        case "MINISTRY_OFFICE":
-          router.push("/dashboard/ministry-office");
+        case "SERVICE_DEPARTMENT":
+          router.push("/dashboard/service-department");
           break;
         default:
           router.push("/dashboard");
@@ -127,8 +127,8 @@ export default function ActivateAccountPage() {
         case "BLW_ZONE":
           router.push("/dashboard/blw-zone");
           break;
-        case "MINISTRY_OFFICE":
-          router.push("/dashboard/ministry-office");
+        case "SERVICE_DEPARTMENT":
+          router.push("/dashboard/service-department");
           break;
         default:
           router.push("/dashboard");
@@ -162,7 +162,7 @@ export default function ActivateAccountPage() {
   const userTypeColors = {
     VGSS_OFFICE: "bg-purple-100 text-purple-800 border-purple-200",
     BLW_ZONE: "bg-blue-100 text-blue-800 border-blue-200",
-    MINISTRY_OFFICE: "bg-green-100 text-green-800 border-green-200",
+    SERVICE_DEPARTMENT: "bg-green-100 text-green-800 border-green-200",
     GRADUATE: "bg-orange-100 text-orange-800 border-orange-200",
   };
 

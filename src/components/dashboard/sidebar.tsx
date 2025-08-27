@@ -63,7 +63,7 @@ const navigationItems = {
     {
       title: "Service Departments",
       icon: HouseIcon,
-      href: "/dashboard/vgss-office/ministry-office",
+      href: "/dashboard/vgss-office/service-department",
       badge: null, // Pending reviews
     },
     {
@@ -118,47 +118,47 @@ const navigationItems = {
       badge: null,
     },
   ],
-  MINISTRY_OFFICE: [
+  SERVICE_DEPARTMENT: [
     {
       title: "Dashboard",
       icon: Home,
-      href: "/dashboard/ministry-office",
+      href: "/dashboard/service-department",
       badge: null,
     },
     {
       title: "Request Staff",
       icon: UserPlus,
-      href: "/dashboard/ministry-office/request",
+      href: "/dashboard/service-department/request",
       badge: null,
     },
     {
       title: "My VGSS Staff",
       icon: Users,
-      href: "/dashboard/ministry-office/staff",
+      href: "/dashboard/service-department/staff",
       badge: "3",
     },
     {
       title: "Salary Management",
       icon: FileText,
-      href: "/dashboard/ministry-office/salary",
+      href: "/dashboard/service-department/salary",
       badge: null,
     },
     {
       title: "Staff Feedback",
       icon: MessageSquare,
-      href: "/dashboard/ministry-office/feedback",
+      href: "/dashboard/service-department/feedback",
       badge: null,
     },
     {
       title: "Reports",
       icon: BarChart3,
-      href: "/dashboard/ministry-office/reports",
+      href: "/dashboard/service-department/reports",
       badge: null,
     },
     {
       title: "Settings",
       icon: Settings,
-      href: "/dashboard/ministry-office/settings",
+      href: "/dashboard/service-department/settings",
       badge: null,
     },
   ],
@@ -228,7 +228,7 @@ export function Sidebar({ className, isCollapsed = false }: SidebarProps) {
         return { icon: Shield, color: "text-purple-600", bg: "bg-purple-100" };
       case "BLW_ZONE":
         return { icon: Building, color: "text-blue-600", bg: "bg-blue-100" };
-      case "MINISTRY_OFFICE":
+      case "SERVICE_DEPARTMENT":
         return { icon: Building, color: "text-green-600", bg: "bg-green-100" };
       case "GRADUATE":
         return {

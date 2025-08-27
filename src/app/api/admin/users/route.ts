@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
       byType: {
         VGSS_OFFICE: stats.filter((u) => u.type === "VGSS_OFFICE").length,
         BLW_ZONE: stats.filter((u) => u.type === "BLW_ZONE").length,
-        MINISTRY_OFFICE: stats.filter((u) => u.type === "MINISTRY_OFFICE")
+        SERVICE_DEPARTMENT: stats.filter((u) => u.type === "SERVICE_DEPARTMENT")
           .length,
         GRADUATE: stats.filter((u) => u.type === "GRADUATE").length,
       },

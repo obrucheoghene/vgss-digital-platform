@@ -12,7 +12,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  type: "VGSS_OFFICE" | "BLW_ZONE" | "MINISTRY_OFFICE" | "GRADUATE";
+  type: "VGSS_OFFICE" | "BLW_ZONE" | "SERVICE_DEPARTMENT" | "GRADUATE";
   accountStatus: "pending_activation" | "active";
   isDeactivated: boolean;
   createdAt: string;
@@ -29,7 +29,7 @@ export interface UserStats {
   byType: {
     VGSS_OFFICE: number;
     BLW_ZONE: number;
-    MINISTRY_OFFICE: number;
+    SERVICE_DEPARTMENT: number;
     GRADUATE: number;
   };
 }

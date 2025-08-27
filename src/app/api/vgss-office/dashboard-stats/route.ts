@@ -24,12 +24,12 @@ export async function GET(req: NextRequest) {
       // Total counts
       totalGraduatesResult,
       totalBLWZonesResult,
-      totalMinistryOfficesResult,
+      totalServiceDepartmentsResult,
       pendingReviewsResult,
 
       // This month counts
       thisMonthGraduatesResult,
-      lastMonthGraduatesResult,
+      // lastMonthGraduatesResult,
 
       // User statistics by type
       userStats,
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
       db
         .select({ count: count() })
         .from(users)
-        .where(eq(users.type, "MINISTRY_OFFICE")),
+        .where(eq(users.type, "SERVICE_DEPARTMENT")),
 
       // Pending reviews (graduates under review)
       db
@@ -65,15 +65,15 @@ export async function GET(req: NextRequest) {
         .where(gte(graduateData.createdAt, startOfMonth)),
 
       // Last month registrations
-      db
-        .select({ count: count() })
-        .from(graduateData)
-        .where(
-          and(
-            gte(graduateData.createdAt, startOfLastMonth),
-            lt(graduateData.createdAt, startOfMonth)
-          )
-        ),
+      // db
+      //   .select({ count: count() })
+      //   .from(graduateData)
+      //   .where(
+      //     and(
+      //       gte(graduateData.createdAt, startOfLastMonth),
+      //       lt(graduateData.createdAt, startOfMonth)
+      //     )
+      //   ),
 
       // User statistics by type and status
       db
@@ -96,15 +96,15 @@ export async function GET(req: NextRequest) {
 
     // Calculate trends
     const thisMonthCount = thisMonthGraduatesResult[0]?.count || 0;
-    const lastMonthCount = lastMonthGraduatesResult[0]?.count || 0;
-    const graduatesTrend =
-      lastMonthCount > 0
-        ? (((thisMonthCount - lastMonthCount) / lastMonthCount) * 100).toFixed(
-            1
-          )
-        : thisMonthCount > 0
-        ? "100.0"
-        : "0";
+    // const lastMonthCount = lastMonthGraduatesResult[0]?.count || 0;
+    // const graduatesTrend =
+    //   lastMonthCount > 0
+    //     ? (((thisMonthCount - lastMonthCount) / lastMonthCount) * 100).toFixed(
+    //         1
+    //       )
+    //     : thisMonthCount > 0
+    //     ? "100.0"
+    //     : "0";
 
     // Process user statistics
     const activeUsers = userStats.filter(
@@ -124,21 +124,18 @@ export async function GET(req: NextRequest) {
 
     const stats = {
       totalGraduates: totalGraduatesResult[0]?.count || 0,
+      thisMonthRegisteredGraduates: thisMonthCount,
       totalBLWZones: totalBLWZonesResult[0]?.count || 0,
-      totalMinistryOffices: totalMinistryOfficesResult[0]?.count || 0,
+      totalServiceDepartments: totalServiceDepartmentsResult[0]?.count || 0,
       pendingReviews: pendingReviewsResult[0]?.count || 0,
-
       // Trends
-      graduatesTrend: `${graduatesTrend >= "0" ? "+" : ""}${graduatesTrend}%`,
-      graduatesTrendDirection: graduatesTrend >= "0" ? "up" : "down",
-
       // User statistics
       totalUsers: userStats.length,
       activeUsers,
       usersByType: {
         VGSS_OFFICE: usersByType.VGSS_OFFICE || 0,
         BLW_ZONE: usersByType.BLW_ZONE || 0,
-        MINISTRY_OFFICE: usersByType.MINISTRY_OFFICE || 0,
+        SERVICE_DEPARTMENT: usersByType.SERVICE_DEPARTMENT || 0,
         GRADUATE: usersByType.GRADUATE || 0,
       },
 

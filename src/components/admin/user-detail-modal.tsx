@@ -50,7 +50,7 @@ interface UserData {
   id: string;
   name: string;
   email: string;
-  type: "VGSS_OFFICE" | "BLW_ZONE" | "MINISTRY_OFFICE" | "GRADUATE";
+  type: "VGSS_OFFICE" | "BLW_ZONE" | "SERVICE_DEPARTMENT" | "GRADUATE";
   accountStatus: "pending_activation" | "active";
   isDeactivated: boolean;
   createdAt: string;
@@ -117,7 +117,7 @@ export function UserDetailModal({
         return Shield;
       case "BLW_ZONE":
         return Building;
-      case "MINISTRY_OFFICE":
+      case "SERVICE_DEPARTMENT":
         return Building;
       case "GRADUATE":
         return GraduationCap;
@@ -130,7 +130,7 @@ export function UserDetailModal({
     const colors = {
       VGSS_OFFICE: "bg-purple-100 text-purple-800 border-purple-200",
       BLW_ZONE: "bg-blue-100 text-blue-800 border-blue-200",
-      MINISTRY_OFFICE: "bg-green-100 text-green-800 border-green-200",
+      SERVICE_DEPARTMENT: "bg-green-100 text-green-800 border-green-200",
       GRADUATE: "bg-orange-100 text-orange-800 border-orange-200",
     };
 

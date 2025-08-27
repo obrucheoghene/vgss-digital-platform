@@ -1,4 +1,4 @@
-// src/app/dashboard/ministry-office/page.tsx
+// src/app/dashboard/service-department/page.tsx
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import {
   Card,

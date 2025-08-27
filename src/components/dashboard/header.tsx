@@ -49,7 +49,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
         return "bg-purple-100 text-purple-800 border-purple-200";
       case "BLW_ZONE":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "MINISTRY_OFFICE":
+      case "SERVICE_DEPARTMENT":
         return "bg-green-100 text-green-800 border-green-200";
       case "GRADUATE":
         return "bg-orange-100 text-orange-800 border-orange-200";
@@ -70,7 +70,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
         return `${greeting}, Administrator`;
       case "BLW_ZONE":
         return `${greeting}, Zone Leader`;
-      case "MINISTRY_OFFICE":
+      case "SERVICE_DEPARTMENT":
         return `${greeting}, Office Manager`;
       case "GRADUATE":
         return `${greeting}, Graduate`;

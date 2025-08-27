@@ -58,41 +58,39 @@ export default function VGSSOfficeDashboard() {
     {
       title: "Total Graduates",
       value: stats?.totalGraduates || 0,
-      change: stats?.graduatesTrend,
-      trend: stats?.graduatesTrendDirection,
+      change: stats?.thisMonthRegisteredGraduates,
+      trend: (stats?.thisMonthRegisteredGraduates || 0) >= 0 ? "up" : "down",
       icon: GraduationCap,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
-      description: "Registered VGSS graduates",
+      description: "Registered Graduates",
+      showTrend: true,
     },
     {
       title: "BLW Zones",
       value: stats?.totalBLWZones || 0,
-      change: "+3",
+      // change: "+3",
       trend: "up" as const,
       icon: Building,
       color: "text-green-600",
       bgColor: "bg-green-100",
-      description: "Active zone accounts",
+      description: "BLW Zone accounts",
     },
     {
       title: "Service Departments",
-      value: stats?.totalMinistryOffices || 0,
-      change: "+2",
+      value: stats?.totalServiceDepartments || 0,
+      // change: "+2",
       trend: "up" as const,
       icon: House,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
-      description: "Ministry office accounts",
+      description: "Service Department accounts",
     },
     {
       title: "Pending Reviews",
       value: stats?.pendingReviews || 0,
-      change: (stats?.pendingReviews || 0) > 20 ? "High Priority" : "Normal",
-      trend:
-        (stats?.pendingReviews || 0) > 20
-          ? ("up" as const)
-          : ("neutral" as const),
+      // change: (stats?.pendingReviews || 0) > 20 ? "High Priority" : "Normal",
+      trend: "up" as const,
       icon: AlertCircle,
       color:
         (stats?.pendingReviews || 0) > 20 ? "text-red-600" : "text-orange-600",
@@ -243,7 +241,7 @@ export default function VGSSOfficeDashboard() {
               title={stat.title}
               value={stat.value}
               change={stat.change}
-              trend={stat.trend}
+              trend={stat.trend as "up" | "down" | "neutral"}
               icon={stat.icon}
               color={stat.color}
               bgColor={stat.bgColor}
@@ -369,7 +367,7 @@ export default function VGSSOfficeDashboard() {
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <House className="w-8 h-8 text-green-600 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-green-900">
-                  {stats?.usersByType.MINISTRY_OFFICE || 0}
+                  {stats?.usersByType.SERVICE_DEPARTMENT || 0}
                 </div>
                 <div className="text-sm text-green-700">
                   Service Departments

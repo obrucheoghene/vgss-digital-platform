@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/use-dashboard.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -6,16 +7,17 @@ import { toast } from "sonner";
 export interface DashboardStats {
   totalGraduates: number;
   totalBLWZones: number;
-  totalMinistryOffices: number;
+  totalServiceDepartments: number;
   pendingReviews: number;
-  graduatesTrend: string;
-  graduatesTrendDirection: "up" | "down";
+  thisMonthRegisteredGraduates: number;
+  // graduatesTrend: string;
+  // graduatesTrendDirection: "up" | "down";
   totalUsers: number;
   activeUsers: number;
   usersByType: {
     VGSS_OFFICE: number;
     BLW_ZONE: number;
-    MINISTRY_OFFICE: number;
+    SERVICE_DEPARTMENT: number;
     GRADUATE: number;
   };
   statusDistribution: Record<string, number>;

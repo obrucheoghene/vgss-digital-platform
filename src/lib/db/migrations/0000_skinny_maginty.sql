@@ -3,13 +3,13 @@ CREATE TYPE "public"."gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
 CREATE TYPE "public"."graduate_status" AS ENUM('Under Review', 'Invited For Interview', 'Interviewed', 'Sighting', 'Serving', 'Not Accepted');--> statement-breakpoint
 CREATE TYPE "public"."marital_status" AS ENUM('SINGLE', 'MARRIED');--> statement-breakpoint
 CREATE TYPE "public"."nysc_status" AS ENUM('COMPLETED', 'IN_PROGRESS', 'NOT_STARTED', 'EXEMPTED');--> statement-breakpoint
-CREATE TYPE "public"."user_type" AS ENUM('VGSS_OFFICE', 'GRADUATE', 'MINISTRY_OFFICE', 'BLW_ZONE');--> statement-breakpoint
+CREATE TYPE "public"."user_type" AS ENUM('VGSS_OFFICE', 'GRADUATE', 'SERVICE_DEPARTMENT', 'BLW_ZONE');--> statement-breakpoint
 CREATE TABLE "graduate_data" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"zone_graduate_id" uuid NOT NULL,
 	"blw_zone_id" uuid NOT NULL,
-	"ministry_office_id" uuid,
+	"SERVICE_DEPARTMENT_id" uuid,
 	"graduate_firstname" varchar(255) NOT NULL,
 	"graduate_surname" varchar(255) NOT NULL,
 	"graduate_gender" "gender" NOT NULL,
@@ -123,6 +123,6 @@ CREATE TABLE "zone_graduates" (
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_zone_graduate_id_zone_graduates_id_fk" FOREIGN KEY ("zone_graduate_id") REFERENCES "public"."zone_graduates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_blw_zone_id_users_id_fk" FOREIGN KEY ("blw_zone_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_ministry_office_id_users_id_fk" FOREIGN KEY ("ministry_office_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_SERVICE_DEPARTMENT_id_users_id_fk" FOREIGN KEY ("SERVICE_DEPARTMENT_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "zone_graduates" ADD CONSTRAINT "zone_graduates_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
   const roleRoutes = {
     VGSS_OFFICE: ["/dashboard/vgss-office"],
     BLW_ZONE: ["/dashboard/blw-zone"],
-    MINISTRY_OFFICE: ["/dashboard/ministry-office"],
+    SERVICE_DEPARTMENT: ["/dashboard/service-department"],
     GRADUATE: ["/dashboard/graduate"],
   };
 
@@ -85,9 +85,9 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(
             new URL("/dashboard/blw-zone", request.url)
           );
-        case "MINISTRY_OFFICE":
+        case "SERVICE_DEPARTMENT":
           return NextResponse.redirect(
-            new URL("/dashboard/ministry-office", request.url)
+            new URL("/dashboard/service-department", request.url)
           );
         case "GRADUATE":
           return NextResponse.redirect(

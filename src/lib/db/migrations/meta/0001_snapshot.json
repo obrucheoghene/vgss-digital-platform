@@ -1,6 +1,6 @@
 {
-  "id": "8b81cd83-2e60-4130-bf96-afee77cb20bd",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "a527c111-a6a9-4ae9-a67e-f9799331cd1c",
+  "prevId": "8b81cd83-2e60-4130-bf96-afee77cb20bd",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -33,8 +33,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "SERVICE_DEPARTMENT_id": {
-          "name": "SERVICE_DEPARTMENT_id",
+        "service_department_id": {
+          "name": "service_department_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -516,12 +516,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "graduate_data_SERVICE_DEPARTMENT_id_users_id_fk": {
-          "name": "graduate_data_SERVICE_DEPARTMENT_id_users_id_fk",
+        "graduate_data_service_department_id_users_id_fk": {
+          "name": "graduate_data_service_department_id_users_id_fk",
           "tableFrom": "graduate_data",
           "tableTo": "users",
           "columnsFrom": [
-            "SERVICE_DEPARTMENT_id"
+            "service_department_id"
           ],
           "columnsTo": [
             "id"
