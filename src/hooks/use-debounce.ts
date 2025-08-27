@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/use-debounce.ts
 import { useState, useEffect } from "react";
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "@/lib/db/schema";
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,7 +15,7 @@ export interface BLWZoneUser {
   // Zone statistics
   totalGraduatesUploaded: number;
   registeredGraduates: number;
-  pendingGraduates?: number;
+  // pendingGraduates?: number;
   recentUploads?: number;
   lastUploadDate?: string;
 }

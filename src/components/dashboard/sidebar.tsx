@@ -66,12 +66,12 @@ const navigationItems = {
       href: "/dashboard/vgss-office/service-department",
       badge: null, // Pending reviews
     },
-    {
-      title: "Reports & Analytics",
-      icon: BarChart3,
-      href: "/dashboard/vgss-office/reports",
-      badge: null,
-    },
+    // {
+    //   title: "Reports & Analytics",
+    //   icon: BarChart3,
+    //   href: "/dashboard/vgss-office/reports",
+    //   badge: null,
+    // },
 
     {
       title: "Settings",

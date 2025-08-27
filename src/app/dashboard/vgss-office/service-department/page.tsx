@@ -533,20 +533,10 @@ export default function MinistryOfficeManagementPage() {
             </p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export Report
-            </Button>
-            <Button onClick={() => router.refresh()} disabled={isLoading}>
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
             <Link href="/dashboard/vgss-office/create-account">
               <Button>
                 <UserPlus className="w-4 h-4 mr-2" />
-                Add New Office
+                Add New Department
               </Button>
             </Link>
           </div>
@@ -559,7 +549,7 @@ export default function MinistryOfficeManagementPage() {
               <div className="flex items-center space-x-2">
                 <Building className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Offices</p>
+                  <p className="text-sm text-muted-foreground">Total Staff</p>
                   <p className="text-2xl font-bold">{stats.totalOffices}</p>
                 </div>
               </div>
@@ -571,7 +561,21 @@ export default function MinistryOfficeManagementPage() {
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Staff</p>
+                  <p className="text-sm text-muted-foreground">Current Staff</p>
+                  <p className="text-2xl font-bold">{stats.activeStaff}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <Users className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Graduated Staff
+                  </p>
                   <p className="text-2xl font-bold">{stats.activeStaff}</p>
                 </div>
               </div>
@@ -593,61 +597,7 @@ export default function MinistryOfficeManagementPage() {
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Star className="w-5 h-5 text-orange-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Avg Performance
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {stats.averagePerformance.toFixed(1)}/5.0
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-
-        {/* Recent Activity Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="w-5 h-5 mr-2" />
-              Recent Activity (Last 7 Days)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
-                  {stats.recentActivity.newRequests}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  New Staff Requests
-                </div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  {stats.recentActivity.newAssignments}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  New Assignments
-                </div>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">
-                  {stats.recentActivity.completedServices}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Completed Services
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Main Content Tabs */}
         <Tabs
@@ -657,7 +607,7 @@ export default function MinistryOfficeManagementPage() {
         >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="offices">
-              Offices ({stats.totalOffices})
+              Departments ({stats.totalOffices})
             </TabsTrigger>
             <TabsTrigger value="requests">
               Staff Requests ({requests.length})

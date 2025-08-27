@@ -1,7 +1,7 @@
 // src/app/dashboard/vgss-office/zones/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import {
   Card,
@@ -54,26 +54,16 @@ import {
   Eye,
   Edit,
   UserPlus,
-  Upload,
   Users,
   CheckCircle,
   Clock,
-  Download,
-  RefreshCw,
   Loader2,
-  User,
   Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  FileText,
   AlertCircle,
-  TrendingUp,
   Activity,
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { BLWZoneUser, useBlwZoneUsers } from "@/hooks/use-blw-zones";
 
 interface ZoneUpload {
@@ -143,23 +133,26 @@ export default function BLWZoneManagementPage() {
 
   // Load data
   // Filter zones
-  const filteredZones =
-    (blwzoneUsers?.data?.results || []).filter((zone: BLWZoneUser) => {
-      const matchesSearch =
-        zone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        zone.email.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredZones = useMemo(
+    () =>
+      (blwzoneUsers?.data?.results || []).filter((zone: BLWZoneUser) => {
+        const matchesSearch =
+          zone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          zone.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesStatus =
-        selectedStatus === "all" ||
-        (selectedStatus === "active" &&
-          zone.accountStatus === "active" &&
-          !zone.isDeactivated) ||
-        (selectedStatus === "pending" &&
-          zone.accountStatus === "pending_activation") ||
-        (selectedStatus === "inactive" && zone.isDeactivated);
+        const matchesStatus =
+          selectedStatus === "all" ||
+          (selectedStatus === "active" &&
+            zone.accountStatus === "active" &&
+            !zone.isDeactivated) ||
+          (selectedStatus === "pending" &&
+            zone.accountStatus === "pending_activation") ||
+          (selectedStatus === "inactive" && zone.isDeactivated);
 
-      return matchesSearch && matchesStatus;
-    }) || [];
+        return matchesSearch && matchesStatus;
+      }) || [],
+    [searchQuery, selectedStatus, blwzoneUsers?.data?.results]
+  );
 
   // Get status badge
   const getStatusBadge = (zone: BLWZoneUser) => {
@@ -364,34 +357,40 @@ export default function BLWZoneManagementPage() {
                             </TableCell>
                             <TableCell>{getStatusBadge(zone)}</TableCell>
                             <TableCell>
-                              <div className="space-y-1">
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-medium">
-                                    {zone.totalGraduatesUploaded}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    total
-                                  </span>
+                              {zone.totalGraduatesUploaded ? (
+                                <div className="space-y-1">
+                                  <div className="flex items-center space-x-2">
+                                    <span className="font-medium">
+                                      {zone.totalGraduatesUploaded}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                      total
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {zone.registeredGraduates} registered •{" "}
+                                    {zone.totalGraduatesUploaded -
+                                      zone.registeredGraduates}{" "}
+                                    pending
+                                  </div>
+                                  <div className="w-full bg-muted rounded-full h-2">
+                                    <div
+                                      className="bg-green-500 h-2 rounded-full"
+                                      style={{
+                                        width: `${
+                                          zone.totalGraduatesUploaded
+                                            ? (zone.registeredGraduates /
+                                                zone.totalGraduatesUploaded) *
+                                              100
+                                            : 0
+                                        }%`,
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {zone.registeredGraduates} registered •{" "}
-                                  {zone.pendingGraduates} pending
-                                </div>
-                                <div className="w-full bg-muted rounded-full h-2">
-                                  <div
-                                    className="bg-green-500 h-2 rounded-full"
-                                    style={{
-                                      width: `${
-                                        zone.totalGraduatesUploaded
-                                          ? (zone.registeredGraduates /
-                                              zone.totalGraduatesUploaded) *
-                                            100
-                                          : 0
-                                      }%`,
-                                    }}
-                                  />
-                                </div>
-                              </div>
+                              ) : (
+                                <>-</>
+                              )}
                             </TableCell>
                             {/* <TableCell>
                               {zone.recentUploads > 0 ? (
@@ -679,7 +678,8 @@ export default function BLWZoneManagementPage() {
                         </div>
                         <div className="text-center p-4 bg-orange-50 rounded-lg">
                           <div className="text-2xl font-bold text-orange-600">
-                            {selectedZone.pendingGraduates}
+                            {selectedZone.totalGraduatesUploaded -
+                              selectedZone.registeredGraduates}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             Pending
