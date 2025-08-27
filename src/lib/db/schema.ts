@@ -51,8 +51,11 @@ export const zoneGraduates = pgTable("zone_graduates", {
 
   // Basic graduate information uploaded by zones
   graduateFirstname: varchar("graduate_firstname", { length: 255 }).notNull(),
-  graduateLastname: varchar("graduate_lastname", { length: 255 }).notNull(),
+  graduateSurname: varchar("graduate_surname", { length: 255 }).notNull(),
   graduateGender: genderEnum("graduate_gender").notNull(),
+  nameOfUniversity: varchar("name_of_university", { length: 255 }).notNull(),
+  courseOfStudy: varchar("course_of_study", { length: 255 }).notNull(),
+  graduationYear: integer("graduation_year").notNull(),
   nameOfFellowship: varchar("name_of_fellowship", { length: 255 }).notNull(),
   nameOfZonalPastor: varchar("name_of_zonal_pastor", { length: 255 }).notNull(),
   nameOfChapterPastor: varchar("name_of_chapter_pastor", {
@@ -66,7 +69,7 @@ export const zoneGraduates = pgTable("zone_graduates", {
   }).notNull(),
   kingschatIDOfChapterPastor: varchar("kingschat_id_of_chapter_pastor", {
     length: 100,
-  }),
+  }).notNull(),
 
   // Status tracking
   isRegistered: boolean("is_registered").default(false), // Has graduate found and registered with this record
@@ -109,8 +112,7 @@ export const graduateData = pgTable("graduate_data", {
 
   // Personal Information (split name from zone data)
   graduateFirstname: varchar("graduate_firstname", { length: 255 }).notNull(),
-  graduateLastname: varchar("graduate_lastname", { length: 255 }).notNull(),
-  graduateName: varchar("graduate_name", { length: 255 }).notNull(), // Full name for display
+  graduateSurname: varchar("graduate_surname", { length: 255 }).notNull(),
   graduateGender: genderEnum("graduate_gender").notNull(),
   maritalStatus: maritalStatusEnum("marital_status").notNull(),
   placeOfBirth: varchar("place_of_birth", { length: 255 }).notNull(),

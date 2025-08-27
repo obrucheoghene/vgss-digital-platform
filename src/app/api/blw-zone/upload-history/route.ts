@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       .select({
         id: zoneGraduates.id,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateLastname,
+        graduateLastname: zoneGraduates.graduateSurname,
         nameOfFellowship: zoneGraduates.nameOfFellowship,
         isRegistered: zoneGraduates.isRegistered,
         registeredAt: zoneGraduates.registeredAt,

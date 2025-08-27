@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
         id: zoneGraduates.id,
         userId: zoneGraduates.userId,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateLastname,
+        graduateLastname: zoneGraduates.graduateSurname,
         graduateGender: zoneGraduates.graduateGender,
         nameOfFellowship: zoneGraduates.nameOfFellowship,
         nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
@@ -489,7 +489,7 @@ export async function GET(req: NextRequest) {
         isRegistered: zoneGraduates.isRegistered,
         registeredAt: zoneGraduates.registeredAt,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateLastname,
+        graduateLastname: zoneGraduates.graduateSurname,
         graduateGender: zoneGraduates.graduateGender,
         nameOfFellowship: zoneGraduates.nameOfFellowship,
         // Graduate data info (if registered)

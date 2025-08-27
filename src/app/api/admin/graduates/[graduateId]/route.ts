@@ -22,7 +22,7 @@ export async function GET(
         id: graduateData.id,
         userId: graduateData.userId,
         graduateFirstname: graduateData.graduateFirstname,
-        graduateLastname: graduateData.graduateLastname,
+        graduateLastname: graduateData.graduateSurname,
         graduateName: graduateData.graduateName,
         graduateGender: graduateData.graduateGender,
         maritalStatus: graduateData.maritalStatus,

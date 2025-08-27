@@ -26,8 +26,8 @@ export async function GET(req: NextRequest) {
     // Search in name fields and fellowship
     searchConditions.push(
       or(
-        ilike(zoneGraduates.graduateFirstname, searchTerm),
-        ilike(zoneGraduates.graduateLastname, searchTerm),
+        // ilike(zoneGraduates.graduateFirstname, searchTerm),
+        ilike(zoneGraduates.graduateSurname, searchTerm),
         ilike(zoneGraduates.nameOfFellowship, searchTerm),
         ilike(zoneGraduates.nameOfChapterPastor, searchTerm),
         ilike(zoneGraduates.nameOfZonalPastor, searchTerm)
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       .select({
         id: zoneGraduates.id,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateLastname,
+        graduateLastname: zoneGraduates.graduateSurname,
         graduateGender: zoneGraduates.graduateGender,
         nameOfFellowship: zoneGraduates.nameOfFellowship,
         nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
         .select({
           id: zoneGraduates.id,
           graduateFirstname: zoneGraduates.graduateFirstname,
-          graduateLastname: zoneGraduates.graduateLastname,
+          graduateLastname: zoneGraduates.graduateSurname,
           graduateGender: zoneGraduates.graduateGender,
           nameOfFellowship: zoneGraduates.nameOfFellowship,
           nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,

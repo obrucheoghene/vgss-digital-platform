@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
             and(
               eq(zoneGraduates.userId, session.user.id),
               eq(zoneGraduates.graduateFirstname, graduate.graduateFirstname),
-              eq(zoneGraduates.graduateLastname, graduate.graduateLastname),
+              eq(zoneGraduates.graduateSurname, graduate.graduateLastname),
               eq(zoneGraduates.nameOfFellowship, graduate.nameOfFellowship)
             )
           )

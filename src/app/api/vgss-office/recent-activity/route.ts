@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         createdAt: zoneGraduates.createdAt,
         isRegistered: zoneGraduates.isRegistered,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateLastname,
+        graduateLastname: zoneGraduates.graduateSurname,
       })
       .from(zoneGraduates)
       .leftJoin(users, eq(zoneGraduates.userId, users.id))
