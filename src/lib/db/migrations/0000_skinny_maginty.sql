@@ -1,13 +1,17 @@
+CREATE TYPE "public"."account_status" AS ENUM('pending_activation', 'active');--> statement-breakpoint
 CREATE TYPE "public"."gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
+CREATE TYPE "public"."graduate_status" AS ENUM('Under Review', 'Invited For Interview', 'Interviewed', 'Sighting', 'Serving', 'Not Accepted');--> statement-breakpoint
 CREATE TYPE "public"."marital_status" AS ENUM('SINGLE', 'MARRIED');--> statement-breakpoint
 CREATE TYPE "public"."nysc_status" AS ENUM('COMPLETED', 'IN_PROGRESS', 'NOT_STARTED', 'EXEMPTED');--> statement-breakpoint
 CREATE TYPE "public"."user_type" AS ENUM('VGSS_OFFICE', 'GRADUATE', 'MINISTRY_OFFICE', 'BLW_ZONE');--> statement-breakpoint
 CREATE TABLE "graduate_data" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
-	"blw_zone_id" uuid,
+	"zone_graduate_id" uuid NOT NULL,
+	"blw_zone_id" uuid NOT NULL,
 	"ministry_office_id" uuid,
-	"graduate_name" varchar(255) NOT NULL,
+	"graduate_firstname" varchar(255) NOT NULL,
+	"graduate_surname" varchar(255) NOT NULL,
 	"graduate_gender" "gender" NOT NULL,
 	"marital_status" "marital_status" NOT NULL,
 	"place_of_birth" varchar(255) NOT NULL,
@@ -57,32 +61,24 @@ CREATE TABLE "graduate_data" (
 	"leadership_roles_in_ministry_and_fellowship" text,
 	"ministry_programs_attended" text,
 	"photo" varchar(500),
+	"vision_mission_purpose" text NOT NULL,
+	"explain_with_examples" text NOT NULL,
+	"partnership_arms" text NOT NULL,
+	"full_meaning" text NOT NULL,
+	"various_tasks_responsible_for" text NOT NULL,
+	"project_proud_of_and_role_played" text NOT NULL,
+	"example_difficult_situation" text NOT NULL,
+	"recent_conflict" text NOT NULL,
+	"convictions" text NOT NULL,
+	"why_vgss" text NOT NULL,
+	"plans_after_vgss" text NOT NULL,
+	"status" "graduate_status" DEFAULT 'Under Review' NOT NULL,
+	"comments" text,
 	"is_approved" boolean DEFAULT false,
 	"approved_by" uuid,
 	"approved_at" timestamp,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "graduate_interview_questions" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"graduate_data_id" uuid NOT NULL,
-	"vision_mission_purpose" text,
-	"explain_with_examples" text,
-	"partnership_arms" text,
-	"full_meaning" text,
-	"various_tasks_responsible_for" text,
-	"project_proud_of_and_role_played" text,
-	"example_difficult_situation" text,
-	"recent_conflict" text,
-	"convictions" text,
-	"why_vgss" text,
-	"plans_after_vgss" text,
-	"is_completed" boolean DEFAULT false,
-	"completed_at" timestamp,
-	"reviewed_by" uuid,
-	"reviewed_at" timestamp,
+	"service_started_date" timestamp,
+	"service_completed_date" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -93,16 +89,40 @@ CREATE TABLE "users" (
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password" varchar(255) NOT NULL,
-	"is_active" boolean DEFAULT true NOT NULL,
+	"is_deactivated" boolean DEFAULT false NOT NULL,
+	"account_status" "account_status" DEFAULT 'pending_activation' NOT NULL,
+	"created_by" uuid,
+	"last_login_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
+CREATE TABLE "zone_graduates" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"graduate_firstname" varchar(255) NOT NULL,
+	"graduate_surname" varchar(255) NOT NULL,
+	"graduate_gender" "gender" NOT NULL,
+	"graduate_phone_number" varchar NOT NULL,
+	"name_of_university" varchar(255) NOT NULL,
+	"course_of_study" varchar(255) NOT NULL,
+	"graduation_year" integer NOT NULL,
+	"name_of_fellowship" varchar(255) NOT NULL,
+	"name_of_zonal_pastor" varchar(255) NOT NULL,
+	"name_of_chapter_pastor" varchar(255) NOT NULL,
+	"phone_number_of_chapter_pastor" varchar(20) NOT NULL,
+	"email_of_chapter_pastor" varchar(255) NOT NULL,
+	"kingschat_id_of_chapter_pastor" varchar(100) NOT NULL,
+	"is_registered" boolean DEFAULT false,
+	"registered_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_zone_graduate_id_zone_graduates_id_fk" FOREIGN KEY ("zone_graduate_id") REFERENCES "public"."zone_graduates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_blw_zone_id_users_id_fk" FOREIGN KEY ("blw_zone_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_ministry_office_id_users_id_fk" FOREIGN KEY ("ministry_office_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_graduate_data_id_graduate_data_id_fk" FOREIGN KEY ("graduate_data_id") REFERENCES "public"."graduate_data"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_interview_questions" ADD CONSTRAINT "graduate_interview_questions_reviewed_by_users_id_fk" FOREIGN KEY ("reviewed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "zone_graduates" ADD CONSTRAINT "zone_graduates_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

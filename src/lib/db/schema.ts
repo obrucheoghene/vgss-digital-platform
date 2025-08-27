@@ -53,6 +53,7 @@ export const zoneGraduates = pgTable("zone_graduates", {
   graduateFirstname: varchar("graduate_firstname", { length: 255 }).notNull(),
   graduateSurname: varchar("graduate_surname", { length: 255 }).notNull(),
   graduateGender: genderEnum("graduate_gender").notNull(),
+  graduatePhoneNumber: varchar("graduate_phone_number").notNull(),
   nameOfUniversity: varchar("name_of_university", { length: 255 }).notNull(),
   courseOfStudy: varchar("course_of_study", { length: 255 }).notNull(),
   graduationYear: integer("graduation_year").notNull(),

@@ -1,5 +1,5 @@
 {
-  "id": "19a576bc-0b4c-42f6-8276-7f2e4cd82fd7",
+  "id": "8b81cd83-2e60-4130-bf96-afee77cb20bd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -21,11 +21,17 @@
           "primaryKey": false,
           "notNull": true
         },
+        "zone_graduate_id": {
+          "name": "zone_graduate_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "blw_zone_id": {
           "name": "blw_zone_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "ministry_office_id": {
           "name": "ministry_office_id",
@@ -33,8 +39,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "graduate_name": {
-          "name": "graduate_name",
+        "graduate_firstname": {
+          "name": "graduate_firstname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_surname": {
+          "name": "graduate_surname",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -337,6 +349,86 @@
           "primaryKey": false,
           "notNull": false
         },
+        "vision_mission_purpose": {
+          "name": "vision_mission_purpose",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "explain_with_examples": {
+          "name": "explain_with_examples",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "partnership_arms": {
+          "name": "partnership_arms",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "full_meaning": {
+          "name": "full_meaning",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "various_tasks_responsible_for": {
+          "name": "various_tasks_responsible_for",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_proud_of_and_role_played": {
+          "name": "project_proud_of_and_role_played",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "example_difficult_situation": {
+          "name": "example_difficult_situation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recent_conflict": {
+          "name": "recent_conflict",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "convictions": {
+          "name": "convictions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "why_vgss": {
+          "name": "why_vgss",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plans_after_vgss": {
+          "name": "plans_after_vgss",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "graduate_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Under Review'"
+        },
+        "comments": {
+          "name": "comments",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_approved": {
           "name": "is_approved",
           "type": "boolean",
@@ -352,6 +444,18 @@
         },
         "approved_at": {
           "name": "approved_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "service_started_date": {
+          "name": "service_started_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "service_completed_date": {
+          "name": "service_completed_date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -379,6 +483,19 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "graduate_data_zone_graduate_id_zone_graduates_id_fk": {
+          "name": "graduate_data_zone_graduate_id_zone_graduates_id_fk",
+          "tableFrom": "graduate_data",
+          "tableTo": "zone_graduates",
+          "columnsFrom": [
+            "zone_graduate_id"
           ],
           "columnsTo": [
             "id"
@@ -432,183 +549,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.graduate_interview_questions": {
-      "name": "graduate_interview_questions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "graduate_data_id": {
-          "name": "graduate_data_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "vision_mission_purpose": {
-          "name": "vision_mission_purpose",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "explain_with_examples": {
-          "name": "explain_with_examples",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "partnership_arms": {
-          "name": "partnership_arms",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "full_meaning": {
-          "name": "full_meaning",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "various_tasks_responsible_for": {
-          "name": "various_tasks_responsible_for",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "project_proud_of_and_role_played": {
-          "name": "project_proud_of_and_role_played",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "example_difficult_situation": {
-          "name": "example_difficult_situation",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recent_conflict": {
-          "name": "recent_conflict",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "convictions": {
-          "name": "convictions",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "why_vgss": {
-          "name": "why_vgss",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "plans_after_vgss": {
-          "name": "plans_after_vgss",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_completed": {
-          "name": "is_completed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "completed_at": {
-          "name": "completed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reviewed_by": {
-          "name": "reviewed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reviewed_at": {
-          "name": "reviewed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "graduate_interview_questions_user_id_users_id_fk": {
-          "name": "graduate_interview_questions_user_id_users_id_fk",
-          "tableFrom": "graduate_interview_questions",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "graduate_interview_questions_graduate_data_id_graduate_data_id_fk": {
-          "name": "graduate_interview_questions_graduate_data_id_graduate_data_id_fk",
-          "tableFrom": "graduate_interview_questions",
-          "tableTo": "graduate_data",
-          "columnsFrom": [
-            "graduate_data_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "graduate_interview_questions_reviewed_by_users_id_fk": {
-          "name": "graduate_interview_questions_reviewed_by_users_id_fk",
-          "tableFrom": "graduate_interview_questions",
-          "tableTo": "users",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -645,12 +585,32 @@
           "primaryKey": false,
           "notNull": true
         },
-        "is_active": {
-          "name": "is_active",
+        "is_deactivated": {
+          "name": "is_deactivated",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": true
+          "default": false
+        },
+        "account_status": {
+          "name": "account_status",
+          "type": "account_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending_activation'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -682,15 +642,181 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.zone_graduates": {
+      "name": "zone_graduates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_firstname": {
+          "name": "graduate_firstname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_surname": {
+          "name": "graduate_surname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_gender": {
+          "name": "graduate_gender",
+          "type": "gender",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduate_phone_number": {
+          "name": "graduate_phone_number",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_university": {
+          "name": "name_of_university",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course_of_study": {
+          "name": "course_of_study",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "graduation_year": {
+          "name": "graduation_year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_fellowship": {
+          "name": "name_of_fellowship",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_zonal_pastor": {
+          "name": "name_of_zonal_pastor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_of_chapter_pastor": {
+          "name": "name_of_chapter_pastor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone_number_of_chapter_pastor": {
+          "name": "phone_number_of_chapter_pastor",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_of_chapter_pastor": {
+          "name": "email_of_chapter_pastor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kingschat_id_of_chapter_pastor": {
+          "name": "kingschat_id_of_chapter_pastor",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_registered": {
+          "name": "is_registered",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "registered_at": {
+          "name": "registered_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "zone_graduates_user_id_users_id_fk": {
+          "name": "zone_graduates_user_id_users_id_fk",
+          "tableFrom": "zone_graduates",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
+    "public.account_status": {
+      "name": "account_status",
+      "schema": "public",
+      "values": [
+        "pending_activation",
+        "active"
+      ]
+    },
     "public.gender": {
       "name": "gender",
       "schema": "public",
       "values": [
         "MALE",
         "FEMALE"
+      ]
+    },
+    "public.graduate_status": {
+      "name": "graduate_status",
+      "schema": "public",
+      "values": [
+        "Under Review",
+        "Invited For Interview",
+        "Interviewed",
+        "Sighting",
+        "Serving",
+        "Not Accepted"
       ]
     },
     "public.marital_status": {

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import * as XLSX from "xlsx";
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,32 +50,27 @@ export async function POST(req: NextRequest) {
         const text = await file.text();
         parsedData = parseCSV(text);
       } else {
-        // Parse Excel (would need xlsx library in production)
-        // For now, return mock data for Excel files
-        parsedData = [
-          {
-            graduateFirstname: "John",
-            graduateLastname: "Doe",
-            graduateGender: "MALE",
-            nameOfFellowship: "Victory Fellowship",
-            nameOfZonalPastor: "Pastor James Wilson",
-            nameOfChapterPastor: "Pastor Mary Johnson",
-            phoneNumberOfChapterPastor: "+234 801 234 5678",
-            emailOfChapterPastor: "mary.johnson@loveworld.org",
-            kingschatIDOfChapterPastor: "maryjohnson_lw",
-          },
-          {
-            graduateFirstname: "Jane",
-            graduateLastname: "Smith",
-            graduateGender: "FEMALE",
-            nameOfFellowship: "Faith Chapel",
-            nameOfZonalPastor: "Pastor David Brown",
-            nameOfChapterPastor: "Pastor Sarah Davis",
-            phoneNumberOfChapterPastor: "+234 802 345 6789",
-            emailOfChapterPastor: "sarah.davis@loveworld.org",
-            kingschatIDOfChapterPastor: "sarahdavis_lw",
-          },
-        ];
+        // Parse Excel
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const sheetName = workbook.SheetNames[0]; // Get first sheet
+        const worksheet = workbook.Sheets[sheetName];
+        parsedData = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1, // Use first row as headers
+          defval: "", // Default value for empty cells
+        });
+
+        // Convert to array of objects (similar to CSV parsing)
+        if (parsedData.length > 0) {
+          const headers = parsedData[0] as string[];
+          parsedData = parsedData.slice(1).map((row: any[]) => {
+            const rowData: { [key: string]: any } = {};
+            headers.forEach((header, index) => {
+              rowData[header] = row[index];
+            });
+            return rowData;
+          });
+        }
       }
 
       if (parsedData.length === 0) {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/api/dashboard/vgss-office/recent-activity/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
@@ -20,7 +21,8 @@ export async function GET(req: NextRequest) {
     const recentRegistrations = await db
       .select({
         id: graduateData.id,
-        graduateName: graduateData.graduateName,
+        graduateFirstname: graduateData.graduateFirstname,
+        graduateSurname: graduateData.graduateSurname,
         email: graduateData.email,
         status: graduateData.status,
         createdAt: graduateData.createdAt,
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest) {
         createdAt: zoneGraduates.createdAt,
         isRegistered: zoneGraduates.isRegistered,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateSurname,
+        graduateSurname: zoneGraduates.graduateSurname,
       })
       .from(zoneGraduates)
       .leftJoin(users, eq(zoneGraduates.userId, users.id))
@@ -51,21 +53,20 @@ export async function GET(req: NextRequest) {
     const recentStatusChanges = await db
       .select({
         id: graduateData.id,
-        graduateName: graduateData.graduateName,
+        graduateFirstname: graduateData.graduateFirstname,
+        graduateSurname: graduateData.graduateSurname,
         status: graduateData.status,
         updatedAt: graduateData.updatedAt,
         createdAt: graduateData.createdAt,
       })
       .from(graduateData)
       .where(
-        and(
-          graduateData.updatedAt !== graduateData.createdAt, // Only records that have been updated
-          or(
-            eq(graduateData.status, "Interviewed"),
-            eq(graduateData.status, "Invited For Interview"),
-            eq(graduateData.status, "Serving"),
-            eq(graduateData.status, "Sighting")
-          )
+        // Only records that have been updated
+        or(
+          eq(graduateData.status, "Interviewed"),
+          eq(graduateData.status, "Invited For Interview"),
+          eq(graduateData.status, "Serving"),
+          eq(graduateData.status, "Sighting")
         )
       )
       .orderBy(desc(graduateData.updatedAt))
@@ -89,8 +90,8 @@ export async function GET(req: NextRequest) {
         id: `reg-${reg.id}`,
         type: "registration",
         title: "New Graduate Registration",
-        description: `${reg.graduateName} completed registration`,
-        user: reg.graduateName,
+        description: `${reg.graduateFirstname} ${reg.graduateSurname} completed registration`,
+        user: `${reg.graduateFirstname} ${reg.graduateSurname}`,
         timestamp: reg.createdAt,
         status: reg.status.toLowerCase().replace(/\s+/g, "_"),
         metadata: {
@@ -106,13 +107,13 @@ export async function GET(req: NextRequest) {
         id: `upload-${upload.id}`,
         type: "upload",
         title: "Graduate Record Uploaded",
-        description: `${upload.zoneName} uploaded graduate record for ${upload.graduateFirstname} ${upload.graduateLastname}`,
+        description: `${upload.zoneName} uploaded graduate record for ${upload.graduateFirstname} ${upload.graduateSurname}`,
         user: upload.zoneName || "Unknown Zone",
         timestamp: upload.createdAt,
         status: upload.isRegistered ? "registered" : "pending_registration",
         metadata: {
           zoneEmail: upload.zoneEmail,
-          graduateName: `${upload.graduateFirstname} ${upload.graduateLastname}`,
+          graduateName: `${upload.graduateFirstname} ${upload.graduateSurname}`,
         },
       });
     });
@@ -130,12 +131,12 @@ export async function GET(req: NextRequest) {
         id: `status-${change.id}`,
         type: "status_change",
         title: "Status Updated",
-        description: `${change.graduateName} ${
+        description: `${change.graduateFirstname} ${change.graduateSurname} ${
           statusDescriptions[
             change.status as keyof typeof statusDescriptions
           ] || "status was updated"
         }`,
-        user: change.graduateName,
+        user: `${change.graduateFirstname} ${change.graduateSurname}`,
         timestamp: change.updatedAt,
         status: change.status.toLowerCase().replace(/\s+/g, "_"),
         metadata: {

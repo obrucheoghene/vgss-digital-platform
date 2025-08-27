@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1756063344457,
-      "tag": "0000_eminent_franklin_richards",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1756069464748,
-      "tag": "0001_giant_grim_reaper",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1756168019595,
-      "tag": "0002_exotic_vampiro",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1756169409993,
-      "tag": "0003_breezy_warstar",
+      "when": 1756296988239,
+      "tag": "0000_skinny_maginty",
       "breakpoints": true
     }
   ]
