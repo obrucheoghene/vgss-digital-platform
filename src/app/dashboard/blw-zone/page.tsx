@@ -19,6 +19,7 @@ import {
   UserCheck,
   AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function BLWZoneDashboard() {
   const stats = [
@@ -98,19 +99,21 @@ export default function BLWZoneDashboard() {
         <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-2">Welcome, Zone Leader!</h2>
+              <h2 className="text-2xl font-bold mb-2">Welcome, Zonal Admin!</h2>
               <p className="opacity-90">
                 Manage and track your {`zone's`} graduates in the VGSS program.
               </p>
             </div>
             <div className="hidden md:block">
-              <Button
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/20"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Graduates
-              </Button>
+              <Link href={"/dashboard/blw-zone/upload"}>
+                <Button
+                  variant="secondary"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Graduates
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

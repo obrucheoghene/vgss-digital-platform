@@ -69,7 +69,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
       case "VGSS_OFFICE":
         return `${greeting}, Administrator`;
       case "BLW_ZONE":
-        return `${greeting}, Zone Leader`;
+        return `${greeting}, Zonal Admin`;
       case "SERVICE_DEPARTMENT":
         return `${greeting}, Office Manager`;
       case "GRADUATE":

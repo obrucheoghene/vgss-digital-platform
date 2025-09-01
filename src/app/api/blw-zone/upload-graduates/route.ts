@@ -40,9 +40,12 @@ export async function POST(req: NextRequest) {
           .where(
             and(
               eq(zoneGraduates.userId, session.user.id),
-              eq(zoneGraduates.graduateFirstname, graduate.graduateFirstname),
-              eq(zoneGraduates.graduateSurname, graduate.graduateLastname),
-              eq(zoneGraduates.nameOfFellowship, graduate.nameOfFellowship)
+              // eq(zoneGraduates.graduateFirstname, graduate.graduateFirstname),
+              // eq(zoneGraduates.graduateSurname, graduate.graduateSurname),
+              eq(
+                zoneGraduates.graduatePhoneNumber,
+                graduate.graduatePhoneNumber
+              )
             )
           )
           .limit(1);
@@ -56,8 +59,12 @@ export async function POST(req: NextRequest) {
         await db.insert(zoneGraduates).values({
           userId: session.user.id,
           graduateFirstname: graduate.graduateFirstname,
-          graduateLastname: graduate.graduateLastname,
+          graduateSurname: graduate.graduateSurname,
           graduateGender: graduate.graduateGender,
+          graduatePhoneNumber: graduate.graduatePhoneNumber,
+          nameOfUniversity: graduate.nameOfUniversity,
+          courseOfStudy: graduate.courseOfStudy,
+          graduationYear: graduate.graduationYear,
           nameOfFellowship: graduate.nameOfFellowship,
           nameOfZonalPastor: graduate.nameOfZonalPastor,
           nameOfChapterPastor: graduate.nameOfChapterPastor,

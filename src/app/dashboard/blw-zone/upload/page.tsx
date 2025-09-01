@@ -40,14 +40,18 @@ import {
 
 interface GraduateUploadData {
   graduateFirstname: string;
-  graduateLastname: string;
+  graduateSurname: string;
   graduateGender: "MALE" | "FEMALE";
+  graduatePhoneNumber: string;
+  nameOfUniversity: string;
+  courseOfStudy: string;
+  graduationYear: string;
   nameOfFellowship: string;
   nameOfZonalPastor: string;
   nameOfChapterPastor: string;
   phoneNumberOfChapterPastor: string;
   emailOfChapterPastor: string;
-  kingschatIDOfChapterPastor?: string;
+  kingschatIDOfChapterPastor: string;
   errors?: string[];
   isValid?: boolean;
 }
@@ -108,20 +112,29 @@ export default function ZoneUploadPage() {
 
   const requiredColumns = [
     "graduateFirstname",
-    "graduateLastname",
+    "graduateSurname",
     "graduateGender",
+    "graduatePhoneNumber",
+    "nameOfUniversity",
+    "courseOfStudy",
+    "graduationYear",
     "nameOfFellowship",
     "nameOfZonalPastor",
     "nameOfChapterPastor",
     "phoneNumberOfChapterPastor",
     "emailOfChapterPastor",
+    "kingschatIDOfChapterPastor",
   ];
 
   const sampleData = [
     {
       graduateFirstname: "John",
-      graduateLastname: "Doe",
+      graduateSurname: "Doe",
       graduateGender: "MALE",
+      graduatePhoneNumber: "+234 803 567 8594",
+      nameOfUniversity: "Ambrose Ali University",
+      courseOfStudy: "Computer Science",
+      graduationYear: "2023",
       nameOfFellowship: "Victory Fellowship",
       nameOfZonalPastor: "Pastor James Wilson",
       nameOfChapterPastor: "Pastor Mary Johnson",
@@ -131,9 +144,13 @@ export default function ZoneUploadPage() {
     },
     {
       graduateFirstname: "Jane",
-      graduateLastname: "Smith",
+      graduateSurname: "Smith",
       graduateGender: "FEMALE",
-      nameOfFellowship: "Faith Chapel",
+      graduatePhoneNumber: "+234 801 456 8038",
+      nameOfUniversity: "University of Benin",
+      courseOfStudy: "Electrical and Electronics Engineering",
+      graduationYear: "2024",
+      nameOfFellowship: "Campus Fellowship",
       nameOfZonalPastor: "Pastor David Brown",
       nameOfChapterPastor: "Pastor Sarah Davis",
       phoneNumberOfChapterPastor: "+234 802 345 6789",
@@ -175,6 +192,13 @@ export default function ZoneUploadPage() {
       }
 
       // Validate phone number format
+      if (row.graduatePhoneNumber) {
+        const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
+        if (!phoneRegex.test(row.graduatePhoneNumber)) {
+          rowErrors.push("Invalid phone number format");
+        }
+      }
+
       if (row.phoneNumberOfChapterPastor) {
         const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
         if (!phoneRegex.test(row.phoneNumberOfChapterPastor)) {
@@ -350,17 +374,7 @@ export default function ZoneUploadPage() {
   };
 
   const downloadTemplate = () => {
-    const headers = [
-      "graduateFirstname",
-      "graduateLastname",
-      "graduateGender",
-      "nameOfFellowship",
-      "nameOfZonalPastor",
-      "nameOfChapterPastor",
-      "phoneNumberOfChapterPastor",
-      "emailOfChapterPastor",
-      "kingschatIDOfChapterPastor",
-    ];
+    const headers = requiredColumns;
 
     const csvContent = [
       headers.join(","),
@@ -593,10 +607,16 @@ export default function ZoneUploadPage() {
                             <TableHead>Status</TableHead>
                             <TableHead>Name</TableHead>
                             <TableHead>Gender</TableHead>
+                            <TableHead>Phone Number</TableHead>
+                            <TableHead>University</TableHead>
+                            <TableHead>Course</TableHead>
+                            <TableHead>Graduation Year</TableHead>
                             <TableHead>Fellowship</TableHead>
+                            <TableHead>Zonal Pastor</TableHead>
                             <TableHead>Chapter Pastor</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Email</TableHead>
+                            <TableHead>Pastor Phone Number</TableHead>
+                            <TableHead>Pastor Email</TableHead>
+                            <TableHead>Pastor KingsChatId</TableHead>
                             <TableHead>Errors</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -623,15 +643,23 @@ export default function ZoneUploadPage() {
                                 )}
                               </TableCell>
                               <TableCell>
-                                {row.graduateFirstname} {row.graduateLastname}
+                                {row.graduateFirstname} {row.graduateSurname}
                               </TableCell>
                               <TableCell>{row.graduateGender}</TableCell>
+                              <TableCell>{row.graduatePhoneNumber}</TableCell>
+                              <TableCell>{row.nameOfUniversity}</TableCell>
+                              <TableCell>{row.courseOfStudy}</TableCell>
+                              <TableCell>{row.graduationYear}</TableCell>
                               <TableCell>{row.nameOfFellowship}</TableCell>
+                              <TableCell>{row.nameOfZonalPastor}</TableCell>
                               <TableCell>{row.nameOfChapterPastor}</TableCell>
                               <TableCell>
                                 {row.phoneNumberOfChapterPastor}
                               </TableCell>
                               <TableCell>{row.emailOfChapterPastor}</TableCell>
+                              <TableCell>
+                                {row.kingschatIDOfChapterPastor}
+                              </TableCell>
                               <TableCell>
                                 {row.errors && row.errors.length > 0 && (
                                   <div className="text-xs text-red-600">
@@ -695,12 +723,12 @@ export default function ZoneUploadPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  {/* <div>
                     <h4 className="font-medium mb-2">Optional Columns</h4>
                     <ul className="text-sm space-y-1 text-muted-foreground">
                       <li>• kingschatIDOfChapterPastor</li>
                     </ul>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">

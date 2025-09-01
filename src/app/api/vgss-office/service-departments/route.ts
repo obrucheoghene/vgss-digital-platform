@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { graduateData, users, zoneGraduates } from "@/lib/db/schema";
+import { graduateData, users } from "@/lib/db/schema";
 import { db } from "@/lib/db";
 import { count, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
