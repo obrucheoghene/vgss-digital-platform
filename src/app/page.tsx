@@ -1,7 +1,7 @@
 // src/app/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,11 +30,57 @@ import {
   MapPin,
   Phone,
   Mail,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  UserCheck,
+  Zap,
+  Lightbulb,
+  Crown,
+  Flame,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Hero carousel slides
+  const heroSlides = [
+    {
+      title: "Give Your First Year to God",
+      subtitle: "Join the Volunteer Graduate Service Scheme",
+      description:
+        "Transform your career while serving in LoveWorld ministries worldwide",
+      gradient: "from-purple-600 via-blue-600 to-teal-500",
+      icon: Crown,
+    },
+    {
+      title: "Serve with Excellence",
+      subtitle: "Make an Eternal Impact",
+      description:
+        "Develop leadership skills while building God's kingdom through service",
+      gradient: "from-pink-500 via-red-500 to-orange-500",
+      icon: Flame,
+    },
+    {
+      title: "Build Your Future",
+      subtitle: "Professional Growth in Ministry",
+      description:
+        "Gain valuable work experience in various ministry departments globally",
+      gradient: "from-emerald-500 via-cyan-500 to-blue-600",
+      icon: Zap,
+    },
+  ];
+
+  useEffect(() => {
+    setIsLoaded(true);
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroSlides.length]);
 
   const programHighlights = [
     {
@@ -42,23 +88,27 @@ export default function HomePage() {
       title: "First Fruit Service",
       description:
         "Dedicate your first working year to God as a first fruit offering",
+      color: "text-red-500 bg-red-50",
     },
     {
       icon: BookOpen,
       title: "Ministry Training",
       description:
         "Comprehensive training in leadership and ministry excellence",
+      color: "text-blue-500 bg-blue-50",
     },
     {
       icon: Globe,
       title: "Global Impact",
       description:
         "Serve in various departments across LoveWorld ministries worldwide",
+      color: "text-green-500 bg-green-50",
     },
     {
       icon: Award,
       title: "Professional Growth",
       description: "Gain valuable work experience while serving in ministry",
+      color: "text-purple-500 bg-purple-50",
     },
   ];
 
@@ -69,6 +119,7 @@ export default function HomePage() {
         "Office management, coordination, and administrative support",
       icon: Building,
       positions: "25+ positions",
+      color: "bg-gradient-to-br from-blue-500 to-cyan-500",
     },
     {
       title: "Media & Communications",
@@ -76,12 +127,14 @@ export default function HomePage() {
         "Content creation, broadcasting, and digital media production",
       icon: Globe,
       positions: "40+ positions",
+      color: "bg-gradient-to-br from-purple-500 to-pink-500",
     },
     {
       title: "Education & Training",
       description: "Teaching, curriculum development, and educational support",
       icon: BookOpen,
       positions: "30+ positions",
+      color: "bg-gradient-to-br from-emerald-500 to-teal-500",
     },
     {
       title: "Ministry Operations",
@@ -89,6 +142,7 @@ export default function HomePage() {
         "Church operations, pastoral support, and ministry coordination",
       icon: Heart,
       positions: "50+ positions",
+      color: "bg-gradient-to-br from-orange-500 to-red-500",
     },
   ];
 
@@ -100,6 +154,7 @@ export default function HomePage() {
       quote:
         "VGSS transformed my life! I gained incredible ministry experience while serving God with my skills.",
       rating: 5,
+      image: "JA",
     },
     {
       name: "Sarah Okafor",
@@ -108,6 +163,7 @@ export default function HomePage() {
       quote:
         "The training and mentorship I received prepared me for leadership in both ministry and my career.",
       rating: 5,
+      image: "SO",
     },
     {
       name: "Michael Eze",
@@ -116,43 +172,68 @@ export default function HomePage() {
       quote:
         "Best decision I ever made! VGSS gave me purpose and direction for my professional life.",
       rating: 5,
+      image: "ME",
     },
   ];
 
   const stats = [
-    { label: "Graduates Served", value: "1,200+", icon: GraduationCap },
-    { label: "Service Departments", value: "45+", icon: Building },
-    { label: "Countries", value: "25+", icon: Globe },
-    { label: "Success Rate", value: "98%", icon: Target },
+    {
+      label: "Graduates Served",
+      value: "1,200+",
+      icon: GraduationCap,
+      change: "+15%",
+    },
+    {
+      label: "Service Departments",
+      value: "45+",
+      icon: Building,
+      change: "+8%",
+    },
+    { label: "Countries", value: "25+", icon: Globe, change: "+12%" },
+    { label: "Success Rate", value: "98%", icon: Target, change: "+2%" },
   ];
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      // Navigate to search page with query
       window.location.href = `/graduate/search?q=${encodeURIComponent(
         searchTerm
       )}`;
     }
   };
 
+  const currentHeroSlide = heroSlides[currentSlide];
+  const HeroIcon = currentHeroSlide.icon;
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* Enhanced Header */}
+      <header className="relative z-50 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-primary-foreground" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <GraduationCap className="w-6 h-6 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-2 h-2 text-white" />
+                </div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">VGSS</h1>
-                <p className="text-xs text-muted-foreground">LoveWorld Inc.</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                  VGSS
+                </h1>
+                <p className="text-xs text-muted-foreground font-medium">
+                  LoveWorld Inc.
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/auth/login">
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  className="hover:bg-primary/10 transition-all duration-300"
+                >
                   <Shield className="w-4 h-4 mr-2" />
                   Staff Login
                 </Button>
@@ -162,91 +243,214 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-background"></div>
-        {/* <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23000000" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div> */}
+      {/* Revolutionary Hero Section */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Animated Background */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${currentHeroSlide.gradient} transition-all duration-1000 ease-in-out`}
+        >
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
 
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-              Volunteer Graduate{" "}
-              <span className="text-primary">Service Scheme</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Give your first working year to God as a first fruit. Join
-              thousands of graduates serving in LoveWorld ministries worldwide
-              and make an eternal impact.
-            </p>
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute opacity-10 animate-bounce"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+              }}
+            >
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+          ))}
+        </div>
 
-            {/* Graduate Search */}
-            <Card className="max-w-lg mx-auto mb-8 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center justify-center">
-                  <Search className="w-5 h-5 mr-2" />
-                  Find Your Record
-                </CardTitle>
-                <CardDescription>
-                  Search for your uploaded graduate record to begin registration
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex space-x-2">
-                  <Input
-                    placeholder="Enter your surname"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleSearch} disabled={!searchTerm.trim()}>
-                    <Search className="w-4 h-4" />
-                  </Button>
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+          <div
+            className={`transition-all duration-700 ${
+              isLoaded
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
+            }`}
+          >
+            {/* Hero Icon */}
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center shadow-2xl border border-white/20">
+                  <HeroIcon className="w-12 h-12 text-white" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Your BLW Zone must have uploaded your details first
-                </p>
-              </CardContent>
-            </Card>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-3 h-3 text-yellow-800" />
+                </div>
+              </div>
+            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/graduate/search">
-                <Button size="lg" className="w-full sm:w-auto">
-                  <Search className="w-4 h-4 mr-2" />
+            {/* Hero Text */}
+            <div className="max-w-5xl mx-auto mb-12">
+              <div className="mb-4">
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-sm px-4 py-2 mb-6">
+                  <Flame className="w-4 h-4 mr-2" />
+                  {currentHeroSlide.subtitle}
+                </Badge>
+              </div>
+
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-none">
+                <span className="block">
+                  {currentHeroSlide.title.split(" ").slice(0, 2).join(" ")}
+                </span>
+                <span className="block bg-gradient-to-r from-yellow-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+                  {currentHeroSlide.title.split(" ").slice(2).join(" ")}
+                </span>
+              </h1>
+
+              <p className="text-xl md:text-2xl font-light text-white/90 max-w-3xl mx-auto leading-relaxed">
+                {currentHeroSlide.description}
+              </p>
+            </div>
+
+            {/* Enhanced Search Component */}
+            <div className="max-w-2xl mx-auto mb-12">
+              <Card className="bg-white/10 backdrop-blur-2xl border-white/20 shadow-2xl">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center justify-center text-white text-xl">
+                    <Search className="w-6 h-6 mr-3" />
+                    Find Your Record & Start Your Journey
+                  </CardTitle>
+                  <CardDescription className="text-white/80 text-base">
+                    Search for your uploaded graduate record to begin
+                    registration
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex space-x-3">
+                    <div className="flex-1 relative">
+                      <Input
+                        placeholder="Enter your surname to search..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                        className="h-14 bg-white/90 border-0 text-lg placeholder:text-gray-500 shadow-lg rounded-xl"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                          <Search className="w-3 h-3 text-primary" />
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleSearch}
+                      disabled={!searchTerm.trim()}
+                      size="lg"
+                      className="h-14 px-8 bg-white text-primary hover:bg-white/90 shadow-lg rounded-xl font-semibold"
+                    >
+                      <Search className="w-5 h-5 mr-2" />
+                      Search
+                    </Button>
+                  </div>
+                  <p className="text-xs text-white/70 mt-3 text-center">
+                    Your BLW Zone must have uploaded your details first
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-16">
+              <Link href="/graduate/search" className="flex-1">
+                <Button
+                  size="lg"
+                  className="w-full h-14 bg-white text-primary hover:bg-white/90 shadow-xl rounded-xl font-bold text-lg"
+                >
+                  <Search className="w-5 h-5 mr-3" />
                   Search Graduate Records
                 </Button>
               </Link>
-              <Link href="#about">
+              <Link href="#about" className="flex-1">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto"
+                  className="w-full h-14 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl rounded-xl font-bold text-lg"
                 >
                   Learn More
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-5 h-5 ml-3" />
                 </Button>
               </Link>
             </div>
           </div>
+
+          {/* Slide Indicators */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? "bg-white scale-125"
+                    : "bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse"></div>
+          </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-muted/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Stats Section */}
+      <section className="py-20 bg-gradient-to-r from-gray-50 to-blue-50 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="bg-primary/10 text-primary border-primary/20 mb-4 px-4 py-2">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Growing Impact
+            </Badge>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              Making a Difference Worldwide
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              See the incredible impact graduates are making across the globe
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat) => {
+            {stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <div key={stat.label} className="text-center">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Icon className="w-6 h-6 text-primary" />
+                <div key={stat.label} className="text-center group">
+                  <div className="relative mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      {stat.change}
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-foreground mb-1">
+                  <div className="text-4xl md:text-5xl font-black text-gray-800 mb-2 group-hover:text-primary transition-colors duration-300">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm font-medium text-gray-600 uppercase tracking-wider">
                     {stat.label}
                   </div>
                 </div>
@@ -256,38 +460,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About VGSS */}
-      <section id="about" className="py-20">
+      {/* About VGSS - Enhanced */}
+      <section id="about" className="py-24 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              What is VGSS?
+          <div className="max-w-4xl mx-auto text-center mb-20">
+            <Badge className="bg-blue-50 text-blue-700 border-blue-200 mb-6 px-4 py-2">
+              <Lightbulb className="w-4 h-4 mr-2" />
+              About VGSS
+            </Badge>
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-8">
+              What is{" "}
+              <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                VGSS
+              </span>
+              ?
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-xl text-gray-600 leading-relaxed mb-12">
               The Volunteer Graduate Service Scheme (VGSS) is a unique program
-              designed by Rev Dr. Chris Oyakhilome PhD, giving young graduates
-              from {`Believers'`} LoveWorld Campus Fellowships the opportunity
-              to give their first working year to God as first fruit through
-              service in Service Departments, departments, or churches.
+              designed by
+              <span className="font-semibold text-primary">
+                {" "}
+                Rev Dr. Chris Oyakhilome PhD
+              </span>
+              , giving young graduates from Believers' LoveWorld Campus
+              Fellowships the opportunity to give their first working year to
+              God as first fruit through service in Service Departments,
+              departments, or churches.
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {programHighlights.map((highlight) => {
+            {programHighlights.map((highlight, index) => {
               const Icon = highlight.icon;
               return (
                 <Card
                   key={highlight.title}
-                  className="text-center hover:shadow-lg transition-shadow"
+                  className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white hover:scale-105"
                 >
-                  <CardContent className="p-6">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                      <Icon className="w-6 h-6 text-primary" />
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className={`w-16 h-16 ${highlight.color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <Icon className="w-8 h-8" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-primary transition-colors duration-300">
                       {highlight.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-gray-600 leading-relaxed">
                       {highlight.description}
                     </p>
                   </CardContent>
@@ -298,43 +517,67 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Service Areas */}
-      <section className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              Service Areas
+      {/* Enhanced Service Areas */}
+      <section className="py-24 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center mb-20">
+            <Badge className="bg-white/10 text-white border-white/20 mb-6 px-4 py-2 backdrop-blur-sm">
+              <Target className="w-4 h-4 mr-2" />
+              Service Opportunities
+            </Badge>
+            <h2 className="text-5xl md:text-6xl font-black mb-8">
+              Choose Your{" "}
+              <span className="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
+                Impact Area
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-xl text-white/80 leading-relaxed">
               Discover the various departments and ministries where you can
               serve and make a meaningful impact while gaining valuable
               experience.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {serviceAreas.map((area) => {
+          <div className="grid gap-8 md:grid-cols-2">
+            {serviceAreas.map((area, index) => {
               const Icon = area.icon;
               return (
                 <Card
                   key={area.title}
-                  className="hover:shadow-lg transition-shadow"
+                  className="group hover:scale-105 transition-all duration-500 bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/20"
                 >
-                  <CardHeader>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle>{area.title}</CardTitle>
-                        <Badge variant="secondary" className="text-xs">
-                          {area.positions}
-                        </Badge>
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div
+                          className={`w-14 h-14 ${area.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                        >
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-white text-xl group-hover:text-yellow-300 transition-colors duration-300">
+                            {area.title}
+                          </CardTitle>
+                          <Badge
+                            variant="secondary"
+                            className="text-xs bg-white/20 text-white/80 mt-1"
+                          >
+                            {area.positions}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">{area.description}</p>
+                    <p className="text-white/80 leading-relaxed">
+                      {area.description}
+                    </p>
                   </CardContent>
                 </Card>
               );
@@ -343,108 +586,132 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20">
+      {/* Enhanced How It Works */}
+      <section className="py-24 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              How It Works
+          <div className="max-w-4xl mx-auto text-center mb-20">
+            <Badge className="bg-purple-100 text-purple-700 border-purple-200 mb-6 px-4 py-2">
+              <Clock className="w-4 h-4 mr-2" />
+              Simple Process
+            </Badge>
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-8">
+              How It{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Works
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-xl text-gray-600 leading-relaxed">
               Simple steps to join the VGSS program and begin your service
               journey
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold text-primary-foreground">
-                  1
-                </span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Search Your Record</h3>
-              <p className="text-muted-foreground">
-                Find your graduate information uploaded by your BLW Zone using
-                our search system.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold text-primary-foreground">
-                  2
-                </span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">
-                Complete Registration
-              </h3>
-              <p className="text-muted-foreground">
-                Fill in your complete profile, answer interview questions, and
-                submit required documents.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold text-primary-foreground">
-                  3
-                </span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Begin Service</h3>
-              <p className="text-muted-foreground">
-                Get assigned to a Service Department and start your year of
-                dedicated service to God.
-              </p>
-            </div>
+          <div className="grid gap-12 md:grid-cols-3">
+            {[
+              {
+                step: "1",
+                title: "Search Your Record",
+                description:
+                  "Find your graduate information uploaded by your BLW Zone using our advanced search system.",
+                icon: Search,
+                color: "from-blue-500 to-cyan-500",
+              },
+              {
+                step: "2",
+                title: "Complete Registration",
+                description:
+                  "Fill in your complete profile, answer interview questions, and submit required documents.",
+                icon: UserCheck,
+                color: "from-purple-500 to-pink-500",
+              },
+              {
+                step: "3",
+                title: "Begin Service",
+                description:
+                  "Get assigned to a Service Department and start your year of dedicated service to God.",
+                icon: Award,
+                color: "from-emerald-500 to-teal-500",
+              },
+            ].map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.step} className="text-center group">
+                  <div className="relative mb-8">
+                    <div
+                      className={`w-24 h-24 bg-gradient-to-br ${step.color} rounded-3xl flex items-center justify-center mx-auto shadow-2xl group-hover:scale-110 transition-transform duration-500`}
+                    >
+                      <Icon className="w-10 h-10 text-white" />
+                    </div>
+                    <div className="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-gray-50">
+                      <span className="text-xl font-black text-gray-800">
+                        {step.step}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-primary transition-colors duration-300">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed text-lg">
+                    {step.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-muted/50">
+      {/* Enhanced Testimonials */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              Graduate Testimonials
+          <div className="max-w-4xl mx-auto text-center mb-20">
+            <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 mb-6 px-4 py-2">
+              <Star className="w-4 h-4 mr-2" />
+              Success Stories
+            </Badge>
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-8">
+              Graduate{" "}
+              <span className="bg-gradient-to-r from-yellow-500 to-red-500 bg-clip-text text-transparent">
+                Testimonials
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-xl text-gray-600 leading-relaxed">
               Hear from graduates who have completed their VGSS journey
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map((testimonial) => (
               <Card
                 key={testimonial.name}
-                className="hover:shadow-lg transition-shadow"
+                className="group hover:scale-105 hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-gray-50"
               >
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-1 mb-4">
+                <CardContent className="p-8">
+                  <div className="flex items-center space-x-1 mb-6">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star
                         key={i}
-                        className="w-4 h-4 text-yellow-500 fill-yellow-500"
+                        className="w-5 h-5 text-yellow-500 fill-yellow-500"
                       />
                     ))}
                   </div>
-                  <p className="text-muted-foreground mb-6 italic">
-                    {`"${testimonial.quote}"`}
+                  <p className="text-gray-700 mb-8 italic text-lg leading-relaxed">
+                    {testimonial.quote}
                   </p>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-primary-foreground text-sm font-semibold">
-                        {testimonial.name.charAt(0)}
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-white text-sm font-bold">
+                        {testimonial.image}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-sm">
+                      <p className="font-bold text-gray-900">
                         {testimonial.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-gray-600">
                         {testimonial.role}
                       </p>
-                      <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                      <div className="flex items-center space-x-1 text-xs text-gray-500 mt-1">
                         <MapPin className="w-3 h-3" />
                         <span>{testimonial.location}</span>
                       </div>
@@ -456,155 +723,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Start Your VGSS Journey?
-          </h2>
-          <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Take the first step towards a meaningful year of service. Search for
-            your record and begin your registration today.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/graduate/search">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="w-full sm:w-auto bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Search Graduate Records
-              </Button>
-            </Link>
-            <Link href="/auth/login">
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Staff Login
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-bold">VGSS</h3>
-                  <p className="text-xs text-muted-foreground">
-                    LoveWorld Inc.
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Volunteer Graduate Service Scheme - Serving God with excellence
-                in our first working year.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">For Graduates</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link
-                    href="/graduate/search"
-                    className="hover:text-foreground"
-                  >
-                    Search Records
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/graduate/register"
-                    className="hover:text-foreground"
-                  >
-                    Register
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/graduate/requirements"
-                    className="hover:text-foreground"
-                  >
-                    Requirements
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/graduate/faq" className="hover:text-foreground">
-                    FAQ
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">For Staff</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/auth/login" className="hover:text-foreground">
-                    Staff Login
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/admin/zones" className="hover:text-foreground">
-                    Zone Management
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/admin/ministries"
-                    className="hover:text-foreground"
-                  >
-                    Service Departments
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/admin/support" className="hover:text-foreground">
-                    Support
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>vgss@loveworld.org</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
-                  <span>+234 1 234 5678</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>Lagos, Nigeria</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t pt-8 mt-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              © 2024 LoveWorld Inc. All rights reserved. |
-              <span className="ml-1">Volunteer Graduate Service Scheme</span>
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/graduate/register/page.tsx
 "use client";
 
