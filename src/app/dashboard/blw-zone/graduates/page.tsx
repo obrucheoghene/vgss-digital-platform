@@ -91,12 +91,11 @@ import { toast } from "sonner";
 interface Graduate {
   id: string;
   userId: string;
-  graduateName: string;
   graduateFirstname: string;
-  graduateLastname: string;
-  email: string;
-  graduatePhoneNumber: string;
+  graduateSurname: string;
   graduateGender: "MALE" | "FEMALE";
+  graduatePhoneNumber: string;
+  graduateEmail: string;
   maritalStatus: "SINGLE" | "MARRIED";
   dateOfBirth: string;
   stateOfOrigin: string;
@@ -123,6 +122,7 @@ interface Graduate {
   serviceCompletedDate?: string;
   createdAt: string;
   updatedAt: string;
+  registeredAt: string;
   // Test questions preview
   visionMissionPurpose?: string;
   whyVgss?: string;
@@ -166,6 +166,30 @@ export default function GraduateManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  const [allGraduates, setAllGraduates] = useState<Graduate[]>([]);
+  const [registeredGraduates, setRegisteredGraduate] = useState<Graduate[]>([]);
+
+  useEffect(() => {
+    const fetchGraduates = async () => {
+      try {
+        setIsLoading(true);
+
+        const response = await fetch("/api/blw-zone/graduates");
+        const data = await response.json();
+        if (data && data.success) {
+          setAllGraduates(data.results.uploadedGraudates);
+          // setAllGraduates(data.results.registeredGraduates);
+        }
+        setIsLoading(false);
+        console.log(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchGraduates();
+  }, []);
+
   // Mock stats - replace with real data
   const [stats, setStats] = useState<GraduateStats>({
     total: 0,
@@ -186,200 +210,24 @@ export default function GraduateManagementPage() {
   });
 
   // Mock data - replace with API call
-  useEffect(() => {
-    const loadGraduates = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Mock graduate data
-        const mockGraduates: Graduate[] = [
-          {
-            id: "1",
-            userId: "user1",
-            graduateName: "John Adeyemi Doe",
-            graduateFirstname: "John",
-            graduateLastname: "Doe",
-            email: "john.doe@email.com",
-            graduatePhoneNumber: "+234 801 234 5678",
-            graduateGender: "MALE",
-            maritalStatus: "SINGLE",
-            dateOfBirth: "1998-05-15",
-            stateOfOrigin: "Lagos",
-            nameOfZone: "Lagos Zone 1",
-            nameOfFellowship: "Victory Fellowship",
-            nameOfChapterPastor: "Pastor Mary Johnson",
-            nameOfUniversity: "University of Lagos",
-            courseOfStudy: "Computer Science",
-            graduationYear: 2023,
-            grade: "Second Class Upper",
-            nyscStatus: "COMPLETED",
-            preferredCityOfPosting: "Lagos",
-            status: "Under Review",
-            isApproved: false,
-            createdAt: "2024-01-15T10:30:00Z",
-            updatedAt: "2024-01-15T10:30:00Z",
-            visionMissionPurpose: "To reach the world with God's love...",
-            whyVgss: "I want to serve God with my first working year...",
-            plansAfterVgss: "Continue in ministry while building my career...",
-          },
-          {
-            id: "2",
-            userId: "user2",
-            graduateName: "Sarah Okafor",
-            graduateFirstname: "Sarah",
-            graduateLastname: "Okafor",
-            email: "sarah.okafor@email.com",
-            graduatePhoneNumber: "+234 802 345 6789",
-            graduateGender: "FEMALE",
-            maritalStatus: "SINGLE",
-            dateOfBirth: "1999-03-22",
-            stateOfOrigin: "Abuja",
-            nameOfZone: "Abuja Zone 2",
-            nameOfFellowship: "Faith Chapel",
-            nameOfChapterPastor: "Pastor David Wilson",
-            nameOfUniversity: "University of Abuja",
-            courseOfStudy: "Mass Communication",
-            graduationYear: 2023,
-            grade: "First Class",
-            nyscStatus: "IN_PROGRESS",
-            preferredCityOfPosting: "Abuja",
-            status: "Interviewed",
-            isApproved: true,
-            approvedBy: "admin1",
-            approvedAt: "2024-01-20T14:30:00Z",
-            createdAt: "2024-01-10T09:15:00Z",
-            updatedAt: "2024-01-20T14:30:00Z",
-            visionMissionPurpose: "To impact lives through media ministry...",
-            whyVgss: "Called to dedicate my first fruits to God...",
-            plansAfterVgss: "Establish a Christian media company...",
-          },
-          {
-            id: "3",
-            userId: "user3",
-            graduateName: "Michael Eze",
-            graduateFirstname: "Michael",
-            graduateLastname: "Eze",
-            email: "michael.eze@email.com",
-            graduatePhoneNumber: "+234 803 456 7890",
-            graduateGender: "MALE",
-            maritalStatus: "MARRIED",
-            dateOfBirth: "1997-11-08",
-            stateOfOrigin: "Port Harcourt",
-            nameOfZone: "Port Harcourt Zone 1",
-            nameOfFellowship: "Grace Assembly",
-            nameOfChapterPastor: "Pastor Emmanuel Kings",
-            nameOfUniversity: "University of Port Harcourt",
-            courseOfStudy: "Electrical Engineering",
-            graduationYear: 2022,
-            grade: "Second Class Upper",
-            nyscStatus: "COMPLETED",
-            preferredCityOfPosting: "Port Harcourt",
-            status: "Serving",
-            isApproved: true,
-            approvedBy: "admin1",
-            approvedAt: "2023-12-15T11:00:00Z",
-            serviceStartedDate: "2024-01-01T00:00:00Z",
-            createdAt: "2023-12-01T08:45:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-            visionMissionPurpose:
-              "To demonstrate God's power through engineering...",
-            whyVgss: "Obedience to God's calling for first fruit service...",
-            plansAfterVgss: "Start an engineering consulting firm...",
-          },
-          {
-            id: "4",
-            userId: "user4",
-            graduateName: "Grace Adebayo",
-            graduateFirstname: "Grace",
-            graduateLastname: "Adebayo",
-            email: "grace.adebayo@email.com",
-            graduatePhoneNumber: "+234 804 567 8901",
-            graduateGender: "FEMALE",
-            maritalStatus: "SINGLE",
-            dateOfBirth: "1998-09-12",
-            stateOfOrigin: "Ibadan",
-            nameOfZone: "Ibadan Zone 3",
-            nameOfFellowship: "Hope Center",
-            nameOfChapterPastor: "Pastor Ruth Akinola",
-            nameOfUniversity: "University of Ibadan",
-            courseOfStudy: "Medicine",
-            graduationYear: 2023,
-            grade: "First Class",
-            nyscStatus: "EXEMPTED",
-            preferredCityOfPosting: "Ibadan",
-            status: "Invited For Interview",
-            isApproved: false,
-            createdAt: "2024-01-05T12:20:00Z",
-            updatedAt: "2024-01-18T16:45:00Z",
-            visionMissionPurpose: "To heal bodies and souls for Christ...",
-            whyVgss: "To combine medical practice with ministry...",
-            plansAfterVgss: "Establish a Christian medical center...",
-          },
-        ];
-
-        setGraduates(mockGraduates);
-
-        // Calculate stats
-        const calculatedStats: GraduateStats = {
-          total: mockGraduates.length,
-          underReview: mockGraduates.filter((g) => g.status === "Under Review")
-            .length,
-          interviewed: mockGraduates.filter((g) => g.status === "Interviewed")
-            .length,
-          serving: mockGraduates.filter((g) => g.status === "Serving").length,
-          completed: mockGraduates.filter((g) => g.serviceCompletedDate).length,
-          notAccepted: mockGraduates.filter((g) => g.status === "Not Accepted")
-            .length,
-          byGender: {
-            MALE: mockGraduates.filter((g) => g.graduateGender === "MALE")
-              .length,
-            FEMALE: mockGraduates.filter((g) => g.graduateGender === "FEMALE")
-              .length,
-          },
-          byStatus: {
-            "Under Review": mockGraduates.filter(
-              (g) => g.status === "Under Review"
-            ).length,
-            "Invited For Interview": mockGraduates.filter(
-              (g) => g.status === "Invited For Interview"
-            ).length,
-            Interviewed: mockGraduates.filter((g) => g.status === "Interviewed")
-              .length,
-            Sighting: mockGraduates.filter((g) => g.status === "Sighting")
-              .length,
-            Serving: mockGraduates.filter((g) => g.status === "Serving").length,
-            "Not Accepted": mockGraduates.filter(
-              (g) => g.status === "Not Accepted"
-            ).length,
-          },
-        };
-
-        setStats(calculatedStats);
-      } catch (error) {
-        toast.error("Failed to load graduates");
-        console.error("Error loading graduates:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadGraduates();
-  }, []);
 
   // Filter graduates based on search and filters
   useEffect(() => {
-    let filtered = graduates;
+    let filtered = allGraduates;
 
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(
         (graduate) =>
-          graduate.graduateName
+          graduate.graduateFirstname
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
-          graduate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          graduate.graduateSurname
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          graduate.graduateEmail
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           graduate.nameOfUniversity
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
@@ -394,25 +242,25 @@ export default function GraduateManagementPage() {
             .includes(searchQuery.toLowerCase())
       );
     }
-
+    console.log({ filtered });
     // Status filter
-    if (selectedStatus !== "all") {
-      filtered = filtered.filter(
-        (graduate) => graduate.status === selectedStatus
-      );
-    }
+    // if (selectedStatus !== "all") {
+    //   filtered = filtered.filter(
+    //     (graduate) => graduate.status === selectedStatus
+    //   );
+    // }
 
-    // Gender filter
-    if (selectedGender !== "all") {
-      filtered = filtered.filter(
-        (graduate) => graduate.graduateGender === selectedGender
-      );
-    }
+    // // Gender filter
+    // if (selectedGender !== "all") {
+    //   filtered = filtered.filter(
+    //     (graduate) => graduate.graduateGender === selectedGender
+    //   );
+    // }
 
     setFilteredGraduates(filtered);
     setCurrentPage(1); // Reset to first page when filters change
     setSelectedGraduates([]); // Clear selections
-  }, [graduates, searchQuery, selectedStatus, selectedGender]);
+  }, [allGraduates, searchQuery, selectedStatus, selectedGender]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -594,86 +442,16 @@ export default function GraduateManagementPage() {
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <GraduationCap className="w-5 h-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Total Graduates
-                  </p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-yellow-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Under Review</p>
-                  <p className="text-2xl font-bold">{stats.underReview}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Star className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Currently Serving
-                  </p>
-                  <p className="text-2xl font-bold">{stats.serving}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-purple-600" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Interviewed</p>
-                  <p className="text-2xl font-bold">{stats.interviewed}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Status Tabs */}
         <Tabs
           value={selectedStatus}
           onValueChange={setSelectedStatus}
           className="space-y-4"
         >
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-            <TabsTrigger value="Under Review">
-              Review ({stats.byStatus["Under Review"]})
-            </TabsTrigger>
-            <TabsTrigger value="Invited For Interview">
-              Invited ({stats.byStatus["Invited For Interview"]})
-            </TabsTrigger>
-            <TabsTrigger value="Interviewed">
-              Interviewed ({stats.byStatus["Interviewed"]})
-            </TabsTrigger>
-            <TabsTrigger value="Sighting">
-              Sighting ({stats.byStatus["Sighting"]})
-            </TabsTrigger>
-            <TabsTrigger value="Serving">
-              Serving ({stats.byStatus["Serving"]})
-            </TabsTrigger>
-            <TabsTrigger value="Not Accepted">
-              Rejected ({stats.byStatus["Not Accepted"]})
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="all">All ({allGraduates.length})</TabsTrigger>
+            <TabsTrigger value="Register">
+              Registered ({stats.byStatus["Under Review"]})
             </TabsTrigger>
           </TabsList>
 
@@ -686,10 +464,10 @@ export default function GraduateManagementPage() {
                       <GraduationCap className="w-5 h-5 mr-2" />
                       Graduate List
                     </CardTitle>
-                    <CardDescription>
+                    {/* <CardDescription>
                       Manage graduate registrations, approvals, and service
                       assignments
-                    </CardDescription>
+                    </CardDescription> */}
                   </div>
 
                   {/* Bulk Actions */}
@@ -798,8 +576,8 @@ export default function GraduateManagementPage() {
                         <TableHead>Graduate</TableHead>
                         <TableHead>Education</TableHead>
                         <TableHead>Ministry Info</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Approval</TableHead>
+                        {/* <TableHead>Status</TableHead>
+                        <TableHead>Approval</TableHead> */}
                         <TableHead>Registered</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
@@ -853,19 +631,19 @@ export default function GraduateManagementPage() {
                                     </div>
                                     <div>
                                       <p className="font-medium">
-                                        {graduate.graduateName}
+                                        {`${graduate.graduateFirstname} ${graduate.graduateSurname}`}
                                       </p>
                                       <p className="text-sm text-muted-foreground">
-                                        {graduate.email}
+                                        {graduate.graduatePhoneNumber}
                                       </p>
                                     </div>
                                   </div>
                                   <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                                     <span>{graduate.graduateGender}</span>
-                                    <span>•</span>
+                                    {/* <span>•</span>
                                     <span>{graduate.maritalStatus}</span>
                                     <span>•</span>
-                                    <span>{graduate.stateOfOrigin}</span>
+                                    <span>{graduate.stateOfOrigin}</span> */}
                                   </div>
                                 </div>
                               </TableCell>
@@ -906,7 +684,7 @@ export default function GraduateManagementPage() {
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell>
+                              {/* <TableCell>
                                 {getStatusBadge(graduate.status)}
                               </TableCell>
                               <TableCell>
@@ -924,20 +702,22 @@ export default function GraduateManagementPage() {
                                     Pending
                                   </Badge>
                                 )}
-                              </TableCell>
+                              </TableCell> */}
                               <TableCell>
-                                <div className="text-sm">
-                                  <p>
-                                    {new Date(
-                                      graduate.createdAt
-                                    ).toLocaleDateString()}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {new Date(
-                                      graduate.createdAt
-                                    ).toLocaleTimeString()}
-                                  </p>
-                                </div>
+                                {graduate.registeredAt ? (
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Registed
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-orange-600"
+                                  >
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    Not Registered
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell className="text-right">
                                 <DropdownMenu>
@@ -1149,7 +929,7 @@ export default function GraduateManagementPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center">
                 <GraduationCap className="w-5 h-5 mr-2" />
-                Graduate Profile: {selectedGraduate?.graduateName}
+                Graduate Profile: {selectedGraduate?.graduateFirstname}
               </DialogTitle>
               <DialogDescription>
                 Complete graduate information and service details
@@ -1229,7 +1009,7 @@ export default function GraduateManagementPage() {
                               Full Name
                             </Label>
                             <p className="font-medium">
-                              {selectedGraduate.graduateName}
+                              {`${selectedGraduate.graduateFirstname} ${selectedGraduate.graduateSurname}`}
                             </p>
                           </div>
                           <div>
@@ -1238,7 +1018,7 @@ export default function GraduateManagementPage() {
                             </Label>
                             <p className="flex items-center">
                               <Mail className="w-4 h-4 mr-1" />
-                              {selectedGraduate.email}
+                              {selectedGraduate.graduateEmail}
                             </p>
                           </div>
                           <div>

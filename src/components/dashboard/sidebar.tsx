@@ -97,7 +97,7 @@ const navigationItems = {
       title: "My Graduates",
       icon: Users,
       href: "/dashboard/blw-zone/graduates",
-      badge: "45",
+      // badge: "45",
     },
     // {
     //   title: "Registration Status",
