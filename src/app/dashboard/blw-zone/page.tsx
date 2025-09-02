@@ -1,4 +1,5 @@
-// src/app/dashboard/blw-zone/page.tsx
+"use client";
+
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import {
   Card,
@@ -20,12 +21,33 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+interface StatsData {
+  totalUploadedGraduates: number;
+  totalRegisteredGraduates: number;
+  totalInServiceGraduates: number;
+  totalPendingRegisteredGraduates: number;
+}
 
 export default function BLWZoneDashboard() {
+  const [statsData, setStatsData] = useState<StatsData>();
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch("/api/blw-zone/dashboard-stats");
+        const data = await response.json();
+        if (data && data.success) setStatsData(data.stats);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchMetrics();
+  }, []);
   const stats = [
     {
       title: "Graduates Uploaded",
-      value: "89",
+      value: statsData ? statsData.totalUploadedGraduates : "-",
       change: "+7",
       trend: "up",
       icon: Upload,
@@ -34,7 +56,7 @@ export default function BLWZoneDashboard() {
     },
     {
       title: "Registered",
-      value: "67",
+      value: statsData ? statsData.totalRegisteredGraduates : "-",
       change: "+12",
       trend: "up",
       icon: UserCheck,
@@ -43,7 +65,7 @@ export default function BLWZoneDashboard() {
     },
     {
       title: "Pending Registration",
-      value: "22",
+      value: statsData ? statsData.totalPendingRegisteredGraduates : "-",
       change: "-5",
       trend: "down",
       icon: Clock,
@@ -52,7 +74,7 @@ export default function BLWZoneDashboard() {
     },
     {
       title: "In Service",
-      value: "45",
+      value: statsData ? statsData.totalInServiceGraduates : "-",
       change: "+8",
       trend: "up",
       icon: CheckCircle,
@@ -139,7 +161,7 @@ export default function BLWZoneDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center text-xs text-muted-foreground">
+                  {/* <div className="flex items-center text-xs text-muted-foreground">
                     <TrendingUp
                       className={`w-3 h-3 mr-1 ${
                         stat.trend === "up" ? "text-green-500" : "text-red-500"
@@ -153,7 +175,7 @@ export default function BLWZoneDashboard() {
                       {stat.change}
                     </span>
                     <span className="ml-1">this month</span>
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
             );

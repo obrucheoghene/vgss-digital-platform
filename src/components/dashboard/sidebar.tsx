@@ -99,18 +99,18 @@ const navigationItems = {
       href: "/dashboard/blw-zone/graduates",
       badge: "45",
     },
-    {
-      title: "Registration Status",
-      icon: FileText,
-      href: "/dashboard/blw-zone/status",
-      badge: "8", // New registrations
-    },
-    {
-      title: "Reports",
-      icon: BarChart3,
-      href: "/dashboard/blw-zone/reports",
-      badge: null,
-    },
+    // {
+    //   title: "Registration Status",
+    //   icon: FileText,
+    //   href: "/dashboard/blw-zone/status",
+    //   badge: "8", // New registrations
+    // },
+    // {
+    //   title: "Reports",
+    //   icon: BarChart3,
+    //   href: "/dashboard/blw-zone/reports",
+    //   badge: null,
+    // },
     {
       title: "Settings",
       icon: Settings,
