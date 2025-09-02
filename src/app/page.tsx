@@ -194,7 +194,7 @@ export default function HomePage() {
               <CardContent>
                 <div className="flex space-x-2">
                   <Input
-                    placeholder="Enter your full name or fellowship name..."
+                    placeholder="Enter your surname"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSearch()}

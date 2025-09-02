@@ -193,15 +193,15 @@ export default function ZoneUploadPage() {
 
       // Validate phone number format
       if (row.graduatePhoneNumber) {
-        const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
+        const phoneRegex = /^\+[\d\s\-\(\)]+$/;
         if (!phoneRegex.test(row.graduatePhoneNumber)) {
           rowErrors.push("Invalid phone number format");
         }
       }
 
       if (row.phoneNumberOfChapterPastor) {
-        const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
-        if (!phoneRegex.test(row.phoneNumberOfChapterPastor)) {
+        const pastorPhoneRegex = /^\+[\d\s\-\(\)]+$/;
+        if (!pastorPhoneRegex.test(row.phoneNumberOfChapterPastor)) {
           rowErrors.push("Invalid phone number format");
         }
       }

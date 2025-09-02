@@ -35,12 +35,19 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import z from "zod";
+import { Form, SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface GraduateRecord {
   id: string;
   graduateFirstname: string;
-  graduateLastname: string;
+  graduateSurname: string;
   graduateGender: "MALE" | "FEMALE";
+  nameOfUniversity: string;
+  courseOfStudy: string;
+  graduationYear: number;
+  graduatePhoneNumber: string;
   nameOfFellowship: string;
   nameOfZonalPastor: string;
   nameOfChapterPastor: string;
@@ -52,160 +59,87 @@ interface GraduateRecord {
   zoneName?: string; // Added for display
 }
 
+interface ZoneData {
+  id: string;
+  name: string;
+}
+
+const SearchValues = z.object({
+  surname: z.string().trim().min(1, "Surname is required"),
+  zone: z.string().min(1, "Zone is required"),
+  gender: z.enum(["MALE", "FEMALE"], "Gender is required "),
+  phoneNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(
+      /^\+\d+$/,
+      "Phone number must begin with your country code and contain only digits"
+    ),
+});
+
 export default function GraduateSearchPage() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [genderFilter, setGenderFilter] = useState<string>("all");
-  const [fellowshipFilter, setFellowshipFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<GraduateRecord[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
-  const [error, setError] = useState("");
+  const [zones, setZones] = useState<ZoneData[]>([]);
+  type SearchType = z.infer<typeof SearchValues>;
 
-  // Mock data for demonstration - replace with actual API call
-  const mockGraduateRecords: GraduateRecord[] = [
-    {
-      id: "1",
-      graduateFirstname: "John",
-      graduateLastname: "Doe",
-      graduateGender: "MALE",
-      nameOfFellowship: "Victory Fellowship",
-      nameOfZonalPastor: "Pastor James Wilson",
-      nameOfChapterPastor: "Pastor Mary Johnson",
-      phoneNumberOfChapterPastor: "+234 801 234 5678",
-      emailOfChapterPastor: "mary.johnson@loveworld.org",
-      isRegistered: false,
-      createdAt: "2024-01-15",
-      zoneName: "Lagos Zone 1",
+  const {
+    control,
+    handleSubmit,
+    register,
+    setFocus,
+    setError,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<SearchType>({
+    resolver: zodResolver(SearchValues),
+    defaultValues: {
+      surname: initialQuery,
+      zone: "",
+      // gender: "",
+      phoneNumber: "",
     },
-    {
-      id: "2",
-      graduateFirstname: "Jane",
-      graduateLastname: "Smith",
-      graduateGender: "FEMALE",
-      nameOfFellowship: "Faith Chapel",
-      nameOfZonalPastor: "Pastor David Brown",
-      nameOfChapterPastor: "Pastor Sarah Davis",
-      phoneNumberOfChapterPastor: "+234 802 345 6789",
-      emailOfChapterPastor: "sarah.davis@loveworld.org",
-      isRegistered: true,
-      registeredAt: "2024-02-01",
-      createdAt: "2024-01-10",
-      zoneName: "Abuja Zone 2",
-    },
-    {
-      id: "3",
-      graduateFirstname: "Michael",
-      graduateLastname: "Johnson",
-      graduateGender: "MALE",
-      nameOfFellowship: "Grace Assembly",
-      nameOfZonalPastor: "Pastor Peter White",
-      nameOfChapterPastor: "Pastor Lisa Anderson",
-      phoneNumberOfChapterPastor: "+234 803 456 7890",
-      emailOfChapterPastor: "lisa.anderson@loveworld.org",
-      isRegistered: false,
-      createdAt: "2024-01-20",
-      zoneName: "Port Harcourt Zone 1",
-    },
-    {
-      id: "4",
-      graduateFirstname: "Sarah",
-      graduateLastname: "Wilson",
-      graduateGender: "FEMALE",
-      nameOfFellowship: "Hope Center",
-      nameOfZonalPastor: "Pastor Mark Thompson",
-      nameOfChapterPastor: "Pastor Grace Miller",
-      phoneNumberOfChapterPastor: "+234 804 567 8901",
-      emailOfChapterPastor: "grace.miller@loveworld.org",
-      isRegistered: false,
-      createdAt: "2024-01-25",
-      zoneName: "Kano Zone 1",
-    },
-  ];
+  });
 
   useEffect(() => {
-    if (initialQuery) {
-      performSearch(initialQuery);
-    }
-  }, [initialQuery]);
+    const fetchZones = async () => {
+      try {
+        const response = await fetch("/api/blw-zone");
+        const data = await response.json();
+        if (data && data.success) setZones(data.results);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
-  const performSearch = async (query: string = searchQuery) => {
-    if (!query.trim()) {
-      setError("Please enter a search term");
-      return;
-    }
+    fetchZones();
+  }, []);
 
-    setIsLoading(true);
-    setError("");
-    setHasSearched(true);
-
+  const performSearch: SubmitHandler<SearchType> = async (values) => {
     try {
       // Call the actual API
       const response = await fetch(
-        `/api/graduate/search?q=${encodeURIComponent(
-          query
-        )}&gender=${genderFilter}&fellowship=${fellowshipFilter}`
+        `/api/graduate/search?q=${encodeURIComponent(values.surname)}&surname=${
+          values.surname
+        }&gender=${values.gender}&zone=${values.zone}&phoneNumber=${
+          values.phoneNumber
+        }`
       );
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to search");
+      setHasSearched(true);
+      if (data && data.success) {
+        console.log(data);
+        setSearchResults(data.results || []);
       }
-
-      setSearchResults(data.results || []);
     } catch (error) {
-      console.error("Search error:", error);
-      setError("An error occurred while searching. Please try again.");
-
-      // Fallback to mock data for demonstration if API fails
-      const filteredResults = mockGraduateRecords.filter((record) => {
-        const fullName =
-          `${record.graduateFirstname} ${record.graduateLastname}`.toLowerCase();
-        const fellowship = record.nameOfFellowship.toLowerCase();
-        const pastor = record.nameOfChapterPastor.toLowerCase();
-        const searchTerm = query.toLowerCase();
-
-        const matchesSearch =
-          fullName.includes(searchTerm) ||
-          fellowship.includes(searchTerm) ||
-          pastor.includes(searchTerm);
-
-        const matchesGender =
-          genderFilter === "all" || record.graduateGender === genderFilter;
-        const matchesFellowship =
-          fellowshipFilter === "all" ||
-          record.nameOfFellowship === fellowshipFilter;
-
-        return matchesSearch && matchesGender && matchesFellowship;
-      });
-
-      setSearchResults(filteredResults);
-    } finally {
-      setIsLoading(false);
+      console.log(error);
     }
   };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    performSearch();
-  };
-
-  const resetSearch = () => {
-    setSearchQuery("");
-    setGenderFilter("all");
-    setFellowshipFilter("all");
-    setSearchResults([]);
-    setHasSearched(false);
-    setError("");
-  };
-
-  // Get unique fellowships for filter
-  const uniqueFellowships = Array.from(
-    new Set(mockGraduateRecords.map((record) => record.nameOfFellowship))
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -266,68 +200,92 @@ export default function GraduateSearchPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSearch} className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="search">Search Term *</Label>
-                    <Input
-                      id="search"
-                      placeholder="Enter your full name, fellowship name, or pastor's name..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      disabled={isLoading}
-                      className="h-11"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Try searching by your full name as uploaded by your zone
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Gender Filter</Label>
+              <form
+                onSubmit={handleSubmit(performSearch)}
+                className="space-y-6"
+              >
+                <div className="flex flex-col gap-4 ">
+                  <div className=" space-y-2">
                     <Select
-                      value={genderFilter}
-                      onValueChange={setGenderFilter}
-                      disabled={isLoading}
+                      value={watch("zone")}
+                      onValueChange={(value) => setValue("zone", value)}
+                      disabled={isSubmitting}
                     >
-                      <SelectTrigger className="h-11">
-                        <SelectValue />
+                      <SelectTrigger className="h-11 w-full">
+                        <SelectValue placeholder="Select your zone" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Genders</SelectItem>
-                        <SelectItem value="MALE">Male</SelectItem>
-                        <SelectItem value="FEMALE">Female</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Fellowship Filter</Label>
-                    <Select
-                      value={fellowshipFilter}
-                      onValueChange={setFellowshipFilter}
-                      disabled={isLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Fellowships" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Fellowships</SelectItem>
-                        {uniqueFellowships.map((fellowship) => (
-                          <SelectItem key={fellowship} value={fellowship}>
-                            {fellowship}
+                        {zones.map((value) => (
+                          <SelectItem key={value.id} value={value.id}>
+                            {value.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <span className="mt-[-6px] text-sm text-red-500">
+                      {errors.zone?.message}
+                    </span>
+                  </div>
+                  <div className=" space-y-2">
+                    <Label htmlFor="surname">Surname</Label>
+                    <Input
+                      id="search"
+                      {...register("surname")}
+                      placeholder="Enter your surname"
+                      disabled={isSubmitting}
+                      className="h-11"
+                    />
+                    <span className="mt-[-6px] text-sm text-red-500">
+                      {errors.surname?.message}
+                    </span>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>Gender</Label>
+                    <Select
+                      value={watch("gender")}
+                      onValueChange={(value: "MALE" | "FEMALE") =>
+                        setValue("gender", value)
+                      }
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="h-11 w-full">
+                        <SelectValue placeholder="Select a gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MALE">Male</SelectItem>
+                        <SelectItem value="FEMALE">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="mt-[-6px] text-sm text-red-500">
+                      {errors.gender?.message}
+                    </span>
+                  </div>
+
+                  <div className=" space-y-2">
+                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Input
+                      id="phoneNumber"
+                      {...register("phoneNumber")}
+                      placeholder="Enter your phone number"
+                      disabled={isSubmitting}
+                      className="h-11"
+                    />
+                    <span className="mt-[-6px] text-sm text-red-500">
+                      {errors.phoneNumber?.message}
+                    </span>
+                    <p className=" text-sm">
+                      Phone numbers should include country code (+234 for
+                      Nigeria)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
                   <div className="flex items-end space-x-2">
                     <Button
                       type="submit"
-                      disabled={isLoading || !searchQuery.trim()}
+                      disabled={isLoading}
                       className="flex-1"
                     >
                       {isLoading && (
@@ -336,24 +294,16 @@ export default function GraduateSearchPage() {
                       <Search className="w-4 h-4 mr-2" />
                       Search Records
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={resetSearch}
-                      disabled={isLoading}
-                    >
-                      <Filter className="w-4 h-4" />
-                    </Button>
                   </div>
                 </div>
               </form>
 
-              {error && (
+              {/* {error && (
                 <Alert variant="destructive" className="mt-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              )}
+              )} */}
             </CardContent>
           </Card>
 
@@ -392,7 +342,7 @@ export default function GraduateSearchPage() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button
                         variant="outline"
-                        onClick={() => setSearchQuery("")}
+                        // onClick={() => setSearchQuery("")}
                       >
                         Try Different Search
                       </Button>
@@ -412,7 +362,7 @@ export default function GraduateSearchPage() {
                           <div>
                             <h3 className="text-lg font-semibold text-foreground">
                               {record.graduateFirstname}{" "}
-                              {record.graduateLastname}
+                              {record.graduateSurname}
                             </h3>
                             <div className="text-right">
                               {record.isRegistered ? (
@@ -440,12 +390,13 @@ export default function GraduateSearchPage() {
                         <div className="grid gap-4 md:grid-cols-2 mb-6">
                           <div>
                             <h4 className="font-medium text-sm mb-2">
-                              Fellowship Information
+                              Zone Information
                             </h4>
                             <div className="space-y-1 text-sm text-muted-foreground">
                               <div className="flex items-center space-x-2">
-                                <Users className="w-3 h-3" />
-                                <span>{record.nameOfFellowship}</span>
+                                <span className=" font-medium">Zone:</span>
+
+                                <span>{record.zoneName}</span>
                               </div>
                               <div>
                                 <span className="font-medium">
@@ -464,18 +415,24 @@ export default function GraduateSearchPage() {
 
                           <div>
                             <h4 className="font-medium text-sm mb-2">
-                              Contact Information
+                              School Information
                             </h4>
                             <div className="space-y-1 text-sm text-muted-foreground">
                               <div>
-                                <span className="font-medium">Phone:</span>{" "}
-                                {record.phoneNumberOfChapterPastor}
+                                <span className="font-medium">School:</span>{" "}
+                                {record.nameOfUniversity}
                               </div>
                               <div>
-                                <span className="font-medium">Email:</span>{" "}
-                                {record.emailOfChapterPastor}
+                                <span className="font-medium">Course:</span>{" "}
+                                {record.courseOfStudy}
                               </div>
-                              {record.registeredAt && (
+                              <div>
+                                <span className="font-medium">
+                                  Graduation Year:
+                                </span>{" "}
+                                {record.graduationYear}
+                              </div>
+                              {/* {record.registeredAt && (
                                 <div>
                                   <span className="font-medium">
                                     Registered:
@@ -484,7 +441,7 @@ export default function GraduateSearchPage() {
                                     record.registeredAt
                                   ).toLocaleDateString()}
                                 </div>
-                              )}
+                              )} */}
                             </div>
                           </div>
                         </div>
@@ -510,9 +467,9 @@ export default function GraduateSearchPage() {
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 This is My Record - Register
                               </Button>
-                              <Button variant="outline" size="lg">
+                              {/* <Button variant="outline" size="lg">
                                 Verify Details
-                              </Button>
+                              </Button> */}
                             </>
                           )}
                         </div>
@@ -555,9 +512,8 @@ export default function GraduateSearchPage() {
                       <li>
                         • Use your exact name as registered with your BLW Zone
                       </li>
-                      <li>• Try searching by your fellowship name</li>
-                      <li>• Include your {`pastor's`} name if needed</li>
-                      <li>• Use filters to narrow down results</li>
+                      <li>• Add country code to you phone number</li>
+                      <li>• Ensure you selected your zone accurately</li>
                     </ul>
                   </div>
                   <div>
@@ -567,7 +523,7 @@ export default function GraduateSearchPage() {
                     <ul className="space-y-1 text-sm text-muted-foreground">
                       <li>• Contact your BLW Zone to confirm upload</li>
                       <li>• Check spelling of names carefully</li>
-                      <li>• Try different search combinations</li>
+                      <li>• Check you enter your phone number correctly</li>
                       <li>
                         • Ensure {`you're`} a BLW Campus Fellowship graduate
                       </li>
@@ -579,7 +535,7 @@ export default function GraduateSearchPage() {
           )}
 
           {/* Contact Support */}
-          <Card className="mt-8">
+          <Card className="mt-8 hidden">
             <CardContent className="text-center py-6">
               <h3 className="font-semibold mb-2">Need Help?</h3>
               <p className="text-muted-foreground mb-4">
