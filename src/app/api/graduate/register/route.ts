@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Missing required fields",
-          missingFields: missingFields as string[],
+          missingFields: missingFields,
           details: `Please provide: ${missingFields.join(", ")}`,
         },
         { status: 400 }
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
     if (
       isNaN(graduationYear) ||
       graduationYear < 1990 ||
-      graduationYear > 2030
+      graduationYear > new Date().getFullYear() + 5
     ) {
       return NextResponse.json(
         { error: "Invalid graduation year" },
@@ -200,8 +200,11 @@ export async function POST(req: NextRequest) {
         id: zoneGraduates.id,
         userId: zoneGraduates.userId,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateSurname,
+        graduateSurname: zoneGraduates.graduateSurname,
         graduateGender: zoneGraduates.graduateGender,
+        nameOfUniversity: zoneGraduates.nameOfUniversity,
+        courseOfStudy: zoneGraduates.courseOfStudy,
+        graduationYear: zoneGraduates.graduationYear,
         nameOfFellowship: zoneGraduates.nameOfFellowship,
         nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
         nameOfChapterPastor: zoneGraduates.nameOfChapterPastor,
@@ -255,7 +258,7 @@ export async function POST(req: NextRequest) {
           .insert(users)
           .values({
             type: "GRADUATE",
-            name: `${record.graduateFirstname} ${record.graduateLastname}`,
+            name: `${record.graduateFirstname} ${record.graduateSurname}`,
             email: formData.email,
             password: hashedPassword,
             accountStatus: "active", // Graduates are immediately active
@@ -275,12 +278,12 @@ export async function POST(req: NextRequest) {
             userId: newUser.id,
             zoneGraduateId: recordId,
             blwZoneId: record.userId, // Required - BLW Zone who uploaded
-            ministryOfficeId: null, // Will be assigned later
+            serviceDepartmentId: null, // Will be assigned later
 
             // Personal Information (from zone data + form)
             graduateFirstname: record.graduateFirstname,
-            graduateLastname: record.graduateLastname,
-            graduateName: `${record.graduateFirstname} ${record.graduateLastname}`,
+            graduateSurname: record.graduateSurname,
+            // graduateName: `${record.graduateFirstname} ${record.graduateLastname}`,
             graduateGender: record.graduateGender,
             maritalStatus: formData.maritalStatus,
             placeOfBirth: formData.placeOfBirth,
@@ -406,7 +409,7 @@ export async function POST(req: NextRequest) {
       userId: result.userId,
       graduateDataId: result.graduateDataId,
       graduate: {
-        name: `${record.graduateFirstname} ${record.graduateLastname}`,
+        name: `${record.graduateFirstname} ${record.graduateSurname}`,
         email: formData.email,
         fellowship: record.nameOfFellowship,
         zone: zoneName,
@@ -489,17 +492,27 @@ export async function GET(req: NextRequest) {
         isRegistered: zoneGraduates.isRegistered,
         registeredAt: zoneGraduates.registeredAt,
         graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateSurname,
+        graduateSurname: zoneGraduates.graduateSurname,
         graduateGender: zoneGraduates.graduateGender,
+        nameOfUniversity: zoneGraduates.nameOfUniversity,
+        courseOfStudy: zoneGraduates.courseOfStudy,
+        graduationYear: zoneGraduates.graduationYear,
         nameOfFellowship: zoneGraduates.nameOfFellowship,
+        nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
+        nameOfChapterPastor: zoneGraduates.nameOfChapterPastor,
+        phoneNumberOfChapterPastor: zoneGraduates.phoneNumberOfChapterPastor,
+        emailOfChapterPastor: zoneGraduates.emailOfChapterPastor,
         // Graduate data info (if registered)
         graduateDataId: graduateData.id,
         userId: graduateData.userId,
         status: graduateData.status,
         email: graduateData.email,
+        // Zone info
+        zoneName: users.name,
       })
       .from(zoneGraduates)
       .leftJoin(graduateData, eq(zoneGraduates.id, graduateData.zoneGraduateId))
+      .leftJoin(users, eq(zoneGraduates.userId, users.id))
       .where(eq(zoneGraduates.id, recordId))
       .limit(1);
 
@@ -517,13 +530,21 @@ export async function GET(req: NextRequest) {
       record: {
         id: record.id,
         graduateFirstname: record.graduateFirstname,
-        graduateLastname: record.graduateLastname,
+        graduateSurname: record.graduateSurname,
         graduateGender: record.graduateGender,
+        nameOfUniversity: record.nameOfUniversity,
+        courseOfStudy: record.courseOfStudy,
+        graduationYear: record.graduationYear,
         nameOfFellowship: record.nameOfFellowship,
+        nameOfZonalPastor: record.nameOfZonalPastor,
+        nameOfChapterPastor: record.nameOfChapterPastor,
+        phoneNumberOfChapterPastor: record.phoneNumberOfChapterPastor,
+        emailOfChapterPastor: record.emailOfChapterPastor,
         isRegistered: record.isRegistered,
         registeredAt: record.registeredAt,
         status: record.status || null,
         email: record.email || null,
+        zoneName: record.zoneName,
         hasGraduateProfile: !!record.graduateDataId,
       },
     });

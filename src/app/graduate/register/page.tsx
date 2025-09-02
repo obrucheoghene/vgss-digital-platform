@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/graduate/register/page.tsx
 "use client";
 
@@ -42,16 +41,22 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
-  Upload,
   MessageSquare,
+  Eye,
+  EyeOff,
+  Shield,
+  Key,
 } from "lucide-react";
 import Link from "next/link";
 
 interface GraduateRecord {
   id: string;
   graduateFirstname: string;
-  graduateLastname: string;
+  graduateSurname: string;
   graduateGender: "MALE" | "FEMALE";
+  nameOfUniversity: string;
+  courseOfStudy: string;
+  graduationYear: number;
   nameOfFellowship: string;
   nameOfZonalPastor: string;
   nameOfChapterPastor: string;
@@ -115,7 +120,7 @@ interface RegistrationFormData {
   leadershipRolesInMinistryAndFellowship: string;
   ministryProgramsAttended: string;
 
-  // Test Questions (formerly interview questions)
+  // Test Questions
   visionMissionPurpose: string;
   explainWithExamples: string;
   partnershipArms: string;
@@ -133,68 +138,70 @@ interface RegistrationFormData {
   confirmPassword: string;
 }
 
+const initialFormData: RegistrationFormData = {
+  placeOfBirth: "",
+  dateOfBirth: "",
+  stateOfOrigin: "",
+  homeAddress: "",
+  graduatePhoneNumber: "",
+  email: "",
+  maritalStatus: "SINGLE",
+  preferredCityOfPosting: "",
+  accommodation: "",
+  whereAccommodation: "",
+  kindAccommodation: "",
+  contactOfPersonLivingWith: "",
+  whereWhenChrist: "",
+  whereWhenHolyGhost: "",
+  whereWhenBaptism: "",
+  whereWhenFoundationSchool: "",
+  hasCertificate: false,
+  localAssemblyAfterGraduation: "",
+  fatherName: "",
+  fatherPhoneNumber: "",
+  fatherEmailAddress: "",
+  fatherOccupation: "",
+  nameOfFatherChurch: "",
+  motherName: "",
+  motherPhoneNumber: "",
+  motherEmailAddress: "",
+  motherOccupation: "",
+  nameOfMotherChurch: "",
+  howManyInFamily: "",
+  whatPositionInFamily: "",
+  familyResidence: "",
+  parentsTogether: false,
+  parentsAwareOfVgssIntention: false,
+  nameOfUniversity: "",
+  courseOfStudy: "",
+  graduationYear: "",
+  grade: "",
+  nyscStatus: "NOT_STARTED",
+  skillsPossessed: "",
+  leadershipRolesInMinistryAndFellowship: "",
+  ministryProgramsAttended: "",
+  visionMissionPurpose: "",
+  explainWithExamples: "",
+  partnershipArms: "",
+  fullMeaning: "",
+  variousTasksResponsibleFor: "",
+  projectProudOfAndRolePlayed: "",
+  exampleDifficultSituation: "",
+  recentConflict: "",
+  convictions: "",
+  whyVgss: "",
+  plansAfterVgss: "",
+  password: "",
+  confirmPassword: "",
+};
+
 export default function GraduateRegisterPage() {
   const searchParams = useSearchParams();
   const recordId = searchParams.get("recordId");
 
   const [currentTab, setCurrentTab] = useState("personal");
-  const [formData, setFormData] = useState<RegistrationFormData>({
-    placeOfBirth: "",
-    dateOfBirth: "",
-    stateOfOrigin: "",
-    homeAddress: "",
-    graduatePhoneNumber: "",
-    email: "",
-    maritalStatus: "SINGLE",
-    preferredCityOfPosting: "",
-    accommodation: "",
-    whereAccommodation: "",
-    kindAccommodation: "",
-    contactOfPersonLivingWith: "",
-    whereWhenChrist: "",
-    whereWhenHolyGhost: "",
-    whereWhenBaptism: "",
-    whereWhenFoundationSchool: "",
-    hasCertificate: false,
-    localAssemblyAfterGraduation: "",
-    fatherName: "",
-    fatherPhoneNumber: "",
-    fatherEmailAddress: "",
-    fatherOccupation: "",
-    nameOfFatherChurch: "",
-    motherName: "",
-    motherPhoneNumber: "",
-    motherEmailAddress: "",
-    motherOccupation: "",
-    nameOfMotherChurch: "",
-    howManyInFamily: "",
-    whatPositionInFamily: "",
-    familyResidence: "",
-    parentsTogether: false,
-    parentsAwareOfVgssIntention: false,
-    nameOfUniversity: "",
-    courseOfStudy: "",
-    graduationYear: "",
-    grade: "",
-    nyscStatus: "NOT_STARTED",
-    skillsPossessed: "",
-    leadershipRolesInMinistryAndFellowship: "",
-    ministryProgramsAttended: "",
-    visionMissionPurpose: "",
-    explainWithExamples: "",
-    partnershipArms: "",
-    fullMeaning: "",
-    variousTasksResponsibleFor: "",
-    projectProudOfAndRolePlayed: "",
-    exampleDifficultSituation: "",
-    recentConflict: "",
-    convictions: "",
-    whyVgss: "",
-    plansAfterVgss: "",
-    password: "",
-    confirmPassword: "",
-  });
-
+  const [formData, setFormData] =
+    useState<RegistrationFormData>(initialFormData);
   const [graduateRecord, setGraduateRecord] = useState<GraduateRecord | null>(
     null
   );
@@ -202,6 +209,8 @@ export default function GraduateRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const tabs = [
     { id: "personal", label: "Personal Info", icon: User, fields: 8 },
@@ -211,7 +220,7 @@ export default function GraduateRegisterPage() {
     { id: "education", label: "Education", icon: GraduationCap, fields: 5 },
     { id: "skills", label: "Skills & Experience", icon: User, fields: 3 },
     { id: "test", label: "Test Questions", icon: MessageSquare, fields: 11 },
-    { id: "account", label: "Create Account", icon: User, fields: 2 },
+    { id: "account", label: "Create Account", icon: Shield, fields: 2 },
   ];
 
   useEffect(() => {
@@ -227,12 +236,9 @@ export default function GraduateRegisterPage() {
   const fetchGraduateRecord = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/graduate/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify_record", recordId }),
-      });
-
+      const response = await fetch(
+        `/api/graduate/register?recordId=${recordId}`
+      );
       const data = await response.json();
 
       if (!response.ok) {
@@ -264,7 +270,7 @@ export default function GraduateRegisterPage() {
   const getCompletionPercentage = () => {
     const totalFields = tabs.reduce((sum, tab) => sum + tab.fields, 0);
     const completedFields = Object.entries(formData).filter(([key, value]) => {
-      if (typeof value === "boolean") return true; // Booleans are always valid
+      if (typeof value === "boolean") return true;
       if (typeof value === "string") return value.trim() !== "";
       return false;
     }).length;
@@ -306,6 +312,20 @@ export default function GraduateRegisterPage() {
           formData.graduationYear &&
           formData.grade
         );
+      case "test":
+        return !!(
+          formData.visionMissionPurpose &&
+          formData.explainWithExamples &&
+          formData.partnershipArms &&
+          formData.fullMeaning &&
+          formData.variousTasksResponsibleFor &&
+          formData.projectProudOfAndRolePlayed &&
+          formData.exampleDifficultSituation &&
+          formData.recentConflict &&
+          formData.convictions &&
+          formData.whyVgss &&
+          formData.plansAfterVgss
+        );
       case "account":
         return !!(
           formData.password &&
@@ -344,10 +364,9 @@ export default function GraduateRegisterPage() {
       }
 
       setSuccess(true);
-      // Redirect to login after successful registration
       setTimeout(() => {
         window.location.href = "/auth/login";
-      }, 3000);
+      }, 15000);
     } catch (error) {
       console.error("Registration error:", error);
       setError(error instanceof Error ? error.message : "Failed to register");
@@ -478,15 +497,16 @@ export default function GraduateRegisterPage() {
                       {graduateRecord.graduateFirstname}
                     </p>
                     <p>
-                      <strong>Last Name:</strong>{" "}
-                      {graduateRecord.graduateLastname}
+                      <strong>Surname:</strong> {graduateRecord.graduateSurname}
                     </p>
                     <p>
                       <strong>Gender:</strong> {graduateRecord.graduateGender}
                     </p>
                     <p>
-                      <strong>Fellowship:</strong>{" "}
-                      {graduateRecord.nameOfFellowship}
+                      <strong>School:</strong> {graduateRecord.nameOfUniversity}
+                    </p>
+                    <p>
+                      <strong>Course:</strong> {graduateRecord.courseOfStudy}
                     </p>
                   </div>
                   <div>
@@ -494,12 +514,16 @@ export default function GraduateRegisterPage() {
                       <strong>Zone:</strong> {graduateRecord.zoneName}
                     </p>
                     <p>
-                      <strong>Chapter Pastor:</strong>{" "}
-                      {graduateRecord.nameOfChapterPastor}
+                      <strong>Fellowship:</strong>{" "}
+                      {graduateRecord.nameOfFellowship}
                     </p>
                     <p>
                       <strong>Zonal Pastor:</strong>{" "}
                       {graduateRecord.nameOfZonalPastor}
+                    </p>
+                    <p>
+                      <strong>Chapter Pastor:</strong>{" "}
+                      {graduateRecord.nameOfChapterPastor}
                     </p>
                   </div>
                 </div>
@@ -520,7 +544,7 @@ export default function GraduateRegisterPage() {
             onValueChange={setCurrentTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4  gap-1 h-fit">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -536,7 +560,7 @@ export default function GraduateRegisterPage() {
               })}
             </TabsList>
 
-            {/* Personal Information */}
+            {/* Personal Information Tab */}
             <TabsContent value="personal" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -643,7 +667,86 @@ export default function GraduateRegisterPage() {
               </Card>
             </TabsContent>
 
-            {/* Posting Preferences */}
+            {/* Account Creation Tab */}
+            <TabsContent value="account" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Shield className="w-5 h-5 mr-2" />
+                    Create Your Account
+                  </CardTitle>
+                  <CardDescription>
+                    Set up your login credentials for the VGSS platform
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password *</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) =>
+                          updateFormData("password", e.target.value)
+                        }
+                        placeholder="Choose a strong password (min. 6 characters)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Password must be at least 6 characters long
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={formData.confirmPassword}
+                        onChange={(e) =>
+                          updateFormData("confirmPassword", e.target.value)
+                        }
+                        placeholder="Confirm your password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    {formData.confirmPassword &&
+                      formData.password !== formData.confirmPassword && (
+                        <p className="text-xs text-red-600">
+                          Passwords do not match
+                        </p>
+                      )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Posting Preferences Tab */}
             <TabsContent value="posting" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -672,7 +775,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="accommodation">
-                      Accommodation Arrangement
+                      Do you have Accommodation in Prefered City of Posting
                     </Label>
                     <Select
                       value={formData.accommodation}
@@ -680,26 +783,19 @@ export default function GraduateRegisterPage() {
                         updateFormData("accommodation", value)
                       }
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select accommodation" />
+                      <SelectTrigger className=" w-full">
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PROVIDED">
-                          Ministry Provided
-                        </SelectItem>
-                        <SelectItem value="PERSONAL">
-                          Personal Arrangement
-                        </SelectItem>
-                        <SelectItem value="FAMILY">
-                          Stay with Family/Friends
-                        </SelectItem>
+                        <SelectItem value="YES">YES</SelectItem>
+                        <SelectItem value="NO">NO</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
                     <Label htmlFor="whereAccommodation">
-                      Where will you be accommodated?
+                      Where do you have accommodation
                     </Label>
                     <Textarea
                       id="whereAccommodation"
@@ -714,7 +810,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="kindAccommodation">
-                      Type of Accommodation
+                      Address / Nearest Bus stop
                     </Label>
                     <Input
                       id="kindAccommodation"
@@ -722,7 +818,7 @@ export default function GraduateRegisterPage() {
                       onChange={(e) =>
                         updateFormData("kindAccommodation", e.target.value)
                       }
-                      placeholder="e.g., Apartment, Shared room"
+                      placeholder="Enter your accommodation address"
                     />
                   </div>
 
@@ -747,13 +843,13 @@ export default function GraduateRegisterPage() {
               </Card>
             </TabsContent>
 
-            {/* Spiritual Journey */}
+            {/* Spiritual Journey Tab */}
             <TabsContent value="spiritual" className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <BookOpen className="w-5 h-5 mr-2" />
-                    Spiritual Journey
+                    Ministry Information
                   </CardTitle>
                   <CardDescription>
                     Share your spiritual experiences and foundation
@@ -761,8 +857,19 @@ export default function GraduateRegisterPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="">Name of Zone</Label>
+                    <Input readOnly={true} value={graduateRecord?.zoneName} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="">Name of Fellowship</Label>
+                    <Input
+                      readOnly={true}
+                      value={graduateRecord?.nameOfFellowship}
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="whereWhenChrist">
-                      Where and when did you give your life to Christ? *
+                      Where and when did you receive Christ? *
                     </Label>
                     <Textarea
                       id="whereWhenChrist"
@@ -792,7 +899,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="whereWhenBaptism">
-                      Where and when were you baptized? *
+                      Where and when were you baptized by immersion? *
                     </Label>
                     <Textarea
                       id="whereWhenBaptism"
@@ -823,7 +930,7 @@ export default function GraduateRegisterPage() {
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 my-6">
                     <Checkbox
                       id="hasCertificate"
                       checked={formData.hasCertificate}
@@ -856,7 +963,7 @@ export default function GraduateRegisterPage() {
               </Card>
             </TabsContent>
 
-            {/* Family Information */}
+            {/* Family Information Tab */}
             <TabsContent value="family" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -883,7 +990,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("fatherName", e.target.value)
                           }
-                          placeholder="Enter {`Father's`} full name"
+                          placeholder="Enter your father's full name"
                         />
                       </div>
 
@@ -913,7 +1020,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("fatherEmailAddress", e.target.value)
                           }
-                          placeholder="father@example.com (optional)"
+                          placeholder="father@example.com"
                         />
                       </div>
 
@@ -927,7 +1034,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("fatherOccupation", e.target.value)
                           }
-                          placeholder="Enter {`Father's`} occupation"
+                          placeholder="Enter your father's occupation"
                         />
                       </div>
 
@@ -961,7 +1068,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("motherName", e.target.value)
                           }
-                          placeholder="Enter {`mother's`} full name"
+                          placeholder="Enter mother's full name"
                         />
                       </div>
 
@@ -991,7 +1098,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("motherEmailAddress", e.target.value)
                           }
-                          placeholder="mother@example.com (optional)"
+                          placeholder="mother@example.com"
                         />
                       </div>
 
@@ -1005,7 +1112,7 @@ export default function GraduateRegisterPage() {
                           onChange={(e) =>
                             updateFormData("motherOccupation", e.target.value)
                           }
-                          placeholder="Enter {`mother's`} occupation"
+                          placeholder="Enter mother's occupation"
                         />
                       </div>
 
@@ -1115,7 +1222,7 @@ export default function GraduateRegisterPage() {
               </Card>
             </TabsContent>
 
-            {/* Education Information */}
+            {/* Education Information Tab */}
             <TabsContent value="education" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -1134,11 +1241,8 @@ export default function GraduateRegisterPage() {
                     </Label>
                     <Input
                       id="nameOfUniversity"
-                      value={formData.nameOfUniversity}
-                      onChange={(e) =>
-                        updateFormData("nameOfUniversity", e.target.value)
-                      }
-                      placeholder="Enter your university name"
+                      readOnly={true}
+                      value={graduateRecord?.nameOfUniversity}
                     />
                   </div>
 
@@ -1146,11 +1250,8 @@ export default function GraduateRegisterPage() {
                     <Label htmlFor="courseOfStudy">Course of Study *</Label>
                     <Input
                       id="courseOfStudy"
-                      value={formData.courseOfStudy}
-                      onChange={(e) =>
-                        updateFormData("courseOfStudy", e.target.value)
-                      }
-                      placeholder="Enter your course/degree program"
+                      value={graduateRecord?.courseOfStudy}
+                      readOnly={true}
                     />
                   </div>
 
@@ -1160,12 +1261,8 @@ export default function GraduateRegisterPage() {
                       id="graduationYear"
                       type="number"
                       min="2000"
-                      max="2030"
-                      value={formData.graduationYear}
-                      onChange={(e) =>
-                        updateFormData("graduationYear", e.target.value)
-                      }
-                      placeholder="e.g., 2023"
+                      value={graduateRecord?.graduationYear}
+                      readOnly={true}
                     />
                   </div>
 
@@ -1175,7 +1272,7 @@ export default function GraduateRegisterPage() {
                       value={formData.grade}
                       onValueChange={(value) => updateFormData("grade", value)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className=" w-full">
                         <SelectValue placeholder="Select your grade" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1200,7 +1297,7 @@ export default function GraduateRegisterPage() {
                         updateFormData("nyscStatus", value)
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className=" w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1215,7 +1312,7 @@ export default function GraduateRegisterPage() {
               </Card>
             </TabsContent>
 
-            {/* Skills and Experience */}
+            {/* Skills and Experience Tab */}
             <TabsContent value="skills" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -1244,7 +1341,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="leadershipRolesInMinistryAndFellowship">
-                      Leadership Roles in Ministry and Fellowship
+                      Leadership Roles in Ministry and in your Fellowship
                     </Label>
                     <Textarea
                       id="leadershipRolesInMinistryAndFellowship"
@@ -1262,7 +1359,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="ministryProgramsAttended">
-                      Ministry Programs Attended
+                      Ministry Programs Attended in the last Year
                     </Label>
                     <Textarea
                       id="ministryProgramsAttended"
@@ -1273,7 +1370,7 @@ export default function GraduateRegisterPage() {
                           e.target.value
                         )
                       }
-                      placeholder="List ministry programs, conferences, and training you've attended"
+                      placeholder="List ministry programs, conferences, and training you attended in the last year"
                       rows={4}
                     />
                   </div>
@@ -1281,7 +1378,7 @@ export default function GraduateRegisterPage() {
               </Card>
             </TabsContent>
 
-            {/* Test Questions */}
+            {/* Test Questions Tab */}
             <TabsContent value="test" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -1290,34 +1387,49 @@ export default function GraduateRegisterPage() {
                     Test Questions
                   </CardTitle>
                   <CardDescription>
-                    Answer these questions to help us understand your ministry
-                    knowledge and vision
+                    Kindly provide answers to all the Questions
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="visionMissionPurpose">
-                      What is the Vision, Mission and Purpose of Christ Embassy?
-                      *
+                      1. (a) What is the Vision, Mission, and Purpose of the
+                      Loveworld Incorporated?
                     </Label>
+                    <Label>
+                      (b) What does the vision mean to you, how does it affect
+                      you as an intending VGSS staff of the Ministry.
+                    </Label>
+                    <Label>
+                      (c) Why do you want to work as a VGSS staff in the
+                      Ministry?
+                    </Label>
+
                     <Textarea
                       id="visionMissionPurpose"
                       value={formData.visionMissionPurpose}
                       onChange={(e) =>
                         updateFormData("visionMissionPurpose", e.target.value)
                       }
-                      placeholder="Explain the Vision, Mission and Purpose of Christ Embassy"
+                      placeholder="Enter your answers here"
                       rows={4}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="explainWithExamples">
-                      Explain with examples what it means to{" "}
-                      {`"Take the Divine
-                      Presence of God to your world"`}{" "}
-                      *
+                      2. Briefly explain the following citing practical
+                      examples:
                     </Label>
+                    <Label htmlFor="explainWithExamples">(a) Work Ethics</Label>
+                    <Label htmlFor="explainWithExamples">
+                      (b) Managing sacred Funds
+                    </Label>
+                    <Label htmlFor="explainWithExamples">(c) Team Work</Label>
+                    <Label htmlFor="explainWithExamples">
+                      (d) Efficiency and Effectiveness{" "}
+                    </Label>
+
                     <Textarea
                       id="explainWithExamples"
                       value={formData.explainWithExamples}
@@ -1331,7 +1443,14 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="partnershipArms">
-                      What are the 5 partnership arms? *
+                      3. (a) List 5 Partnership arms of the Ministry
+                    </Label>
+                    <Label htmlFor="partnershipArms">
+                      (b) Mention five (5) Ministry Departments you know.
+                    </Label>
+                    <Label htmlFor="partnershipArms">
+                      (c) What was your cumulative partnership for the last 12
+                      months?
                     </Label>
                     <Textarea
                       id="partnershipArms"
@@ -1339,14 +1458,24 @@ export default function GraduateRegisterPage() {
                       onChange={(e) =>
                         updateFormData("partnershipArms", e.target.value)
                       }
-                      placeholder="List and briefly explain the 5 partnership arms"
+                      placeholder="List and briefly explain"
                       rows={4}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="fullMeaning">
-                      What is the full meaning of {"Rehoboth"}? *
+                      4. What is the full meaning of the following acronyms?
+                    </Label>
+                    <Label htmlFor="fullMeaning">(a) GSCC and VGSS?</Label>
+                    <Label htmlFor="fullMeaning">(b) What does CEC mean?</Label>
+                    <Label htmlFor="fullMeaning">
+                      (c) List the names of the CEC Members we have in the
+                      Ministry.
+                    </Label>
+                    <Label htmlFor="fullMeaning">
+                      (d) What are the names of the Secretary General, CEO and
+                      COO of the Ministry?
                     </Label>
                     <Textarea
                       id="fullMeaning"
@@ -1354,15 +1483,15 @@ export default function GraduateRegisterPage() {
                       onChange={(e) =>
                         updateFormData("fullMeaning", e.target.value)
                       }
-                      placeholder="Provide the complete meaning and significance of Rehoboth"
+                      placeholder="Provide the full meaning of the acronyms"
                       rows={3}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="variousTasksResponsibleFor">
-                      What are the various tasks you have been responsible for
-                      in your local assembly? *
+                      5 List the Various tasks you have been responsible for in
+                      Campus Ministry.
                     </Label>
                     <Textarea
                       id="variousTasksResponsibleFor"
@@ -1377,11 +1506,11 @@ export default function GraduateRegisterPage() {
                       rows={4}
                     />
                   </div>
-
+                  <div>PROJECT QUESTIONS</div>
                   <div className="space-y-2">
                     <Label htmlFor="projectProudOfAndRolePlayed">
-                      What is one project you are proud of and what role did you
-                      play? *
+                      6. What Project you were particularly proud of and the
+                      role you played in its success?
                     </Label>
                     <Textarea
                       id="projectProudOfAndRolePlayed"
@@ -1399,8 +1528,8 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="exampleDifficultSituation">
-                      Give an example of a difficult situation you have
-                      encountered and how you handled it *
+                      7. Give an example of time when you had to deal with a
+                      seemly difficult situation?
                     </Label>
                     <Textarea
                       id="exampleDifficultSituation"
@@ -1418,8 +1547,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="recentConflict">
-                      Describe a recent conflict you have had and how you
-                      resolved it *
+                      8. How did you handle a recent conflict situation?
                     </Label>
                     <Textarea
                       id="recentConflict"
@@ -1434,7 +1562,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="convictions">
-                      What are your convictions? *
+                      9. What are your convictions? *
                     </Label>
                     <Textarea
                       id="convictions"
@@ -1449,7 +1577,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="whyVgss">
-                      Why do you want to join VGSS? *
+                      10. Why do you want to join VGSS? *
                     </Label>
                     <Textarea
                       id="whyVgss"
@@ -1464,7 +1592,7 @@ export default function GraduateRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="plansAfterVgss">
-                      What are your plans after VGSS? *
+                      11. What are your plans after VGSS? *
                     </Label>
                     <Textarea
                       id="plansAfterVgss"
@@ -1493,88 +1621,6 @@ export default function GraduateRegisterPage() {
                         rejection
                       </li>
                     </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Account Creation */}
-            <TabsContent value="account" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <User className="w-5 h-5 mr-2" />
-                    Create Your Account
-                  </CardTitle>
-                  <CardDescription>
-                    Set up your login credentials for the VGSS platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password *</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        updateFormData("password", e.target.value)
-                      }
-                      placeholder="Choose a strong password (min. 6 characters)"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Password must be at least 6 characters long
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={(e) =>
-                        updateFormData("confirmPassword", e.target.value)
-                      }
-                      placeholder="Confirm your password"
-                    />
-                    {formData.confirmPassword &&
-                      formData.password !== formData.confirmPassword && (
-                        <p className="text-xs text-red-600">
-                          Passwords do not match
-                        </p>
-                      )}
-                  </div>
-
-                  <div className="md:col-span-2 space-y-4">
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                      <h4 className="font-medium text-blue-900 mb-2">
-                        Account Details
-                      </h4>
-                      <div className="text-sm text-blue-800 space-y-1">
-                        <p>
-                          <strong>Email:</strong>{" "}
-                          {formData.email || "Not provided"}
-                        </p>
-                        <p>
-                          <strong>Name:</strong>{" "}
-                          {graduateRecord?.graduateFirstname}{" "}
-                          {graduateRecord?.graduateLastname}
-                        </p>
-                        <p>
-                          <strong>Role:</strong> Graduate
-                        </p>
-                      </div>
-                    </div>
-
-                    <Alert>
-                      <CheckCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Once you complete registration, {`you'll`} be able to
-                        log in with your email and password to access your
-                        graduate dashboard and complete interview questions.
-                      </AlertDescription>
-                    </Alert>
                   </div>
                 </CardContent>
               </Card>
@@ -1630,6 +1676,15 @@ export default function GraduateRegisterPage() {
                 </Button>
               )}
             </div>
+          </div>
+
+          <div className=" mt-6">
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
       </div>
