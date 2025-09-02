@@ -33,10 +33,13 @@ import {
   ArrowLeft,
   Filter,
   Loader2,
+  Building,
+  Calendar,
+  Phone,
 } from "lucide-react";
 import Link from "next/link";
-import z from "zod";
-import { Form, SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 interface GraduateRecord {
@@ -56,7 +59,7 @@ interface GraduateRecord {
   isRegistered: boolean;
   registeredAt?: string;
   createdAt: string;
-  zoneName?: string; // Added for display
+  zoneName?: string;
 }
 
 interface ZoneData {
@@ -67,7 +70,7 @@ interface ZoneData {
 const SearchValues = z.object({
   surname: z.string().trim().min(1, "Surname is required"),
   zone: z.string().min(1, "Zone is required"),
-  gender: z.enum(["MALE", "FEMALE"], "Gender is required "),
+  gender: z.enum(["MALE", "FEMALE"], "Gender is required"),
   phoneNumber: z
     .string()
     .min(1, "Phone number is required")
@@ -85,14 +88,12 @@ export default function GraduateSearchPage() {
   const [searchResults, setSearchResults] = useState<GraduateRecord[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [zones, setZones] = useState<ZoneData[]>([]);
+
   type SearchType = z.infer<typeof SearchValues>;
 
   const {
-    control,
     handleSubmit,
     register,
-    setFocus,
-    setError,
     setValue,
     watch,
     formState: { errors, isSubmitting },
@@ -101,7 +102,6 @@ export default function GraduateSearchPage() {
     defaultValues: {
       surname: initialQuery,
       zone: "",
-      // gender: "",
       phoneNumber: "",
     },
   });
@@ -121,8 +121,8 @@ export default function GraduateSearchPage() {
   }, []);
 
   const performSearch: SubmitHandler<SearchType> = async (values) => {
+    setIsLoading(true);
     try {
-      // Call the actual API
       const response = await fetch(
         `/api/graduate/search?q=${encodeURIComponent(values.surname)}&surname=${
           values.surname
@@ -133,37 +133,43 @@ export default function GraduateSearchPage() {
       const data = await response.json();
       setHasSearched(true);
       if (data && data.success) {
-        console.log(data);
         setSearchResults(data.results || []);
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <Link href="/">
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-900"
+                >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Home
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">
-                  Graduate Search
-                </h1>
-                <p className="text-xs text-muted-foreground">
-                  Find your VGSS record
-                </p>
+              <div className="hidden sm:block h-6 w-px bg-gray-300"></div>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                  <GraduationCap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold text-gray-900">
+                    Graduate Search
+                  </h1>
+                  <p className="text-xs text-gray-500">Find your VGSS record</p>
+                </div>
               </div>
             </div>
             <Link href="/auth/login">
@@ -177,35 +183,42 @@ export default function GraduateSearchPage() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Search Header */}
+          {/* Page Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Search Graduate Records
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Find your graduate information that was uploaded by your BLW Zone.
               Once found, you can proceed with your VGSS registration.
             </p>
           </div>
 
           {/* Search Form */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Search className="w-5 h-5 mr-2" />
+          <Card className="mb-8 shadow-sm">
+            <CardHeader className="border-b bg-gray-50">
+              <CardTitle className="flex items-center text-gray-900">
+                <Search className="w-5 h-5 mr-2 text-primary" />
                 Search Criteria
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-600">
                 Enter your details to find your graduate record
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <form
                 onSubmit={handleSubmit(performSearch)}
                 className="space-y-6"
               >
-                <div className="flex flex-col gap-4 ">
-                  <div className=" space-y-2">
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Zone Selection */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="zone"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      BLW Zone *
+                    </Label>
                     <Select
                       value={watch("zone")}
                       onValueChange={(value) => setValue("zone", value)}
@@ -215,33 +228,47 @@ export default function GraduateSearchPage() {
                         <SelectValue placeholder="Select your zone" />
                       </SelectTrigger>
                       <SelectContent>
-                        {zones.map((value) => (
-                          <SelectItem key={value.id} value={value.id}>
-                            {value.name}
+                        {zones.map((zone) => (
+                          <SelectItem key={zone.id} value={zone.id}>
+                            {zone.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <span className="mt-[-6px] text-sm text-red-500">
-                      {errors.zone?.message}
-                    </span>
+                    {errors.zone && (
+                      <p className="text-sm text-red-600">
+                        {errors.zone.message}
+                      </p>
+                    )}
                   </div>
-                  <div className=" space-y-2">
-                    <Label htmlFor="surname">Surname</Label>
+
+                  {/* Surname */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="surname"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Surname *
+                    </Label>
                     <Input
-                      id="search"
+                      id="surname"
                       {...register("surname")}
                       placeholder="Enter your surname"
                       disabled={isSubmitting}
                       className="h-11"
                     />
-                    <span className="mt-[-6px] text-sm text-red-500">
-                      {errors.surname?.message}
-                    </span>
+                    {errors.surname && (
+                      <p className="text-sm text-red-600">
+                        {errors.surname.message}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Gender */}
                   <div className="space-y-2">
-                    <Label>Gender</Label>
+                    <Label className="text-sm font-medium text-gray-700">
+                      Gender *
+                    </Label>
                     <Select
                       value={watch("gender")}
                       onValueChange={(value: "MALE" | "FEMALE") =>
@@ -250,108 +277,107 @@ export default function GraduateSearchPage() {
                       disabled={isSubmitting}
                     >
                       <SelectTrigger className="h-11 w-full">
-                        <SelectValue placeholder="Select a gender" />
+                        <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="MALE">Male</SelectItem>
                         <SelectItem value="FEMALE">Female</SelectItem>
                       </SelectContent>
                     </Select>
-                    <span className="mt-[-6px] text-sm text-red-500">
-                      {errors.gender?.message}
-                    </span>
+                    {errors.gender && (
+                      <p className="text-sm text-red-600">
+                        {errors.gender.message}
+                      </p>
+                    )}
                   </div>
 
-                  <div className=" space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                  {/* Phone Number */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="phoneNumber"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Phone Number *
+                    </Label>
                     <Input
                       id="phoneNumber"
                       {...register("phoneNumber")}
-                      placeholder="Enter your phone number"
+                      placeholder="e.g., +2348012345678"
                       disabled={isSubmitting}
                       className="h-11"
                     />
-                    <span className="mt-[-6px] text-sm text-red-500">
-                      {errors.phoneNumber?.message}
-                    </span>
-                    <p className=" text-sm">
-                      Phone numbers should include country code (+234 for
-                      Nigeria)
+                    {errors.phoneNumber && (
+                      <p className="text-sm text-red-600">
+                        {errors.phoneNumber.message}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Include country code (+234 for Nigeria)
                     </p>
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-end space-x-2">
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="flex-1"
-                    >
-                      {isLoading && (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      )}
-                      <Search className="w-4 h-4 mr-2" />
-                      Search Records
-                    </Button>
-                  </div>
+                {/* Search Button */}
+                <div className="flex justify-center pt-4">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="min-w-[200px] h-11"
+                  >
+                    {isLoading && (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    )}
+                    <Search className="w-4 h-4 mr-2" />
+                    Search Records
+                  </Button>
                 </div>
               </form>
-
-              {/* {error && (
-                <Alert variant="destructive" className="mt-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )} */}
             </CardContent>
           </Card>
 
           {/* Search Results */}
           {hasSearched && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-semibold text-gray-900">
                   Search Results
                   {searchResults.length > 0 && (
-                    <span className="ml-2 text-muted-foreground">
+                    <span className="ml-2 text-gray-500 font-normal">
                       ({searchResults.length} found)
                     </span>
                   )}
                 </h2>
                 {searchResults.length > 0 && (
-                  <Badge variant="outline">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
                     {searchResults.filter((r) => !r.isRegistered).length}{" "}
-                    available for registration
+                    available
                   </Badge>
                 )}
               </div>
 
               {searchResults.length === 0 ? (
-                <Card>
-                  <CardContent className="text-center py-12">
-                    <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
                       No Records Found
                     </h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    <p className="text-gray-600 mb-6 max-w-md mx-auto">
                       We {`couldn't`} find any graduate records matching your
                       search criteria. Please check your details or contact your
                       BLW Zone.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <Button
-                        variant="outline"
-                        // onClick={() => setSearchQuery("")}
-                      >
-                        Try Different Search
-                      </Button>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button variant="outline">Try Different Search</Button>
                       <Button variant="outline">Contact Your Zone</Button>
                     </div>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-6">
                   {searchResults.map((record) => (
                     <Card
                       key={record.id}
@@ -360,117 +386,123 @@ export default function GraduateSearchPage() {
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div>
-                            <h3 className="text-lg font-semibold text-foreground">
+                            <h3 className="text-lg font-semibold text-gray-900">
                               {record.graduateFirstname}{" "}
                               {record.graduateSurname}
                             </h3>
-                            <div className="text-right">
+                            <div className="flex items-center mt-2">
                               {record.isRegistered ? (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-green-100 text-green-800 border-green-200"
-                                >
+                                <Badge className="bg-green-100 text-green-800 border-green-200">
                                   <CheckCircle className="w-3 h-3 mr-1" />
                                   Already Registered
                                 </Badge>
                               ) : (
                                 <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                                  Available
+                                  Available for Registration
                                 </Badge>
                               )}
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Added{" "}
-                                {new Date(
-                                  record.createdAt
-                                ).toLocaleDateString()}
-                              </p>
                             </div>
                           </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500">
+                              Added{" "}
+                              {new Date(record.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                        <div className="grid gap-4 md:grid-cols-2 mb-6">
+
+                        <div className="grid gap-6 md:grid-cols-2 mb-6">
+                          {/* Zone Information */}
                           <div>
-                            <h4 className="font-medium text-sm mb-2">
+                            <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                              <MapPin className="w-4 h-4 mr-2 text-gray-600" />
                               Zone Information
                             </h4>
-                            <div className="space-y-1 text-sm text-muted-foreground">
-                              <div className="flex items-center space-x-2">
-                                <span className=" font-medium">Zone:</span>
-
-                                <span>{record.zoneName}</span>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex">
+                                <span className="font-medium text-gray-600 w-24">
+                                  Zone:
+                                </span>
+                                <span className="text-gray-900">
+                                  {record.zoneName}
+                                </span>
                               </div>
-                              <div>
-                                <span className="font-medium">
-                                  Zonal Pastor:
-                                </span>{" "}
-                                {record.nameOfZonalPastor}
+                              <div className="flex">
+                                <span className="font-medium text-gray-600 w-24">
+                                  Fellowship:
+                                </span>
+                                <span className="text-gray-900">
+                                  {record.nameOfFellowship}
+                                </span>
                               </div>
-                              <div>
-                                <span className="font-medium">
+                              <div className="flex">
+                                <span className="font-medium text-gray-600 w-24">
                                   Chapter Pastor:
-                                </span>{" "}
-                                {record.nameOfChapterPastor}
+                                </span>
+                                <span className="text-gray-900">
+                                  {record.nameOfChapterPastor}
+                                </span>
                               </div>
                             </div>
                           </div>
 
+                          {/* Education Information */}
                           <div>
-                            <h4 className="font-medium text-sm mb-2">
-                              School Information
+                            <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                              <GraduationCap className="w-4 h-4 mr-2 text-gray-600" />
+                              Education Information
                             </h4>
-                            <div className="space-y-1 text-sm text-muted-foreground">
-                              <div>
-                                <span className="font-medium">School:</span>{" "}
-                                {record.nameOfUniversity}
+                            <div className="space-y-2 text-sm">
+                              <div className="flex">
+                                <span className="font-medium text-gray-600 w-24">
+                                  University:
+                                </span>
+                                <span className="text-gray-900">
+                                  {record.nameOfUniversity}
+                                </span>
                               </div>
-                              <div>
-                                <span className="font-medium">Course:</span>{" "}
-                                {record.courseOfStudy}
+                              <div className="flex">
+                                <span className="font-medium text-gray-600 w-24">
+                                  Course:
+                                </span>
+                                <span className="text-gray-900">
+                                  {record.courseOfStudy}
+                                </span>
                               </div>
-                              <div>
-                                <span className="font-medium">
-                                  Graduation Year:
-                                </span>{" "}
-                                {record.graduationYear}
+                              <div className="flex">
+                                <span className="font-medium text-gray-600 w-24">
+                                  Year:
+                                </span>
+                                <span className="text-gray-900">
+                                  {record.graduationYear}
+                                </span>
                               </div>
-                              {/* {record.registeredAt && (
-                                <div>
-                                  <span className="font-medium">
-                                    Registered:
-                                  </span>{" "}
-                                  {new Date(
-                                    record.registeredAt
-                                  ).toLocaleDateString()}
-                                </div>
-                              )} */}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Actions */}
+                        <div className="border-t pt-4">
                           {record.isRegistered ? (
-                            <div className="flex-1 p-3 bg-muted/50 rounded-lg text-center">
-                              <p className="text-sm text-muted-foreground">
+                            <div className="bg-gray-50 p-4 rounded-lg text-center">
+                              <p className="text-sm text-gray-600">
                                 This record has already been claimed and
                                 registered by another user.
                               </p>
                             </div>
                           ) : (
-                            <>
+                            <div className="flex flex-col sm:flex-row gap-3">
                               <Button
                                 className="flex-1"
                                 size="lg"
                                 onClick={() => {
-                                  // Navigate to registration with this record ID
                                   window.location.href = `/graduate/register?recordId=${record.id}`;
                                 }}
                               >
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 This is My Record - Register
                               </Button>
-                              {/* <Button variant="outline" size="lg">
-                                Verify Details
-                              </Button> */}
-                            </>
+                            </div>
                           )}
                         </div>
 
@@ -495,59 +527,49 @@ export default function GraduateSearchPage() {
 
           {/* Help Section */}
           {!hasSearched && (
-            <Card className="bg-muted/50">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2 text-primary" />
-                  Search Tips
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <h4 className="font-medium mb-2">
-                      How to Search Effectively
-                    </h4>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
-                      <li>
-                        • Use your exact name as registered with your BLW Zone
-                      </li>
-                      <li>• Add country code to you phone number</li>
-                      <li>• Ensure you selected your zone accurately</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">
-                      {`Can't`} Find Your Record?
-                    </h4>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
-                      <li>• Contact your BLW Zone to confirm upload</li>
-                      <li>• Check spelling of names carefully</li>
-                      <li>• Check you enter your phone number correctly</li>
-                      <li>
-                        • Ensure {`you're`} a BLW Campus Fellowship graduate
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-gray-900">
+                    <Filter className="w-5 h-5 mr-2 text-primary" />
+                    Search Tips
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li>
+                      • Use your exact name as registered with your BLW Zone
+                    </li>
+                    <li>
+                      • Include country code in your phone number (+234 for
+                      Nigeria)
+                    </li>
+                    <li>• Ensure you select the correct zone</li>
+                    <li>• Double-check spelling of your surname</li>
+                  </ul>
+                </CardContent>
+              </Card>
 
-          {/* Contact Support */}
-          <Card className="mt-8 hidden">
-            <CardContent className="text-center py-6">
-              <h3 className="font-semibold mb-2">Need Help?</h3>
-              <p className="text-muted-foreground mb-4">
-                If {`you're`} having trouble finding your record or need
-                assistance, our support team is here to help.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="outline">Contact Support</Button>
-                <Button variant="outline">Contact Your BLW Zone</Button>
-              </div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-gray-900">
+                    <AlertCircle className="w-5 h-5 mr-2 text-primary" />
+                    {` Can't`} Find Your Record?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li>• Contact your BLW Zone to confirm upload</li>
+                    <li>• Check spelling of names carefully</li>
+                    <li>• Verify phone number format is correct</li>
+                    <li>
+                      • Ensure {`you're`} a BLW Campus Fellowship graduate
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>

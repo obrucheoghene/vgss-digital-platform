@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   GraduationCap,
   Shield,
-  Users,
   Building,
   ArrowRight,
   Search,
@@ -24,9 +23,7 @@ import {
   BookOpen,
   Award,
   Target,
-  CheckCircle,
   Star,
-  Calendar,
   MapPin,
   Phone,
   Mail,
@@ -375,7 +372,7 @@ export default function HomePage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full h-14 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl rounded-xl font-bold text-lg"
+                  className="w-full h-14 bg-white/30 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl rounded-xl font-bold text-lg"
                 >
                   Learn More
                   <ArrowRight className="w-5 h-5 ml-3" />
@@ -482,7 +479,7 @@ export default function HomePage() {
                 {" "}
                 Rev Dr. Chris Oyakhilome PhD
               </span>
-              , giving young graduates from Believers' LoveWorld Campus
+              , giving young graduates from {`Believers'`} LoveWorld Campus
               Fellowships the opportunity to give their first working year to
               God as first fruit through service in Service Departments,
               departments, or churches.
@@ -723,6 +720,336 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Enhanced CTA Section */}
+      <section className="relative py-24 overflow-hidden">
+        {/* Revolutionary Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-600 to-blue-600">
+          <div className="absolute inset-0 bg-black/20"></div>
+          {/* Animated Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-10 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+            <div
+              className="absolute bottom-10 right-10 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse"
+              style={{ animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute top-1/2 left-1/3 w-48 h-48 bg-white/10 rounded-full blur-2xl animate-bounce"
+              style={{ animationDelay: "2s" }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Floating Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute opacity-20 animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${4 + Math.random() * 6}s`,
+              }}
+            >
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+          ))}
+        </div>
+
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+          <div className="max-w-5xl mx-auto">
+            {/* Badge */}
+            <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm mb-8 px-6 py-3 text-lg">
+              <Target className="w-5 h-5 mr-2" />
+              Start Your Journey
+            </Badge>
+
+            {/* Main Heading */}
+            <h2 className="text-5xl md:text-7xl font-black mb-8 leading-none">
+              Ready to Start Your{" "}
+              <span className="block bg-gradient-to-r from-yellow-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+                VGSS Journey?
+              </span>
+            </h2>
+
+            {/* Description */}
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed font-light">
+              Take the first step towards a meaningful year of service. Join
+              thousands of graduates who have transformed their lives while
+              serving God with excellence. Your journey to purpose and impact
+              starts here.
+            </p>
+
+            {/* Enhanced Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center max-w-2xl mx-auto mb-16">
+              <Link href="/graduate/search" className="flex-1">
+                <Button
+                  size="lg"
+                  className="w-full h-16 bg-white text-primary hover:bg-white/95 shadow-2xl rounded-2xl font-bold text-lg border-0 group transition-all duration-300 hover:scale-105"
+                >
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Search className="w-5 h-5 text-primary" />
+                    </div>
+                    <span>Search Graduate Records</span>
+                  </div>
+                </Button>
+              </Link>
+              <Link href="/auth/login" className="flex-1">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-16 border-2 border-white/40 text-white bg-white/10 hover:bg-white/10 backdrop-blur-sm shadow-2xl rounded-2xl font-bold text-lg group transition-all duration-300 hover:scale-105"
+                >
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <span>Staff Login</span>
+                  </div>
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Footer */}
+      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
+        </div>
+
+        <div className="relative">
+          {/* Main Footer Content */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="grid gap-12 lg:grid-cols-4 md:grid-cols-2">
+              {/* Brand Section */}
+              <div className="lg:col-span-1">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="relative">
+                    <div className="w-14 h-14 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                      <GraduationCap className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-2 h-2 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                      VGSS
+                    </h3>
+                    <p className="text-sm text-gray-400 font-medium">
+                      LoveWorld Inc.
+                    </p>
+                  </div>
+                </div>
+                <p className="text-gray-300 leading-relaxed mb-6 max-w-xs">
+                  Volunteer Graduate Service Scheme - Transforming lives through
+                  dedicated service in our first working year with excellence
+                  and purpose.
+                </p>
+                <div className="flex space-x-4">
+                  {/* Social Media Icons (placeholder) */}
+                  <div className="w-10 h-10 bg-gray-800 hover:bg-primary/20 rounded-xl flex items-center justify-center cursor-pointer transition-colors duration-300">
+                    <Globe className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="w-10 h-10 bg-gray-800 hover:bg-primary/20 rounded-xl flex items-center justify-center cursor-pointer transition-colors duration-300">
+                    <Mail className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="w-10 h-10 bg-gray-800 hover:bg-primary/20 rounded-xl flex items-center justify-center cursor-pointer transition-colors duration-300">
+                    <Phone className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* For Graduates */}
+              <div>
+                <h4 className="text-lg font-bold mb-6 text-white flex items-center">
+                  <GraduationCap className="w-5 h-5 mr-2 text-primary" />
+                  For Graduates
+                </h4>
+                <ul className="space-y-4">
+                  {[
+                    { label: "Search Records", href: "/graduate/search" },
+                    { label: "Registration Guide", href: "/graduate/guide" },
+                    { label: "Requirements", href: "/graduate/requirements" },
+                    { label: "FAQ", href: "/graduate/faq" },
+                    { label: "Training Modules", href: "/graduate/training" },
+                    {
+                      label: "Success Stories",
+                      href: "/graduate/testimonials",
+                    },
+                  ].map((item, index) => (
+                    <li key={index}>
+                      <Link
+                        href={item.href}
+                        className="text-gray-400 hover:text-primary transition-colors duration-300 flex items-center group"
+                      >
+                        <ArrowRight className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* For Organizations */}
+              <div>
+                <h4 className="text-lg font-bold mb-6 text-white flex items-center">
+                  <Building className="w-5 h-5 mr-2 text-primary" />
+                  For Organizations
+                </h4>
+                <ul className="space-y-4">
+                  {[
+                    { label: "Staff Login", href: "/auth/login" },
+                    { label: "Zone Management", href: "/zones" },
+                    { label: "Service Departments", href: "/departments" },
+                    { label: "Admin Portal", href: "/admin" },
+                    { label: "Reports & Analytics", href: "/reports" },
+                    { label: "Support Center", href: "/support" },
+                  ].map((item, index) => (
+                    <li key={index}>
+                      <Link
+                        href={item.href}
+                        className="text-gray-400 hover:text-primary transition-colors duration-300 flex items-center group"
+                      >
+                        <ArrowRight className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Contact & Support */}
+              <div>
+                <h4 className="text-lg font-bold mb-6 text-white flex items-center">
+                  <Phone className="w-5 h-5 mr-2 text-primary" />
+                  Contact & Support
+                </h4>
+                <ul className="space-y-4">
+                  <li className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mt-0.5">
+                      <Mail className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <a
+                        href="mailto:vgss@loveworld.org"
+                        className="text-gray-300 hover:text-primary transition-colors"
+                      >
+                        vgss@loveworld.org
+                      </a>
+                    </div>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mt-0.5">
+                      <Phone className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Phone</p>
+                      <a
+                        href="tel:+2341234567890"
+                        className="text-gray-300 hover:text-primary transition-colors"
+                      >
+                        +234 1 234 567 890
+                      </a>
+                    </div>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mt-0.5">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p className="text-gray-300">
+                        LoveWorld Headquarters
+                        <br />
+                        Lagos, Nigeria
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mt-0.5">
+                      <Clock className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Support Hours</p>
+                      <p className="text-gray-300">
+                        Mon - Fri: 8:00 AM - 6:00 PM WAT
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-800">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                {/* Copyright */}
+                <div className="text-center md:text-left">
+                  <p className="text-gray-400 text-sm">
+                    © 2024 LoveWorld Inc. All rights reserved.
+                  </p>
+                  <p className="text-gray-500 text-xs mt-1">
+                    Volunteer Graduate Service Scheme Platform
+                  </p>
+                </div>
+
+                {/* Quick Stats */}
+                {/* <div className="flex items-center space-x-8">
+                  <div className="text-center">
+                    <div className="text-primary font-bold">1,200+</div>
+                    <div className="text-xs text-gray-500">Graduates</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-primary font-bold">25+</div>
+                    <div className="text-xs text-gray-500">Countries</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-primary font-bold">98%</div>
+                    <div className="text-xs text-gray-500">Success Rate</div>
+                  </div>
+                </div> */}
+
+                {/* Legal Links */}
+                <div className="flex items-center space-x-6 text-sm text-gray-400">
+                  <Link
+                    href="/privacy"
+                    className="hover:text-primary transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    href="/terms"
+                    className="hover:text-primary transition-colors"
+                  >
+                    Terms of Service
+                  </Link>
+                  <Link
+                    href="/cookies"
+                    className="hover:text-primary transition-colors"
+                  >
+                    Cookie Policy
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
