@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/graduate/register/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -196,7 +194,7 @@ const initialFormData: RegistrationFormData = {
   confirmPassword: "",
 };
 
-export default function GraduateRegisterPage() {
+function GraduateRegisterForm() {
   const searchParams = useSearchParams();
   const recordId = searchParams.get("recordId");
 
@@ -231,38 +229,38 @@ export default function GraduateRegisterPage() {
       );
       return;
     }
+    const fetchGraduateRecord = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `/api/graduate/register?recordId=${recordId}`
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch graduate record");
+        }
+
+        if (data.record.isRegistered) {
+          setError("This record has already been registered by another user.");
+          return;
+        }
+
+        setGraduateRecord(data.record);
+      } catch (error) {
+        console.error("Error fetching graduate record:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch graduate record"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchGraduateRecord();
   }, [recordId]);
-
-  const fetchGraduateRecord = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/graduate/register?recordId=${recordId}`
-      );
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch graduate record");
-      }
-
-      if (data.record.isRegistered) {
-        setError("This record has already been registered by another user.");
-        return;
-      }
-
-      setGraduateRecord(data.record);
-    } catch (error) {
-      console.error("Error fetching graduate record:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch graduate record"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const updateFormData = (field: keyof RegistrationFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -1690,5 +1688,23 @@ export default function GraduateRegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the form in Suspense
+export default function GraduateRegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <GraduateRegisterForm />
+    </Suspense>
   );
 }

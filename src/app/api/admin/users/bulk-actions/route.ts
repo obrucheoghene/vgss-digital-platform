@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
       case "deactivate":
         // Prevent deactivating VGSS_OFFICE users
         const vgssUsers = await db
-          .select({ id: users.id })
+          .select({
+            id: users.id,
+            type: users.type,
+          })
           .from(users)
           .where(inArray(users.id, userIds));
 

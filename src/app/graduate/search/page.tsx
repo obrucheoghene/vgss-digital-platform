@@ -1,7 +1,7 @@
 // src/app/graduate/search/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,7 +80,7 @@ const SearchValues = z.object({
     ),
 });
 
-export default function GraduateSearchPage() {
+function GraduateSearchForm() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
 
@@ -573,5 +573,23 @@ export default function GraduateSearchPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the form in Suspense
+export default function GraduateSearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <GraduateSearchForm />
+    </Suspense>
   );
 }

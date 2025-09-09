@@ -659,8 +659,8 @@ export function UserDetailModal({
                 <div className="p-4 border rounded-lg space-y-3">
                   <h4 className="font-medium text-base">Password Management</h4>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Reset the user's password to the default value and require
-                    account reactivation.
+                    Reset the {`user's`} password to the default value and
+                    require account reactivation.
                   </p>
 
                   <AlertDialog>
@@ -677,8 +677,8 @@ export function UserDetailModal({
                           Reset User Password
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will reset the user's password to the default
-                          "VgssTemp123" and require them to activate their
+                          This will reset the {`user's`} password to the default
+                          {`"VgssTemp123"`} and require them to activate their
                           account again. The user will need to log in and set a
                           new password.
                         </AlertDialogDescription>

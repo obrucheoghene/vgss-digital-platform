@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/hooks/use-graduate-management.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -68,18 +66,23 @@ export interface DetailedGraduate extends Graduate {
   whereWhenHolyGhost: string;
   whereWhenBaptism: string;
   whereWhenFoundationSchool: string;
-
+  hasCertificate: boolean;
   // Family Information
   fatherName: string;
   fatherPhoneNumber: string;
+  fatherEmailAddress: string;
+  nameOfFatherChurch: string;
   fatherOccupation: string;
   motherName: string;
   motherPhoneNumber: string;
+  motherEmailAddress: string;
   motherOccupation: string;
+  nameOfMotherChurch: string;
   howManyInFamily: number;
   whatPositionInFamily: number;
   familyResidence: string;
-
+  parentsTogether: boolean;
+  parentsAwareOfVgssIntention: boolean;
   // Test Questions
   visionMissionPurpose: string;
   explainWithExamples: string;

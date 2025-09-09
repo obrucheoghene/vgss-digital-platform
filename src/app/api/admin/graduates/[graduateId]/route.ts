@@ -1,4 +1,3 @@
-// src/app/api/admin/graduates/[graduateId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -7,9 +6,11 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { graduateId: string } }
+  { params }: { params: Promise<{ graduateId: string }> }
 ) {
   try {
+    const { graduateId } = await params;
+
     const session = await auth();
 
     if (!session || !session.user || session.user.type !== "VGSS_OFFICE") {
@@ -23,7 +24,6 @@ export async function GET(
         userId: graduateData.userId,
         graduateFirstname: graduateData.graduateFirstname,
         graduateLastname: graduateData.graduateSurname,
-        graduateName: graduateData.graduateName,
         graduateGender: graduateData.graduateGender,
         maritalStatus: graduateData.maritalStatus,
         dateOfBirth: graduateData.dateOfBirth,
@@ -97,7 +97,7 @@ export async function GET(
       })
       .from(graduateData)
       .leftJoin(users, eq(graduateData.blwZoneId, users.id))
-      .where(eq(graduateData.id, params.graduateId))
+      .where(eq(graduateData.id, graduateId))
       .limit(1);
 
     if (!graduate.length) {
@@ -122,9 +122,11 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { graduateId: string } }
+  { params }: { params: Promise<{ graduateId: string }> }
 ) {
   try {
+    const { graduateId } = await params;
+
     const session = await auth();
 
     if (!session || !session.user || session.user.type !== "VGSS_OFFICE") {
@@ -145,7 +147,7 @@ export async function PATCH(
             comments: updateData.comments || null,
             updatedAt: new Date(),
           })
-          .where(eq(graduateData.id, params.graduateId))
+          .where(eq(graduateData.id, graduateId))
           .returning();
         break;
 
@@ -160,7 +162,7 @@ export async function PATCH(
             comments: updateData.comments || null,
             updatedAt: new Date(),
           })
-          .where(eq(graduateData.id, params.graduateId))
+          .where(eq(graduateData.id, graduateId))
           .returning();
         break;
 
@@ -173,7 +175,7 @@ export async function PATCH(
             comments: updateData.comments || "Application rejected",
             updatedAt: new Date(),
           })
-          .where(eq(graduateData.id, params.graduateId))
+          .where(eq(graduateData.id, graduateId))
           .returning();
         break;
 
@@ -185,7 +187,7 @@ export async function PATCH(
             serviceStartedDate: new Date(),
             updatedAt: new Date(),
           })
-          .where(eq(graduateData.id, params.graduateId))
+          .where(eq(graduateData.id, graduateId))
           .returning();
         break;
 
@@ -196,7 +198,7 @@ export async function PATCH(
             serviceCompletedDate: new Date(),
             updatedAt: new Date(),
           })
-          .where(eq(graduateData.id, params.graduateId))
+          .where(eq(graduateData.id, graduateId))
           .returning();
         break;
 
@@ -207,7 +209,7 @@ export async function PATCH(
             comments: updateData.comments,
             updatedAt: new Date(),
           })
-          .where(eq(graduateData.id, params.graduateId))
+          .where(eq(graduateData.id, graduateId))
           .returning();
         break;
 

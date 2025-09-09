@@ -7,9 +7,10 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     const session = await auth();
 
     if (!session || !session.user || session.user.type !== "VGSS_OFFICE") {
@@ -29,7 +30,7 @@ export async function GET(
         updatedAt: users.updatedAt,
       })
       .from(users)
-      .where(eq(users.id, params.userId))
+      .where(eq(users.id, userId))
       .limit(1);
 
     if (!user.length) {
@@ -51,9 +52,10 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     const session = await auth();
 
     if (!session || !session.user || session.user.type !== "VGSS_OFFICE") {
@@ -71,7 +73,7 @@ export async function PATCH(
             isDeactivated: updateData.isDeactivated,
             updatedAt: new Date(),
           })
-          .where(eq(users.id, params.userId));
+          .where(eq(users.id, userId));
         break;
 
       case "reset_password":
@@ -83,7 +85,7 @@ export async function PATCH(
             accountStatus: "pending_activation",
             updatedAt: new Date(),
           })
-          .where(eq(users.id, params.userId));
+          .where(eq(users.id, userId));
         break;
 
       case "update_details":
@@ -94,7 +96,7 @@ export async function PATCH(
             email: updateData.email,
             updatedAt: new Date(),
           })
-          .where(eq(users.id, params.userId));
+          .where(eq(users.id, userId));
         break;
 
       default:
@@ -114,7 +116,7 @@ export async function PATCH(
         updatedAt: users.updatedAt,
       })
       .from(users)
-      .where(eq(users.id, params.userId))
+      .where(eq(users.id, userId))
       .limit(1);
 
     return NextResponse.json({
@@ -133,9 +135,10 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     const session = await auth();
 
     if (!session || !session.user || session.user.type !== "VGSS_OFFICE") {
@@ -143,7 +146,7 @@ export async function DELETE(
     }
 
     // Prevent deletion of VGSS_OFFICE users and self-deletion
-    if (params.userId === session.user.id) {
+    if (userId === session.user.id) {
       return NextResponse.json(
         { error: "Cannot delete your own account" },
         { status: 400 }
@@ -153,7 +156,7 @@ export async function DELETE(
     const userToDelete = await db
       .select()
       .from(users)
-      .where(eq(users.id, params.userId))
+      .where(eq(users.id, userId))
       .limit(1);
 
     if (!userToDelete.length) {
@@ -174,7 +177,7 @@ export async function DELETE(
         isDeactivated: true,
         updatedAt: new Date(),
       })
-      .where(eq(users.id, params.userId));
+      .where(eq(users.id, userId));
 
     return NextResponse.json({
       success: true,

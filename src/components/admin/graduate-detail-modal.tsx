@@ -1,4 +1,3 @@
-// src/components/admin/graduate-detail-modal.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -333,9 +332,9 @@ export function GraduateDetailModal({
                         <AlertDialogTitle>Reject Graduate</AlertDialogTitle>
                         <AlertDialogDescription>
                           Are you sure you want to reject{" "}
-                          {graduate.graduateName}'s application? This will mark
-                          them as "Not Accepted" and they will not be eligible
-                          for service.
+                          {`${graduate.graduateName}'s`} application? This will
+                          mark them as {"Not Accepted"} and they will not be
+                          eligible for service.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -444,7 +443,7 @@ export function GraduateDetailModal({
                             </div>
                             <div>
                               <Label className="text-sm font-medium text-muted-foreground">
-                                Pastor's Phone
+                                {`Pastor's Phone`}
                               </Label>
                               <p className="text-base flex items-center mt-1">
                                 <Phone className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -453,7 +452,7 @@ export function GraduateDetailModal({
                             </div>
                             <div>
                               <Label className="text-sm font-medium text-muted-foreground">
-                                Pastor's Email
+                                {` Pastor's Email`}
                               </Label>
                               <p className="text-base flex items-center mt-1">
                                 <Mail className="w-4 h-4 mr-2 text-muted-foreground" />

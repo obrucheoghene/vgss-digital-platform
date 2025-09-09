@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/api/admin/graduates/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -31,7 +29,8 @@ export async function GET(req: NextRequest) {
     if (search) {
       conditions.push(
         or(
-          ilike(graduateData.graduateName, `%${search}%`),
+          ilike(graduateData.graduateFirstname, `%${search}%`),
+          ilike(graduateData.graduateSurname, `%${search}%`),
           ilike(graduateData.email, `%${search}%`),
           ilike(graduateData.nameOfFellowship, `%${search}%`),
           ilike(graduateData.nameOfZone, `%${search}%`)
@@ -63,7 +62,8 @@ export async function GET(req: NextRequest) {
           // Graduate data
           id: graduateData.id,
           userId: graduateData.userId,
-          graduateName: graduateData.graduateName,
+          graduateFirstname: graduateData.graduateFirstname,
+          graduateSurname: graduateData.graduateSurname,
           email: graduateData.email,
           graduateGender: graduateData.graduateGender,
           dateOfBirth: graduateData.dateOfBirth,

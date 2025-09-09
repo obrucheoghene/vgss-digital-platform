@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/hooks/use-debounce.ts
 import { useState, useEffect } from "react";
 
 /**
@@ -55,7 +53,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [callback, delay, ...(deps || [])]);
+  }, [callback, delay]);
 
   return debouncedCallback || callback;
 }

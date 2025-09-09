@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/dashboard/vgss-office/settings/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";

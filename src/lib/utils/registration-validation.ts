@@ -114,7 +114,7 @@ export function validatePersonalInfo(
   if (data.dateOfBirth) {
     const birthDate = new Date(data.dateOfBirth);
     const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
     if (

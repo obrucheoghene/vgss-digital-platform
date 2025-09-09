@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "@/lib/db/schema";
 import { useQuery } from "@tanstack/react-query";
 

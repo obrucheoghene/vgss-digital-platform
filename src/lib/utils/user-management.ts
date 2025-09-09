@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/lib/utils/user-management.ts
 import { db } from "@/lib/db";
 import { users, type NewUser, type UserType } from "@/lib/db/schema";
 import { hashPassword } from "@/lib/auth";
