@@ -439,9 +439,12 @@ export default function ZoneUploadPage() {
 
         <Tabs defaultValue="upload" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="addrecord">Add Record</TabsTrigger>
             <TabsTrigger value="upload">Upload Data</TabsTrigger>
             <TabsTrigger value="history">Upload History</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="addrecord" className="space-y-6"></TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
             {/* File Upload Section */}
