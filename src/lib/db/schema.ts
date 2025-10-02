@@ -57,7 +57,10 @@ export const zoneGraduates = pgTable("zone_graduates", {
   nameOfUniversity: varchar("name_of_university", { length: 255 }).notNull(),
   courseOfStudy: varchar("course_of_study", { length: 255 }).notNull(),
   graduationYear: integer("graduation_year").notNull(),
-  nameOfFellowship: varchar("name_of_fellowship", { length: 255 }).notNull(),
+  chapterId: uuid("chapter_id")
+    .references(() => chapters.id, { onDelete: "cascade" }) // FIXED: Correct reference to chapters table
+    .notNull(),
+  // nameOfFellowship: varchar("name_of_fellowship", { length: 255 }).notNull(),
   nameOfZonalPastor: varchar("name_of_zonal_pastor", { length: 255 }).notNull(),
   nameOfChapterPastor: varchar("name_of_chapter_pastor", {
     length: 255,
@@ -76,6 +79,16 @@ export const zoneGraduates = pgTable("zone_graduates", {
   isRegistered: boolean("is_registered").default(false), // Has graduate found and registered with this record
   registeredAt: timestamp("registered_at"),
 
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const chapters = pgTable("chapters", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(), // BLW Zone who uploaded
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -136,7 +149,9 @@ export const graduateData = pgTable("graduate_data", {
 
   // Ministry Information
   nameOfZone: varchar("name_of_zone", { length: 255 }).notNull(),
-  nameOfFellowship: varchar("name_of_fellowship", { length: 255 }).notNull(),
+  chapterId: uuid("chapter_id")
+    .references(() => chapters.id, { onDelete: "cascade" }) // FIXED: Correct reference to chapters table
+    .notNull(),
   nameOfZonalPastor: varchar("name_of_zonal_pastor", { length: 255 }).notNull(),
   nameOfChapterPastor: varchar("name_of_chapter_pastor", {
     length: 255,
@@ -224,8 +239,6 @@ export const graduateData = pgTable("graduate_data", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// REMOVED: graduateInterviewQuestions table - now part of graduateData
-
 // Relations - Updated to remove interview questions relationships
 export const usersRelations = relations(users, ({ one, many }) => ({
   // User as graduate
@@ -236,6 +249,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   officeAssignedGraduates: many(graduateData, {
     relationName: "serviceDepartmentManager",
   }),
+  //
+  zoneChapter: many(chapters, { relationName: "chapterZone" }),
   // User as approver
   approvedGraduates: many(graduateData, { relationName: "approver" }),
   // User as account creator
@@ -257,6 +272,11 @@ export const zoneGraduatesRelations = relations(
       fields: [zoneGraduates.userId],
       references: [users.id],
       relationName: "zoneUploader",
+    }),
+    chapter: one(chapters, {
+      fields: [zoneGraduates.chapterId],
+      references: [chapters.id],
+      relationName: "graduateChapter",
     }),
     graduateData: many(graduateData, { relationName: "linkedZoneGraduate" }),
   })
@@ -287,6 +307,19 @@ export const graduateDataRelations = relations(graduateData, ({ one }) => ({
     fields: [graduateData.approvedBy],
     references: [users.id],
     relationName: "approver",
+  }),
+  chapter: one(chapters, {
+    fields: [graduateData.chapterId],
+    references: [chapters.id],
+    relationName: "graduateChapter",
+  }),
+}));
+
+export const chapterRelationship = relations(chapters, ({ one }) => ({
+  user: one(users, {
+    fields: [chapters.userId],
+    references: [users.id],
+    relationName: "chapterZone",
   }),
 }));
 

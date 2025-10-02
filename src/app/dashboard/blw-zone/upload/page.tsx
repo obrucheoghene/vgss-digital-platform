@@ -37,6 +37,7 @@ import {
   Eye,
   Trash2,
 } from "lucide-react";
+import UploadGraduateForm from "@/components/forms/upload-graduate";
 
 interface GraduateUploadData {
   graduateFirstname: string;
@@ -444,7 +445,9 @@ export default function ZoneUploadPage() {
             <TabsTrigger value="history">Upload History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="addrecord" className="space-y-6"></TabsContent>
+          <TabsContent value="addrecord" className="space-y-6">
+            <UploadGraduateForm />
+          </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
             {/* File Upload Section */}

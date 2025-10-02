@@ -4,12 +4,20 @@ CREATE TYPE "public"."graduate_status" AS ENUM('Under Review', 'Invited For Inte
 CREATE TYPE "public"."marital_status" AS ENUM('SINGLE', 'MARRIED');--> statement-breakpoint
 CREATE TYPE "public"."nysc_status" AS ENUM('COMPLETED', 'IN_PROGRESS', 'NOT_STARTED', 'EXEMPTED');--> statement-breakpoint
 CREATE TYPE "public"."user_type" AS ENUM('VGSS_OFFICE', 'GRADUATE', 'SERVICE_DEPARTMENT', 'BLW_ZONE');--> statement-breakpoint
+CREATE TABLE "chapters" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"user_id" uuid NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "graduate_data" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"zone_graduate_id" uuid NOT NULL,
 	"blw_zone_id" uuid NOT NULL,
-	"SERVICE_DEPARTMENT_id" uuid,
+	"service_department_id" uuid,
 	"graduate_firstname" varchar(255) NOT NULL,
 	"graduate_surname" varchar(255) NOT NULL,
 	"graduate_gender" "gender" NOT NULL,
@@ -26,7 +34,7 @@ CREATE TABLE "graduate_data" (
 	"kind_accommodation" varchar(100),
 	"contact_of_person_living_with" varchar(20),
 	"name_of_zone" varchar(255) NOT NULL,
-	"name_of_fellowship" varchar(255) NOT NULL,
+	"chapter_id" uuid NOT NULL,
 	"name_of_zonal_pastor" varchar(255) NOT NULL,
 	"name_of_chapter_pastor" varchar(255) NOT NULL,
 	"phone_number_of_chapter_pastor" varchar(20) NOT NULL,
@@ -108,7 +116,7 @@ CREATE TABLE "zone_graduates" (
 	"name_of_university" varchar(255) NOT NULL,
 	"course_of_study" varchar(255) NOT NULL,
 	"graduation_year" integer NOT NULL,
-	"name_of_fellowship" varchar(255) NOT NULL,
+	"chapter_id" uuid NOT NULL,
 	"name_of_zonal_pastor" varchar(255) NOT NULL,
 	"name_of_chapter_pastor" varchar(255) NOT NULL,
 	"phone_number_of_chapter_pastor" varchar(20) NOT NULL,
@@ -120,9 +128,12 @@ CREATE TABLE "zone_graduates" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "chapters" ADD CONSTRAINT "chapters_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_zone_graduate_id_zone_graduates_id_fk" FOREIGN KEY ("zone_graduate_id") REFERENCES "public"."zone_graduates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_blw_zone_id_users_id_fk" FOREIGN KEY ("blw_zone_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_SERVICE_DEPARTMENT_id_users_id_fk" FOREIGN KEY ("SERVICE_DEPARTMENT_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_service_department_id_users_id_fk" FOREIGN KEY ("service_department_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_chapter_id_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "graduate_data" ADD CONSTRAINT "graduate_data_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "zone_graduates" ADD CONSTRAINT "zone_graduates_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "zone_graduates" ADD CONSTRAINT "zone_graduates_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "zone_graduates" ADD CONSTRAINT "zone_graduates_chapter_id_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE cascade ON UPDATE no action;

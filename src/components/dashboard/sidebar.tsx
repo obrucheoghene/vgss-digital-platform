@@ -23,6 +23,7 @@ import {
   LogOut,
   UserCog,
   HouseIcon,
+  Church,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -97,7 +98,13 @@ const navigationItems = {
       title: "My Graduates",
       icon: Users,
       href: "/dashboard/blw-zone/graduates",
-      // badge: "45",
+      badge: null,
+    },
+    {
+      title: "Chapters",
+      icon: Church,
+      href: "/dashboard/blw-zone/chapters",
+      badge: null,
     },
     // {
     //   title: "Registration Status",

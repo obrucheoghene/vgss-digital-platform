@@ -1,9 +1,69 @@
 {
-  "id": "8b81cd83-2e60-4130-bf96-afee77cb20bd",
+  "id": "e19fbf99-2ea6-4e89-aa9c-2c55550357d5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.chapters": {
+      "name": "chapters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "chapters_user_id_users_id_fk": {
+          "name": "chapters_user_id_users_id_fk",
+          "tableFrom": "chapters",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.graduate_data": {
       "name": "graduate_data",
       "schema": "",
@@ -33,8 +93,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "SERVICE_DEPARTMENT_id": {
-          "name": "SERVICE_DEPARTMENT_id",
+        "service_department_id": {
+          "name": "service_department_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -137,9 +197,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name_of_fellowship": {
-          "name": "name_of_fellowship",
-          "type": "varchar(255)",
+        "chapter_id": {
+          "name": "chapter_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -516,17 +576,30 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "graduate_data_SERVICE_DEPARTMENT_id_users_id_fk": {
-          "name": "graduate_data_SERVICE_DEPARTMENT_id_users_id_fk",
+        "graduate_data_service_department_id_users_id_fk": {
+          "name": "graduate_data_service_department_id_users_id_fk",
           "tableFrom": "graduate_data",
           "tableTo": "users",
           "columnsFrom": [
-            "SERVICE_DEPARTMENT_id"
+            "service_department_id"
           ],
           "columnsTo": [
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "graduate_data_chapter_id_chapters_id_fk": {
+          "name": "graduate_data_chapter_id_chapters_id_fk",
+          "tableFrom": "graduate_data",
+          "tableTo": "chapters",
+          "columnsFrom": [
+            "chapter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "graduate_data_approved_by_users_id_fk": {
@@ -703,9 +776,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name_of_fellowship": {
-          "name": "name_of_fellowship",
-          "type": "varchar(255)",
+        "chapter_id": {
+          "name": "chapter_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -775,6 +848,19 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "zone_graduates_chapter_id_chapters_id_fk": {
+          "name": "zone_graduates_chapter_id_chapters_id_fk",
+          "tableFrom": "zone_graduates",
+          "tableTo": "chapters",
+          "columnsFrom": [
+            "chapter_id"
           ],
           "columnsTo": [
             "id"
