@@ -13,6 +13,8 @@ import { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { toast } from "sonner";
 
 // Define the validation schema using zod
 const chapterSchema = z.object({
@@ -31,6 +33,7 @@ export function ChapterFormDailog({
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<ChapterFormValues>({
     resolver: zodResolver(chapterSchema),
@@ -41,15 +44,17 @@ export function ChapterFormDailog({
   const onSubmit = async (data: ChapterFormValues) => {
     console.log("Form submitted:", data);
     try {
-      await fetch("/api/blw-zone/chapters", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      await axios.post("/api/blw-zone/chapters", data);
+      setOpen(false); // Close the dialog after submission
     } catch (error) {
       console.error("Error submitting form:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        const message = error.response.data?.error || "Submission failed";
+        console.log(message);
+
+        setError("name", { message });
+      }
     }
-    setOpen(false); // Close the dialog after submission
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -60,6 +65,10 @@ export function ChapterFormDailog({
         >
           <DialogHeader>
             <DialogTitle>Add Chapter</DialogTitle>
+
+            {errors.root && (
+              <p className="text-red-500 text-sm">{errors.root.message}</p>
+            )}
             <DialogDescription>Enter Chapter name</DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2">
