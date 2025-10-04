@@ -1,13 +1,39 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { chapters } from "@/lib/db/schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 import { and, eq } from "drizzle-orm";
+import { ca } from "zod/v4/locales";
 
 const chapterSchema = z.object({
   name: z.string().min(1, "Chapter name is required"),
 });
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || session.user.type !== "BLW_ZONE") {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+    const chaptersList = await db
+      .select()
+      .from(chapters)
+      .where(eq(chapters.userId, session.user.id))
+      .orderBy(chapters.name);
+
+    return NextResponse.json({ success: true, chapters: chaptersList });
+  } catch (error) {
+    console.error("Chapters error:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal Server Error";
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+    });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
