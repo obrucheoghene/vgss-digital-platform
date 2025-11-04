@@ -28,49 +28,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useChaptersForZone } from "@/hooks/user-chapters";
-
-const FormValues = z.object({
-  graduateFirstname: z
-    .string()
-    .trim()
-    .min(1, "Firstname is required")
-    .min(2, "Firstname must be at least 3 characters long"),
-  graduateSurname: z
-    .string()
-    .trim()
-    .min(1, "Surname is required")
-    .min(2, "Surname must be at least 3 characters long"),
-  graduateGender: z.enum(["FEMALE", "MALE"], "Gender must be MALE or FEMALE"),
-  graduatePhoneNumber: z.string().trim().min(1, "Phone number is required"),
-  nameOfUniversity: z.string().trim().min(1, "University is required"),
-  courseOfStudy: z.string().trim().min(1, "Course of study is required"),
-  graduationYear: z.string().trim().min(1, "Year of graduation is required"),
-  chapter: z.string().trim().min(1, "Chapter is required"),
-  nameOfZonalPastor: z.string().trim().min(1, "Zonal Pastor name is required"),
-  nameOfChapterPastor: z
-    .string()
-    .trim()
-    .min(1, "Chapter Pastor name is required"),
-  phoneNumberOfChapterPastor: z
-    .string()
-    .trim()
-    .min(1, "Chapter Pastor Phone number is required"),
-  emailOfChapterPastor: z
-    .string()
-    .trim()
-    .min(1, "Chapter Pastor Phone number is required"),
-  kingschatIDOfChapterPastor: z
-    .string()
-    .trim()
-    .min(1, "Chapter Pastor Phone number is required"),
-});
+import axios from "axios";
+import { uploadGraduateSchema } from "@/lib/utils/validators";
 
 const UploadGraduateForm = () => {
   const zoneChapters = useChaptersForZone();
 
-  type FormType = z.infer<typeof FormValues>;
+  type FormType = z.infer<typeof uploadGraduateSchema>;
   const form = useForm<FormType>({
-    resolver: zodResolver(FormValues),
+    resolver: zodResolver(uploadGraduateSchema),
     defaultValues: {
       graduateFirstname: "",
       graduateSurname: "",
@@ -78,13 +44,16 @@ const UploadGraduateForm = () => {
   });
 
   const onSubmit = async (data: FormType) => {
+    console.log("Form submitted:", data);
     try {
-      console.log(data);
+      await axios.post("/api/blw-zone/upload-graduate", data);
     } catch (error) {
-      console.log(error);
+      console.error("Error submitting form:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        const message = error.response.data?.error || "Submission failed";
+        console.log(message);
+      }
     }
-
-    console.log(data);
   };
 
   return (
@@ -114,7 +83,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Graduate firstname"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order  text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -134,7 +103,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Graduate surname"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -179,7 +148,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Graduate phone number"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -199,7 +168,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Graduate university"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -219,7 +188,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Graduate course of Study"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -240,7 +209,7 @@ const UploadGraduateForm = () => {
                         type="number"
                         placeholder="Graduation Year"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -250,7 +219,7 @@ const UploadGraduateForm = () => {
 
               <FormField
                 control={form.control}
-                name="chapter"
+                name="chapterId"
                 render={({ field }) => (
                   <FormItem className=" flex-1 ">
                     <FormLabel>BLW Chapter</FormLabel>
@@ -290,7 +259,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Zonal Pastor Name"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -308,9 +277,9 @@ const UploadGraduateForm = () => {
                       <Input
                         {...field}
                         type="text"
-                        placeholder="Graduation Year"
+                        placeholder="Chapter Pastor Name"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -330,7 +299,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Chapter Pastor phone number"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -350,7 +319,7 @@ const UploadGraduateForm = () => {
                         type="text"
                         placeholder="Chapter Pastor Kingschat Id"
                         // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage />
@@ -366,10 +335,10 @@ const UploadGraduateForm = () => {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Uploading...
+                  Submiting...
                 </>
               ) : (
-                "Upload"
+                "Submit"
               )}
             </Button>
           </form>

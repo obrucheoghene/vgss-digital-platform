@@ -8,6 +8,13 @@
       "when": 1759415290202,
       "tag": "0000_tiresome_jackpot",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762271756599,
+      "tag": "0001_nostalgic_franklin_storm",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "zone_graduates" DROP COLUMN "email_of_chapter_pastor";

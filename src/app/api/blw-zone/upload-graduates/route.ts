@@ -65,11 +65,11 @@ export async function POST(req: NextRequest) {
           nameOfUniversity: graduate.nameOfUniversity,
           courseOfStudy: graduate.courseOfStudy,
           graduationYear: graduate.graduationYear,
-          nameOfFellowship: graduate.nameOfFellowship,
+          chapterId: graduate.chapterId,
           nameOfZonalPastor: graduate.nameOfZonalPastor,
           nameOfChapterPastor: graduate.nameOfChapterPastor,
           phoneNumberOfChapterPastor: graduate.phoneNumberOfChapterPastor,
-          emailOfChapterPastor: graduate.emailOfChapterPastor,
+          // emailOfChapterPastor: graduate.emailOfChapterPastor,
           kingschatIDOfChapterPastor:
             graduate.kingschatIDOfChapterPastor || null,
           isRegistered: false,

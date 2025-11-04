@@ -68,9 +68,9 @@ export const zoneGraduates = pgTable("zone_graduates", {
   phoneNumberOfChapterPastor: varchar("phone_number_of_chapter_pastor", {
     length: 20,
   }).notNull(),
-  emailOfChapterPastor: varchar("email_of_chapter_pastor", {
-    length: 255,
-  }).notNull(),
+  // emailOfChapterPastor: varchar("email_of_chapter_pastor", {
+  //   length: 255,
+  // }).notNull(),
   kingschatIDOfChapterPastor: varchar("kingschat_id_of_chapter_pastor", {
     length: 100,
   }).notNull(),
