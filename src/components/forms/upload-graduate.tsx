@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useChaptersForZone } from "@/hooks/user-chapters";
 
 const FormValues = z.object({
   graduateFirstname: z
@@ -65,6 +66,8 @@ const FormValues = z.object({
 });
 
 const UploadGraduateForm = () => {
+  const zoneChapters = useChaptersForZone();
+
   type FormType = z.infer<typeof FormValues>;
   const form = useForm<FormType>({
     resolver: zodResolver(FormValues),
@@ -140,10 +143,10 @@ const UploadGraduateForm = () => {
               />
               <FormField
                 control={form.control}
-                name="graduateSurname"
+                name="graduateGender"
                 render={({ field }) => (
                   <FormItem className=" flex-1 ">
-                    <FormLabel>Surname</FormLabel>
+                    <FormLabel>Gender</FormLabel>
 
                     <Select
                       onValueChange={field.onChange}
@@ -234,7 +237,7 @@ const UploadGraduateForm = () => {
                     <FormControl className="">
                       <Input
                         {...field}
-                        type="text"
+                        type="number"
                         placeholder="Graduation Year"
                         // onKeyUp={handleKeyPress}
                         className="w-full  px-4 py-3 order text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -258,12 +261,15 @@ const UploadGraduateForm = () => {
                     >
                       <FormControl>
                         <SelectTrigger className=" w-full">
-                          <SelectValue placeholder="Chapter" />
+                          <SelectValue placeholder="Select chapter" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Chapter 1">Chapter 1</SelectItem>
-                        <SelectItem value="Chapter 2">Chapter 2</SelectItem>
+                        {zoneChapters.data?.chapters.map((chapter) => (
+                          <SelectItem key={chapter.id} value={chapter.name}>
+                            {chapter.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

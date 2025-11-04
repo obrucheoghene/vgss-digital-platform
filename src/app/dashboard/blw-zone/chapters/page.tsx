@@ -1,15 +1,9 @@
 // src/app/dashboard/vgss-office/graduates/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,29 +23,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import {
-  GraduationCap,
   Search,
-  Filter,
   MoreHorizontal,
   Eye,
   Edit,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Download,
-  RefreshCw,
   Loader2,
-  Building,
-  User,
-  FileText,
   Church,
 } from "lucide-react";
-import { toast } from "sonner";
 import { ChapterFormDailog } from "@/components/forms/chapter-form-dialog";
+import { useChaptersForZone } from "@/hooks/user-chapters";
 
 interface Chapter {
   id: string;
@@ -61,30 +43,12 @@ interface Chapter {
 }
 
 export default function GraduateManagementPage() {
-  const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const zoneChapters = useChaptersForZone();
 
   const [openChapterDialog, setOpenChapterDialog] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-
-  useEffect(() => {
-    const fetchChapters = async () => {
-      try {
-        setIsLoading(true);
-
-        const response = await fetch("/api/blw-zone/chapters");
-        const data = await response.json();
-        setChapters(data.chapters || []);
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchChapters();
-  }, []);
 
   return (
     <DashboardLayout title="Graduate Management">
@@ -163,7 +127,7 @@ export default function GraduateManagementPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoading ? (
+                  {zoneChapters.isLoading ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
@@ -171,7 +135,7 @@ export default function GraduateManagementPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    chapters.map((chapter) => (
+                    (zoneChapters.data?.chapters || []).map((chapter) => (
                       <TableRow key={chapter.id} className="hover:bg-muted/50">
                         <TableCell>
                           <Checkbox checked={false} />

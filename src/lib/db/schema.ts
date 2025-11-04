@@ -332,6 +332,8 @@ export type NewGraduateData = typeof graduateData.$inferInsert;
 
 export type ZoneGraduates = typeof zoneGraduates.$inferSelect;
 export type NewZoneGraduates = typeof zoneGraduates.$inferInsert;
+export type Chapter = typeof chapters.$inferSelect;
+export type NewChapter = typeof users.$inferInsert;
 
 export type UserType =
   | "VGSS_OFFICE"
