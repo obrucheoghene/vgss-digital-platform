@@ -1,15 +1,8 @@
-// src/app/dashboard/vgss-office/graduates/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,20 +39,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
+
 import {
   GraduationCap,
   Search,
@@ -127,6 +109,7 @@ interface Graduate {
   visionMissionPurpose?: string;
   whyVgss?: string;
   plansAfterVgss?: string;
+  chapter: string;
 }
 
 interface GraduateStats {
@@ -176,6 +159,7 @@ export default function GraduateManagementPage() {
 
         const response = await fetch("/api/blw-zone/graduates");
         const data = await response.json();
+        console.log(data);
         if (data && data.success) {
           setAllGraduates(data.results.uploadedGraudates);
           // setAllGraduates(data.results.registeredGraduates);
@@ -662,12 +646,6 @@ export default function GraduateManagementPage() {
                                     >
                                       {graduate.graduationYear}
                                     </Badge>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {graduate.grade}
-                                    </Badge>
                                   </div>
                                 </div>
                               </TableCell>
@@ -677,7 +655,7 @@ export default function GraduateManagementPage() {
                                     {graduate.nameOfZone}
                                   </p>
                                   <p className="text-sm text-muted-foreground">
-                                    {graduate.nameOfFellowship}
+                                    {graduate.chapter}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     {graduate.nameOfChapterPastor}

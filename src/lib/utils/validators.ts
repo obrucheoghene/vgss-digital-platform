@@ -11,11 +11,14 @@ export const uploadGraduateSchema = z.object({
     .trim()
     .min(1, "Surname is required")
     .min(2, "Surname must be at least 3 characters long"),
-  graduateGender: z.enum(["FEMALE", "MALE"], "Gender must be MALE or FEMALE"),
+  graduateGender: z.enum(
+    ["", "FEMALE", "MALE"],
+    "Gender must be MALE or FEMALE"
+  ),
   graduatePhoneNumber: z.string().trim().min(1, "Phone number is required"),
   nameOfUniversity: z.string().trim().min(1, "University is required"),
   courseOfStudy: z.string().trim().min(1, "Course of study is required"),
-  graduationYear: z.number(),
+  graduationYear: z.string(),
   chapterId: z.string().trim().min(1, "Chapter is required"),
   nameOfZonalPastor: z.string().trim().min(1, "Zonal Pastor name is required"),
   nameOfChapterPastor: z

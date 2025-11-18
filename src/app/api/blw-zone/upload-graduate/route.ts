@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       )
       .limit(1);
 
-    if (existing) throw new Error("Duplicate Graduate record");
+    if (existing.length) throw new Error("Duplicate Graduate record");
 
     // Insert new record
     await db

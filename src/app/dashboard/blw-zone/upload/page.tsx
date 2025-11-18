@@ -438,7 +438,7 @@ export default function ZoneUploadPage() {
           </Button>
         </div>
 
-        <Tabs defaultValue="upload" className="space-y-6">
+        <Tabs defaultValue="addrecord" className="space-y-6">
           <TabsList>
             <TabsTrigger value="addrecord">Add Record</TabsTrigger>
             <TabsTrigger value="upload">Upload Data</TabsTrigger>

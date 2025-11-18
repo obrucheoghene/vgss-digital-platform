@@ -30,6 +30,8 @@ import {
 import { useChaptersForZone } from "@/hooks/user-chapters";
 import axios from "axios";
 import { uploadGraduateSchema } from "@/lib/utils/validators";
+import { createRangeArray } from "@/lib/utils";
+import { toast } from "sonner";
 
 const UploadGraduateForm = () => {
   const zoneChapters = useChaptersForZone();
@@ -40,13 +42,29 @@ const UploadGraduateForm = () => {
     defaultValues: {
       graduateFirstname: "",
       graduateSurname: "",
+      graduateGender: "MALE",
+      graduatePhoneNumber: "",
+      nameOfUniversity: "",
+      courseOfStudy: "",
+      graduationYear: "2020",
+      chapterId: "",
+      nameOfZonalPastor: "",
+      nameOfChapterPastor: "",
+      phoneNumberOfChapterPastor: "",
+      kingschatIDOfChapterPastor: "",
     },
   });
 
+  const yearsArray = createRangeArray(2000, 2030);
+
   const onSubmit = async (data: FormType) => {
-    console.log("Form submitted:", data);
     try {
       await axios.post("/api/blw-zone/upload-graduate", data);
+      form.reset();
+      toast.success("Successfully submited graduate data", {
+        position: "top-center",
+        richColors: true,
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       if (axios.isAxiosError(error) && error.response) {
@@ -202,16 +220,23 @@ const UploadGraduateForm = () => {
                 render={({ field }) => (
                   <FormItem className=" flex-1 ">
                     <FormLabel>Graduation Year</FormLabel>
-
-                    <FormControl className="">
-                      <Input
-                        {...field}
-                        type="number"
-                        placeholder="Graduation Year"
-                        // onKeyUp={handleKeyPress}
-                        className="w-full  px-4 py-3 order placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className=" w-full">
+                          <SelectValue placeholder="Graduation Year" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {yearsArray.map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year.toString()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -235,7 +260,7 @@ const UploadGraduateForm = () => {
                       </FormControl>
                       <SelectContent>
                         {zoneChapters.data?.chapters.map((chapter) => (
-                          <SelectItem key={chapter.id} value={chapter.name}>
+                          <SelectItem key={chapter.id} value={chapter.id}>
                             {chapter.name}
                           </SelectItem>
                         ))}

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { graduateData, zoneGraduates } from "@/lib/db/schema";
+import { chapters, graduateData, zoneGraduates } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -27,10 +27,12 @@ export async function GET(req: NextRequest) {
           nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
           nameOfChapterPastor: zoneGraduates.nameOfChapterPastor,
           phoneNumberOfChapterPastor: zoneGraduates.phoneNumberOfChapterPastor,
-          emailOfChapterPastor: zoneGraduates.emailOfChapterPastor,
+          kingschatIDOfChapterPastor: zoneGraduates.kingschatIDOfChapterPastor,
           registeredAt: zoneGraduates.registeredAt,
+          chapter: chapters.name,
         })
         .from(zoneGraduates)
+        .innerJoin(chapters, eq(zoneGraduates.chapterId, chapters.id))
         .where(eq(zoneGraduates.userId, session.user.id)),
 
       db
