@@ -83,36 +83,36 @@ export default function BLWZoneDashboard() {
     },
   ];
 
-  const recentGraduates = [
-    {
-      id: 1,
-      name: "John Doe",
-      fellowship: "Victory Fellowship",
-      status: "registered",
-      date: "2 days ago",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      fellowship: "Faith Chapel",
-      status: "pending",
-      date: "3 days ago",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      fellowship: "Grace Assembly",
-      status: "in-service",
-      date: "1 week ago",
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      fellowship: "Hope Center",
-      status: "registered",
-      date: "1 week ago",
-    },
-  ];
+  // const recentGraduates = [
+  //   {
+  //     id: 1,
+  //     name: "John Doe",
+  //     fellowship: "Victory Fellowship",
+  //     status: "registered",
+  //     date: "2 days ago",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Jane Smith",
+  //     fellowship: "Faith Chapel",
+  //     status: "pending",
+  //     date: "3 days ago",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Mike Johnson",
+  //     fellowship: "Grace Assembly",
+  //     status: "in-service",
+  //     date: "1 week ago",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Sarah Wilson",
+  //     fellowship: "Hope Center",
+  //     status: "registered",
+  //     date: "1 week ago",
+  //   },
+  // ];
 
   return (
     <DashboardLayout title="BLW Zone Dashboard">
@@ -183,7 +183,7 @@ export default function BLWZoneDashboard() {
         </div>
 
         {/* Recent Graduates */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Recent Graduate Activity</CardTitle>
             <CardDescription>
@@ -230,7 +230,7 @@ export default function BLWZoneDashboard() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </DashboardLayout>
   );

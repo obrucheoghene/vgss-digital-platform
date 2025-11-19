@@ -226,20 +226,6 @@ export default function GraduateManagementPage() {
             .includes(searchQuery.toLowerCase())
       );
     }
-    console.log({ filtered });
-    // Status filter
-    // if (selectedStatus !== "all") {
-    //   filtered = filtered.filter(
-    //     (graduate) => graduate.status === selectedStatus
-    //   );
-    // }
-
-    // // Gender filter
-    // if (selectedGender !== "all") {
-    //   filtered = filtered.filter(
-    //     (graduate) => graduate.graduateGender === selectedGender
-    //   );
-    // }
 
     setFilteredGraduates(filtered);
     setCurrentPage(1); // Reset to first page when filters change
@@ -409,7 +395,7 @@ export default function GraduateManagementPage() {
               Manage all registered graduates and their service status
             </p>
           </div>
-          <div className="flex space-x-2">
+          {/* <div className="flex space-x-2">
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export Data
@@ -423,7 +409,7 @@ export default function GraduateManagementPage() {
               />
               Refresh
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Status Tabs */}

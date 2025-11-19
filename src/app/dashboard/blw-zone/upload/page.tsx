@@ -429,21 +429,28 @@ export default function ZoneUploadPage() {
           <div>
             <h1 className="text-2xl font-bold">Upload Graduate Records</h1>
             <p className="text-muted-foreground">
-              Upload graduate information from your zone via CSV or Excel files
+              Upload graduate information from your zone
             </p>
+            {/* <p className="text-muted-foreground">
+              Upload graduate information from your zone via CSV or Excel files
+            </p> */}
           </div>
-          <Button onClick={downloadTemplate} variant="outline">
+          <Button
+            onClick={downloadTemplate}
+            variant="outline"
+            className=" hidden"
+          >
             <Download className="w-4 h-4 mr-2" />
             Download Template
           </Button>
         </div>
 
         <Tabs defaultValue="addrecord" className="space-y-6">
-          <TabsList>
+          {/* <TabsList>
             <TabsTrigger value="addrecord">Add Record</TabsTrigger>
             <TabsTrigger value="upload">Upload Data</TabsTrigger>
             <TabsTrigger value="history">Upload History</TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <TabsContent value="addrecord" className="space-y-6">
             <UploadGraduateForm />
