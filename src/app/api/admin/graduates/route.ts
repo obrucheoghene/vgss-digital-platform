@@ -32,7 +32,6 @@ export async function GET(req: NextRequest) {
           ilike(graduateData.graduateFirstname, `%${search}%`),
           ilike(graduateData.graduateSurname, `%${search}%`),
           ilike(graduateData.email, `%${search}%`),
-          ilike(graduateData.nameOfFellowship, `%${search}%`),
           ilike(graduateData.nameOfZone, `%${search}%`)
         )
       );
@@ -79,7 +78,7 @@ export async function GET(req: NextRequest) {
 
           // Ministry info
           nameOfZone: graduateData.nameOfZone,
-          nameOfFellowship: graduateData.nameOfFellowship,
+          chapterId: graduateData.chapterId,
           nameOfChapterPastor: graduateData.nameOfChapterPastor,
 
           // Service info

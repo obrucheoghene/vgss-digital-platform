@@ -15,6 +15,13 @@
       "when": 1762271756599,
       "tag": "0001_nostalgic_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767961294204,
+      "tag": "0002_complete_living_lightning",
+      "breakpoints": true
     }
   ]
 }

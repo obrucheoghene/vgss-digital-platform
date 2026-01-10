@@ -42,7 +42,7 @@ export async function GET(
 
         // Ministry Information
         nameOfZone: graduateData.nameOfZone,
-        nameOfFellowship: graduateData.nameOfFellowship,
+        chapterId: graduateData.chapterId,
         nameOfZonalPastor: graduateData.nameOfZonalPastor,
         nameOfChapterPastor: graduateData.nameOfChapterPastor,
         phoneNumberOfChapterPastor: graduateData.phoneNumberOfChapterPastor,

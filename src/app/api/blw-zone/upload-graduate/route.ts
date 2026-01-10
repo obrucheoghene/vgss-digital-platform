@@ -33,10 +33,12 @@ export async function POST(req: NextRequest) {
 
     if (existing.length) throw new Error("Duplicate Graduate record");
 
-    // Insert new record
-    await db
-      .insert(zoneGraduates)
-      .values({ ...values, userId: session.user.id });
+    // Insert new record (convert graduationYear string to number for database)
+    await db.insert(zoneGraduates).values({
+      ...values,
+      graduationYear: parseInt(values.graduationYear, 10),
+      userId: session.user.id,
+    });
 
     return NextResponse.json({
       success: true,

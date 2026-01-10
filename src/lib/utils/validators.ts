@@ -11,14 +11,22 @@ export const uploadGraduateSchema = z.object({
     .trim()
     .min(1, "Surname is required")
     .min(2, "Surname must be at least 3 characters long"),
-  graduateGender: z.enum(
-    ["", "FEMALE", "MALE"],
-    "Gender must be MALE or FEMALE"
-  ),
+  graduateGender: z.enum(["FEMALE", "MALE"], {
+    message: "Gender must be MALE or FEMALE",
+  }),
   graduatePhoneNumber: z.string().trim().min(1, "Phone number is required"),
   nameOfUniversity: z.string().trim().min(1, "University is required"),
   courseOfStudy: z.string().trim().min(1, "Course of study is required"),
-  graduationYear: z.string(),
+  graduationYear: z
+    .string()
+    .min(1, "Graduation year is required")
+    .refine(
+      (val) => {
+        const year = parseInt(val, 10);
+        return !isNaN(year) && year >= 1990 && year <= 2030;
+      },
+      { message: "Graduation year must be between 1990 and 2030" }
+    ),
   chapterId: z.string().trim().min(1, "Chapter is required"),
   nameOfZonalPastor: z.string().trim().min(1, "Zonal Pastor name is required"),
   nameOfChapterPastor: z

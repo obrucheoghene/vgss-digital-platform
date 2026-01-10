@@ -42,6 +42,22 @@ export const graduateStatusEnum = pgEnum("graduate_status", [
   "Not Accepted",
 ]);
 
+// Staff Request Enums
+export const staffRequestStatusEnum = pgEnum("staff_request_status", [
+  "Pending",
+  "Approved",
+  "Rejected",
+  "Fulfilled",
+  "Cancelled",
+]);
+
+export const staffRequestUrgencyEnum = pgEnum("staff_request_urgency", [
+  "Low",
+  "Medium",
+  "High",
+  "Urgent",
+]);
+
 // Zone Graduates table - Data uploaded by BLW Zones before graduate registration
 export const zoneGraduates = pgTable("zone_graduates", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -239,6 +255,63 @@ export const graduateData = pgTable("graduate_data", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Staff Requests table - Service Departments request graduates
+export const staffRequests = pgTable("staff_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  serviceDepartmentId: uuid("service_department_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+
+  // Position Details
+  positionTitle: varchar("position_title", { length: 255 }).notNull(),
+  positionDescription: text("position_description").notNull(),
+  numberOfStaff: integer("number_of_staff").default(1).notNull(),
+
+  // Requirements
+  skillsRequired: text("skills_required"),
+  qualificationsRequired: text("qualifications_required"),
+  preferredGender: genderEnum("preferred_gender"),
+
+  // Priority
+  urgency: staffRequestUrgencyEnum("urgency").default("Medium").notNull(),
+
+  // Status
+  status: staffRequestStatusEnum("status").default("Pending").notNull(),
+
+  // Approval Tracking
+  approvedBy: uuid("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
+
+  // Assignment Tracking
+  fulfilledCount: integer("fulfilled_count").default(0).notNull(),
+  fulfilledAt: timestamp("fulfilled_at"),
+
+  // Notes
+  notes: text("notes"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Staff Request Assignments table - Links graduates to requests
+export const staffRequestAssignments = pgTable("staff_request_assignments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  staffRequestId: uuid("staff_request_id")
+    .references(() => staffRequests.id, { onDelete: "cascade" })
+    .notNull(),
+  graduateDataId: uuid("graduate_data_id")
+    .references(() => graduateData.id, { onDelete: "cascade" })
+    .notNull(),
+  assignedBy: uuid("assigned_by")
+    .references(() => users.id)
+    .notNull(),
+  assignedAt: timestamp("assigned_at").defaultNow().notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations - Updated to remove interview questions relationships
 export const usersRelations = relations(users, ({ one, many }) => ({
   // User as graduate
@@ -263,6 +336,12 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   // Zone uploaded graduates
   uploadedGraduates: many(zoneGraduates, { relationName: "zoneUploader" }),
+  // Staff requests made by service department
+  staffRequests: many(staffRequests, { relationName: "departmentRequests" }),
+  // Staff requests approved by user
+  approvedStaffRequests: many(staffRequests, { relationName: "requestApprover" }),
+  // Staff request assignments made by user
+  staffAssignments: many(staffRequestAssignments, { relationName: "assigner" }),
 }));
 
 export const zoneGraduatesRelations = relations(
@@ -282,7 +361,7 @@ export const zoneGraduatesRelations = relations(
   })
 );
 
-export const graduateDataRelations = relations(graduateData, ({ one }) => ({
+export const graduateDataRelations = relations(graduateData, ({ one, many }) => ({
   user: one(users, {
     fields: [graduateData.userId],
     references: [users.id],
@@ -313,6 +392,10 @@ export const graduateDataRelations = relations(graduateData, ({ one }) => ({
     references: [chapters.id],
     relationName: "graduateChapter",
   }),
+  // Staff request assignments for this graduate
+  staffRequestAssignments: many(staffRequestAssignments, {
+    relationName: "graduateAssignment",
+  }),
 }));
 
 export const chapterRelationship = relations(chapters, ({ one }) => ({
@@ -322,6 +405,46 @@ export const chapterRelationship = relations(chapters, ({ one }) => ({
     relationName: "chapterZone",
   }),
 }));
+
+export const staffRequestsRelations = relations(
+  staffRequests,
+  ({ one, many }) => ({
+    serviceDepartment: one(users, {
+      fields: [staffRequests.serviceDepartmentId],
+      references: [users.id],
+      relationName: "departmentRequests",
+    }),
+    approver: one(users, {
+      fields: [staffRequests.approvedBy],
+      references: [users.id],
+      relationName: "requestApprover",
+    }),
+    assignments: many(staffRequestAssignments, {
+      relationName: "requestAssignments",
+    }),
+  })
+);
+
+export const staffRequestAssignmentsRelations = relations(
+  staffRequestAssignments,
+  ({ one }) => ({
+    staffRequest: one(staffRequests, {
+      fields: [staffRequestAssignments.staffRequestId],
+      references: [staffRequests.id],
+      relationName: "requestAssignments",
+    }),
+    graduate: one(graduateData, {
+      fields: [staffRequestAssignments.graduateDataId],
+      references: [graduateData.id],
+      relationName: "graduateAssignment",
+    }),
+    assignedByUser: one(users, {
+      fields: [staffRequestAssignments.assignedBy],
+      references: [users.id],
+      relationName: "assigner",
+    }),
+  })
+);
 
 // Type exports for better TypeScript support
 export type User = typeof users.$inferSelect;
@@ -355,3 +478,16 @@ export type GraduateStatus =
   | "Sighting"
   | "Serving"
   | "Not Accepted";
+
+// Staff Request types
+export type StaffRequest = typeof staffRequests.$inferSelect;
+export type NewStaffRequest = typeof staffRequests.$inferInsert;
+export type StaffRequestAssignment = typeof staffRequestAssignments.$inferSelect;
+export type NewStaffRequestAssignment = typeof staffRequestAssignments.$inferInsert;
+export type StaffRequestStatus =
+  | "Pending"
+  | "Approved"
+  | "Rejected"
+  | "Fulfilled"
+  | "Cancelled";
+export type StaffRequestUrgency = "Low" | "Medium" | "High" | "Urgent";

@@ -65,7 +65,13 @@ const navigationItems = {
       title: "Service Departments",
       icon: HouseIcon,
       href: "/dashboard/vgss-office/service-department",
-      badge: null, // Pending reviews
+      badge: null,
+    },
+    {
+      title: "Staff Requests",
+      icon: FileText,
+      href: "/dashboard/vgss-office/staff-requests",
+      badge: null,
     },
     // {
     //   title: "Reports & Analytics",
@@ -133,16 +139,16 @@ const navigationItems = {
       badge: null,
     },
     {
-      title: "Request Staff",
-      icon: UserPlus,
-      href: "/dashboard/service-department/request",
+      title: "Staff Requests",
+      icon: FileText,
+      href: "/dashboard/service-department/staff-requests",
       badge: null,
     },
     {
       title: "My VGSS Staff",
       icon: Users,
       href: "/dashboard/service-department/staff",
-      badge: "3",
+      badge: null,
     },
     {
       title: "Salary Management",

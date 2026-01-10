@@ -209,7 +209,6 @@ export async function POST(req: NextRequest) {
         nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
         nameOfChapterPastor: zoneGraduates.nameOfChapterPastor,
         phoneNumberOfChapterPastor: zoneGraduates.phoneNumberOfChapterPastor,
-        emailOfChapterPastor: zoneGraduates.emailOfChapterPastor,
         kingschatIDOfChapterPastor: zoneGraduates.kingschatIDOfChapterPastor,
         isRegistered: zoneGraduates.isRegistered,
         createdAt: zoneGraduates.createdAt,
@@ -307,7 +306,7 @@ export async function POST(req: NextRequest) {
             nameOfZonalPastor: record.nameOfZonalPastor,
             nameOfChapterPastor: record.nameOfChapterPastor,
             phoneNumberOfChapterPastor: record.phoneNumberOfChapterPastor,
-            emailOfChapterPastor: record.emailOfChapterPastor,
+            emailOfChapterPastor: formData.emailOfChapterPastor,
 
             // Spiritual Journey
             whereWhenChrist: formData.whereWhenChrist,
@@ -501,7 +500,6 @@ export async function GET(req: NextRequest) {
         nameOfZonalPastor: zoneGraduates.nameOfZonalPastor,
         nameOfChapterPastor: zoneGraduates.nameOfChapterPastor,
         phoneNumberOfChapterPastor: zoneGraduates.phoneNumberOfChapterPastor,
-        emailOfChapterPastor: zoneGraduates.emailOfChapterPastor,
         // Graduate data info (if registered)
         graduateDataId: graduateData.id,
         userId: graduateData.userId,
@@ -539,7 +537,6 @@ export async function GET(req: NextRequest) {
         nameOfZonalPastor: record.nameOfZonalPastor,
         nameOfChapterPastor: record.nameOfChapterPastor,
         phoneNumberOfChapterPastor: record.phoneNumberOfChapterPastor,
-        emailOfChapterPastor: record.emailOfChapterPastor,
         isRegistered: record.isRegistered,
         registeredAt: record.registeredAt,
         status: record.status || null,
