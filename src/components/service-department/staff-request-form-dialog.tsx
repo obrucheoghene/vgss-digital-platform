@@ -41,7 +41,7 @@ const staffRequestSchema = z.object({
     .max(10, "Maximum 10 staff per request"),
   skillsRequired: z.string().optional(),
   qualificationsRequired: z.string().optional(),
-  preferredGender: z.enum(["MALE", "FEMALE", ""]).optional(),
+  preferredGender: z.enum(["MALE", "FEMALE", "none"]).optional(),
   urgency: z.enum(["Low", "Medium", "High", "Urgent"]),
 });
 
@@ -74,7 +74,7 @@ export function StaffRequestFormDialog({
       numberOfStaff: 1,
       skillsRequired: "",
       qualificationsRequired: "",
-      preferredGender: "",
+      preferredGender: "none",
       urgency: "Medium",
     },
   });
@@ -88,7 +88,7 @@ export function StaffRequestFormDialog({
         skillsRequired: data.skillsRequired || undefined,
         qualificationsRequired: data.qualificationsRequired || undefined,
         preferredGender:
-          data.preferredGender === ""
+          data.preferredGender === "none"
             ? undefined
             : (data.preferredGender as "MALE" | "FEMALE"),
         urgency: data.urgency,
@@ -209,7 +209,7 @@ export function StaffRequestFormDialog({
                       <SelectValue placeholder="No preference" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No preference</SelectItem>
+                      <SelectItem value="none">No preference</SelectItem>
                       <SelectItem value="MALE">Male</SelectItem>
                       <SelectItem value="FEMALE">Female</SelectItem>
                     </SelectContent>
