@@ -22,6 +22,13 @@
       "when": 1767961294204,
       "tag": "0002_complete_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1768156569171,
+      "tag": "0003_large_mentallo",
+      "breakpoints": true
     }
   ]
 }

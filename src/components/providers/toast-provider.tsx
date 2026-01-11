@@ -10,10 +10,15 @@ export function ToastProvider() {
       closeButton
       theme="system"
       toastOptions={{
-        style: {
-          background: "hsl(var(--background))",
-          color: "hsl(var(--foreground))",
-          border: "1px solid hsl(var(--border))",
+        classNames: {
+          toast: "group-[.toaster]:shadow-lg",
+          success:
+            "group-[.toaster]:bg-green-500 group-[.toaster]:text-white group-[.toaster]:border-green-600",
+          error:
+            "group-[.toaster]:bg-red-500 group-[.toaster]:text-white group-[.toaster]:border-red-600",
+          warning:
+            "group-[.toaster]:bg-yellow-500 group-[.toaster]:text-white group-[.toaster]:border-yellow-600",
+          info: "group-[.toaster]:bg-blue-500 group-[.toaster]:text-white group-[.toaster]:border-blue-600",
         },
       }}
     />

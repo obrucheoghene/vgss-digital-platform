@@ -1,4 +1,4 @@
-// src/app/dashboard/vgss-office/graduates/page.tsx
+// src/app/dashboard/blw-zone/chapters/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -23,54 +23,148 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import {
   Search,
   MoreHorizontal,
-  Eye,
   Edit,
   Loader2,
   Church,
+  Trash2,
+  Plus,
 } from "lucide-react";
 import { ChapterFormDailog } from "@/components/forms/chapter-form-dialog";
 import { useChaptersForZone } from "@/hooks/user-chapters";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
 
 interface Chapter {
   id: string;
   name: string;
-  createdAt: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
+  userId?: string;
 }
 
-export default function GraduateManagementPage() {
+export default function ChapterManagementPage() {
   const zoneChapters = useChaptersForZone();
+  const queryClient = useQueryClient();
 
   const [openChapterDialog, setOpenChapterDialog] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [chapterToDelete, setChapterToDelete] = useState<Chapter | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Filter chapters based on search query
+  const filteredChapters = (zoneChapters.data?.chapters || []).filter(
+    (chapter) =>
+      chapter.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleOpenAddDialog = () => {
+    setSelectedChapter(null);
+    setOpenChapterDialog(true);
+  };
+
+  const handleOpenEditDialog = (chapter: Chapter) => {
+    setSelectedChapter(chapter);
+    setOpenChapterDialog(true);
+  };
+
+  const handleDeleteClick = (chapter: Chapter) => {
+    setChapterToDelete(chapter);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!chapterToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await axios.delete(`/api/blw-zone/chapters/${chapterToDelete.id}`);
+      toast.success("Chapter deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["chapters-for-zone"] });
+    } catch (error) {
+      console.error("Error deleting chapter:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data?.error || "Failed to delete chapter");
+      } else {
+        toast.error("Failed to delete chapter");
+      }
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setChapterToDelete(null);
+    }
+  };
 
   return (
-    <DashboardLayout title="Graduate Management">
+    <DashboardLayout title="Chapter Management">
       <ChapterFormDailog
         open={openChapterDialog}
         setOpen={setOpenChapterDialog}
+        chapter={selectedChapter}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Chapter</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{chapterToDelete?.name}&quot;? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Chapter Management</h1>
-            <p className="text-muted-foreground">Manage chapters the zone</p>
+            <p className="text-muted-foreground">
+              Manage chapters in your zone
+            </p>
           </div>
           <div className="flex space-x-2">
-            <Button onClick={() => setOpenChapterDialog(true)}>
+            <Button onClick={handleOpenAddDialog}>
+              <Plus className="w-4 h-4 mr-2" />
               Add Chapter
             </Button>
           </div>
         </div>
-
-        {/* Status Tabs */}
 
         <Card>
           <CardHeader>
@@ -80,15 +174,11 @@ export default function GraduateManagementPage() {
                   <Church className="w-5 h-5 mr-2" />
                   Chapter List
                 </CardTitle>
-                {/* <CardDescription>
-                      Manage graduate registrations, approvals, and service
-                      assignments
-                    </CardDescription> */}
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {/* Filters */}
+            {/* Search Filter */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <Label htmlFor="search" className="sr-only">
@@ -99,51 +189,63 @@ export default function GraduateManagementPage() {
                   <Input
                     id="search"
                     placeholder="Search by name..."
-                    // value={}
-                    // onChange={(e) => setSearchQuery(e.target.value)}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Graduates Table */}
+            {/* Chapters Table */}
             <div className="rounded-lg border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
-                      <Checkbox
-                        // checked={isAllSelected}
-                        // onCheckedChange={handleSelectAll}
-                        ref={(ref) => {
-                          // if (ref) ref.indeterminate = isSomeSelected;
-                        }}
-                      />
+                      <Checkbox disabled />
                     </TableHead>
                     <TableHead>Name</TableHead>
-
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {zoneChapters.isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
+                      <TableCell colSpan={3} className="text-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                        Loading graduates...
+                        Loading chapters...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredChapters.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-8">
+                        <Church className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-muted-foreground">
+                          {searchQuery
+                            ? "No chapters found matching your search"
+                            : "No chapters added yet"}
+                        </p>
+                        {!searchQuery && (
+                          <Button
+                            variant="link"
+                            onClick={handleOpenAddDialog}
+                            className="mt-2"
+                          >
+                            Add your first chapter
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    (zoneChapters.data?.chapters || []).map((chapter) => (
+                    filteredChapters.map((chapter) => (
                       <TableRow key={chapter.id} className="hover:bg-muted/50">
                         <TableCell>
                           <Checkbox checked={false} />
                         </TableCell>
                         <TableCell>
-                          <p>{chapter.name}</p>
+                          <p className="font-medium">{chapter.name}</p>
                         </TableCell>
-
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -153,25 +255,23 @@ export default function GraduateManagementPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>
-                                Graduate Actions
+                                Chapter Actions
                               </DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                              // onClick={() => {
-                              //   setSelectedGraduate(graduate);
-                              //   setIsDetailModalOpen(true);
-                              // }}
+                                onClick={() => handleOpenEditDialog(chapter)}
                               >
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
                                 <Edit className="w-4 h-4 mr-2" />
-                                Edit Information
+                                Edit Chapter
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-
-                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteClick(chapter)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Chapter
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -181,6 +281,14 @@ export default function GraduateManagementPage() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Results count */}
+            {!zoneChapters.isLoading && filteredChapters.length > 0 && (
+              <div className="mt-4 text-sm text-muted-foreground">
+                Showing {filteredChapters.length} of{" "}
+                {zoneChapters.data?.chapters?.length || 0} chapters
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

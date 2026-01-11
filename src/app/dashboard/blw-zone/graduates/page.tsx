@@ -69,51 +69,60 @@ import {
   BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useChaptersForZone } from "@/hooks/user-chapters";
+import axios from "axios";
 
 interface Graduate {
   id: string;
-  userId: string;
+  userId?: string;
   graduateFirstname: string;
   graduateSurname: string;
   graduateGender: "MALE" | "FEMALE";
   graduatePhoneNumber: string;
-  graduateEmail: string;
-  maritalStatus: "SINGLE" | "MARRIED";
-  dateOfBirth: string;
-  stateOfOrigin: string;
-  nameOfZone: string;
-  nameOfFellowship: string;
+  graduateEmail?: string;
+  maritalStatus?: "SINGLE" | "MARRIED";
+  dateOfBirth?: string;
+  stateOfOrigin?: string;
+  nameOfZone?: string;
+  nameOfFellowship?: string;
   nameOfChapterPastor: string;
   nameOfUniversity: string;
   courseOfStudy: string;
   graduationYear: number;
-  grade: string;
-  nyscStatus: "COMPLETED" | "IN_PROGRESS" | "NOT_STARTED" | "EXEMPTED";
+  grade?: string;
+  nyscStatus?: "COMPLETED" | "IN_PROGRESS" | "NOT_STARTED" | "EXEMPTED";
   preferredCityOfPosting?: string;
-  status:
+  status?:
     | "Under Review"
     | "Invited For Interview"
     | "Interviewed"
     | "Sighting"
     | "Serving"
     | "Not Accepted";
-  isApproved: boolean;
+  isApproved?: boolean;
   approvedBy?: string;
   approvedAt?: string;
   serviceStartedDate?: string;
   serviceCompletedDate?: string;
-  createdAt: string;
-  updatedAt: string;
-  registeredAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isRegistered: boolean;
+  registeredAt?: string;
+  // Additional fields from zoneGraduates
+  chapterId?: string;
+  nameOfZonalPastor?: string;
+  phoneNumberOfChapterPastor?: string;
+  kingschatIDOfChapterPastor?: string;
   // Test questions preview
   visionMissionPurpose?: string;
   whyVgss?: string;
   plansAfterVgss?: string;
-  chapter: string;
+  chapter?: string;
 }
 
 interface GraduateStats {
   total: number;
+  registered: number;
   underReview: number;
   interviewed: number;
   serving: number;
@@ -151,6 +160,28 @@ export default function GraduateManagementPage() {
 
   const [allGraduates, setAllGraduates] = useState<Graduate[]>([]);
   const [registeredGraduates, setRegisteredGraduate] = useState<Graduate[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingGraduate, setEditingGraduate] = useState<Graduate | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Form state for editing
+  const [editForm, setEditForm] = useState({
+    graduateFirstname: "",
+    graduateSurname: "",
+    graduateGender: "MALE" as "MALE" | "FEMALE",
+    graduatePhoneNumber: "",
+    nameOfUniversity: "",
+    courseOfStudy: "",
+    graduationYear: new Date().getFullYear(),
+    chapterId: "",
+    nameOfZonalPastor: "",
+    nameOfChapterPastor: "",
+    phoneNumberOfChapterPastor: "",
+    kingschatIDOfChapterPastor: "",
+  });
+
+  const chaptersQuery = useChaptersForZone();
+  const chapters = chaptersQuery.data?.chapters || [];
 
   useEffect(() => {
     const fetchGraduates = async () => {
@@ -174,9 +205,10 @@ export default function GraduateManagementPage() {
     fetchGraduates();
   }, []);
 
-  // Mock stats - replace with real data
+  // Stats calculated from graduates data
   const [stats, setStats] = useState<GraduateStats>({
     total: 0,
+    registered: 0,
     underReview: 0,
     interviewed: 0,
     serving: 0,
@@ -193,7 +225,33 @@ export default function GraduateManagementPage() {
     },
   });
 
-  // Mock data - replace with API call
+  // Calculate stats when graduates data changes
+  useEffect(() => {
+    if (allGraduates.length > 0) {
+      const newStats: GraduateStats = {
+        total: allGraduates.length,
+        registered: allGraduates.filter((g) => g.isRegistered).length,
+        underReview: allGraduates.filter((g) => g.status === "Under Review").length,
+        interviewed: allGraduates.filter((g) => g.status === "Interviewed").length,
+        serving: allGraduates.filter((g) => g.status === "Serving").length,
+        completed: allGraduates.filter((g) => g.serviceCompletedDate).length,
+        notAccepted: allGraduates.filter((g) => g.status === "Not Accepted").length,
+        byGender: {
+          MALE: allGraduates.filter((g) => g.graduateGender === "MALE").length,
+          FEMALE: allGraduates.filter((g) => g.graduateGender === "FEMALE").length,
+        },
+        byStatus: {
+          "Under Review": allGraduates.filter((g) => g.status === "Under Review").length,
+          "Invited For Interview": allGraduates.filter((g) => g.status === "Invited For Interview").length,
+          Interviewed: allGraduates.filter((g) => g.status === "Interviewed").length,
+          Sighting: allGraduates.filter((g) => g.status === "Sighting").length,
+          Serving: allGraduates.filter((g) => g.status === "Serving").length,
+          "Not Accepted": allGraduates.filter((g) => g.status === "Not Accepted").length,
+        },
+      };
+      setStats(newStats);
+    }
+  }, [allGraduates]);
 
   // Filter graduates based on search and filters
   useEffect(() => {
@@ -201,30 +259,35 @@ export default function GraduateManagementPage() {
 
     // Search filter
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (graduate) =>
-          graduate.graduateFirstname
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.graduateSurname
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.graduateEmail
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.nameOfUniversity
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.courseOfStudy
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.nameOfZone
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.nameOfFellowship
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
+          (graduate.graduateFirstname || "").toLowerCase().includes(query) ||
+          (graduate.graduateSurname || "").toLowerCase().includes(query) ||
+          (graduate.graduateEmail || "").toLowerCase().includes(query) ||
+          (graduate.nameOfUniversity || "").toLowerCase().includes(query) ||
+          (graduate.courseOfStudy || "").toLowerCase().includes(query) ||
+          (graduate.nameOfZone || "").toLowerCase().includes(query) ||
+          (graduate.nameOfFellowship || "").toLowerCase().includes(query)
       );
+    }
+
+    // Gender filter
+    if (selectedGender && selectedGender !== "all") {
+      filtered = filtered.filter(
+        (graduate) => graduate.graduateGender === selectedGender
+      );
+    }
+
+    // Status/Registration filter
+    if (selectedStatus && selectedStatus !== "all") {
+      if (selectedStatus === "registered") {
+        filtered = filtered.filter((graduate) => graduate.isRegistered);
+      } else {
+        filtered = filtered.filter(
+          (graduate) => graduate.status === selectedStatus
+        );
+      }
     }
 
     setFilteredGraduates(filtered);
@@ -266,59 +329,53 @@ export default function GraduateManagementPage() {
     );
   };
 
-  const handleStatusUpdate = async (graduateId: string, newStatus: string) => {
-    setIsUpdating(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setGraduates((prev) =>
-        prev.map((grad) =>
-          grad.id === graduateId
-            ? {
-                ...grad,
-                status: newStatus as Graduate["status"],
-                updatedAt: new Date().toISOString(),
-              }
-            : grad
-        )
-      );
-
-      toast.success(`Graduate status updated to ${newStatus}`);
-    } catch (error) {
-      toast.error("Failed to update status");
-    } finally {
-      setIsUpdating(false);
-    }
+  const handleOpenEditModal = (graduate: Graduate) => {
+    setEditingGraduate(graduate);
+    setEditForm({
+      graduateFirstname: graduate.graduateFirstname || "",
+      graduateSurname: graduate.graduateSurname || "",
+      graduateGender: graduate.graduateGender || "MALE",
+      graduatePhoneNumber: graduate.graduatePhoneNumber || "",
+      nameOfUniversity: graduate.nameOfUniversity || "",
+      courseOfStudy: graduate.courseOfStudy || "",
+      graduationYear: graduate.graduationYear || new Date().getFullYear(),
+      chapterId: graduate.chapterId || "",
+      nameOfZonalPastor: graduate.nameOfZonalPastor || "",
+      nameOfChapterPastor: graduate.nameOfChapterPastor || "",
+      phoneNumberOfChapterPastor: graduate.phoneNumberOfChapterPastor || "",
+      kingschatIDOfChapterPastor: graduate.kingschatIDOfChapterPastor || "",
+    });
+    setIsEditModalOpen(true);
   };
 
-  const handleApproval = async (graduateId: string, approved: boolean) => {
-    setIsUpdating(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  const handleSaveEdit = async () => {
+    if (!editingGraduate) return;
 
-      setGraduates((prev) =>
+    setIsSaving(true);
+    try {
+      await axios.put(`/api/blw-zone/graduates/${editingGraduate.id}`, editForm);
+
+      // Update local state
+      setAllGraduates((prev) =>
         prev.map((grad) =>
-          grad.id === graduateId
-            ? {
-                ...grad,
-                isApproved: approved,
-                approvedBy: approved ? "current-admin" : undefined,
-                approvedAt: approved ? new Date().toISOString() : undefined,
-                updatedAt: new Date().toISOString(),
-              }
+          grad.id === editingGraduate.id
+            ? { ...grad, ...editForm }
             : grad
         )
       );
 
-      toast.success(
-        `Graduate ${approved ? "approved" : "approval revoked"} successfully`
-      );
+      toast.success("Graduate updated successfully");
+      setIsEditModalOpen(false);
+      setEditingGraduate(null);
     } catch (error) {
-      toast.error(`Failed to ${approved ? "approve" : "revoke approval"}`);
+      console.error("Error updating graduate:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data?.error || "Failed to update graduate");
+      } else {
+        toast.error("Failed to update graduate");
+      }
     } finally {
-      setIsUpdating(false);
+      setIsSaving(false);
     }
   };
 
@@ -420,8 +477,8 @@ export default function GraduateManagementPage() {
         >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="all">All ({allGraduates.length})</TabsTrigger>
-            <TabsTrigger value="Register">
-              Registered ({stats.byStatus["Under Review"]})
+            <TabsTrigger value="registered">
+              Registered ({stats.registered})
             </TabsTrigger>
           </TabsList>
 
@@ -668,10 +725,10 @@ export default function GraduateManagementPage() {
                                 )}
                               </TableCell> */}
                               <TableCell>
-                                {graduate.registeredAt ? (
+                                {graduate.isRegistered ? (
                                   <Badge className="bg-green-100 text-green-800">
                                     <CheckCircle className="w-3 h-3 mr-1" />
-                                    Registed
+                                    Registered
                                   </Badge>
                                 ) : (
                                   <Badge
@@ -704,106 +761,12 @@ export default function GraduateManagementPage() {
                                       <Eye className="w-4 h-4 mr-2" />
                                       View Details
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleOpenEditModal(graduate)}
+                                    >
                                       <Edit className="w-4 h-4 mr-2" />
                                       Edit Information
                                     </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-
-                                    {/* Status Update Submenu */}
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger className="flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent">
-                                        <FileText className="w-4 h-4 mr-2" />
-                                        Update Status
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent side="left">
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Under Review"
-                                            )
-                                          }
-                                        >
-                                          Under Review
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Invited For Interview"
-                                            )
-                                          }
-                                        >
-                                          Invite for Interview
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Interviewed"
-                                            )
-                                          }
-                                        >
-                                          Interviewed
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Sighting"
-                                            )
-                                          }
-                                        >
-                                          Sighting
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Serving"
-                                            )
-                                          }
-                                        >
-                                          Start Service
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                          className="text-red-600"
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Not Accepted"
-                                            )
-                                          }
-                                        >
-                                          Not Accepted
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-
-                                    <DropdownMenuSeparator />
-                                    {graduate.isApproved ? (
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleApproval(graduate.id, false)
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <XCircle className="w-4 h-4 mr-2" />
-                                        Revoke Approval
-                                      </DropdownMenuItem>
-                                    ) : (
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleApproval(graduate.id, true)
-                                        }
-                                        className="text-green-600"
-                                      >
-                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                        Approve Graduate
-                                      </DropdownMenuItem>
-                                    )}
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </TableCell>
@@ -912,13 +875,15 @@ export default function GraduateManagementPage() {
                           Current Status
                         </h3>
                         <div className="space-y-2">
-                          {getStatusBadge(selectedGraduate.status)}
-                          <div className="text-sm text-muted-foreground">
-                            Last updated:{" "}
-                            {new Date(
-                              selectedGraduate.updatedAt
-                            ).toLocaleString()}
-                          </div>
+                          {getStatusBadge(selectedGraduate.status || "Under Review")}
+                          {selectedGraduate.updatedAt && (
+                            <div className="text-sm text-muted-foreground">
+                              Last updated:{" "}
+                              {new Date(
+                                selectedGraduate.updatedAt
+                              ).toLocaleString()}
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -1198,45 +1163,214 @@ export default function GraduateManagementPage() {
                     >
                       Close
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (selectedGraduate) {
+                          setIsDetailModalOpen(false);
+                          handleOpenEditModal(selectedGraduate);
+                        }
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Graduate
                     </Button>
-                    {!selectedGraduate.isApproved ? (
-                      <Button
-                        onClick={() => {
-                          handleApproval(selectedGraduate.id, true);
-                          setIsDetailModalOpen(false);
-                        }}
-                        disabled={isUpdating}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        {isUpdating && (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        )}
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Approve Graduate
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="destructive"
-                        onClick={() => {
-                          handleApproval(selectedGraduate.id, false);
-                          setIsDetailModalOpen(false);
-                        }}
-                        disabled={isUpdating}
-                      >
-                        {isUpdating && (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        )}
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Revoke Approval
-                      </Button>
-                    )}
                   </div>
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Graduate Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Graduate Information</DialogTitle>
+              <DialogDescription>
+                Update the graduate&apos;s information below.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-firstname">First Name</Label>
+                  <Input
+                    id="edit-firstname"
+                    value={editForm.graduateFirstname}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, graduateFirstname: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-surname">Surname</Label>
+                  <Input
+                    id="edit-surname"
+                    value={editForm.graduateSurname}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, graduateSurname: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-gender">Gender</Label>
+                  <Select
+                    value={editForm.graduateGender}
+                    onValueChange={(value: "MALE" | "FEMALE") =>
+                      setEditForm({ ...editForm, graduateGender: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Male</SelectItem>
+                      <SelectItem value="FEMALE">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">Phone Number</Label>
+                  <Input
+                    id="edit-phone"
+                    value={editForm.graduatePhoneNumber}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, graduatePhoneNumber: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-university">University</Label>
+                  <Input
+                    id="edit-university"
+                    value={editForm.nameOfUniversity}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, nameOfUniversity: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course">Course of Study</Label>
+                  <Input
+                    id="edit-course"
+                    value={editForm.courseOfStudy}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, courseOfStudy: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-year">Graduation Year</Label>
+                  <Input
+                    id="edit-year"
+                    type="number"
+                    value={editForm.graduationYear}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, graduationYear: parseInt(e.target.value) || new Date().getFullYear() })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-chapter">Chapter</Label>
+                  <Select
+                    value={editForm.chapterId}
+                    onValueChange={(value) =>
+                      setEditForm({ ...editForm, chapterId: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select chapter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {chapters.map((chapter) => (
+                        <SelectItem key={chapter.id} value={chapter.id}>
+                          {chapter.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-zonal-pastor">Name of Zonal Pastor</Label>
+                <Input
+                  id="edit-zonal-pastor"
+                  value={editForm.nameOfZonalPastor}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, nameOfZonalPastor: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-chapter-pastor">Name of Chapter Pastor</Label>
+                  <Input
+                    id="edit-chapter-pastor"
+                    value={editForm.nameOfChapterPastor}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, nameOfChapterPastor: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-pastor-phone">Chapter Pastor Phone</Label>
+                  <Input
+                    id="edit-pastor-phone"
+                    value={editForm.phoneNumberOfChapterPastor}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, phoneNumberOfChapterPastor: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-kingschat">KingsChat ID of Chapter Pastor</Label>
+                <Input
+                  id="edit-kingschat"
+                  value={editForm.kingschatIDOfChapterPastor}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, kingschatIDOfChapterPastor: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setEditingGraduate(null);
+                }}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

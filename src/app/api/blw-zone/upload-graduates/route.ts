@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { zoneGraduates } from "@/lib/db/schema";
+import { zoneGraduates, uploadHistory } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
@@ -23,6 +23,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Create upload history record
+    const [historyRecord] = await db
+      .insert(uploadHistory)
+      .values({
+        userId: session.user.id,
+        filename: filename || "bulk_upload.csv",
+        totalRecords: graduates.length,
+        status: "processing",
+      })
+      .returning();
+
     let successCount = 0;
     let duplicateCount = 0;
     let errorCount = 0;
@@ -33,15 +44,25 @@ export async function POST(req: NextRequest) {
       const graduate = graduates[i];
 
       try {
-        // Check for duplicate (same name, fellowship, and zone)
+        // Validate phone number starts with +234
+        if (
+          !graduate.graduatePhoneNumber ||
+          !graduate.graduatePhoneNumber.startsWith("+234")
+        ) {
+          errorCount++;
+          errors.push(
+            `Row ${i + 1}: Phone number must start with +234`
+          );
+          continue;
+        }
+
+        // Check for duplicate (same phone number for this zone)
         const existing = await db
           .select()
           .from(zoneGraduates)
           .where(
             and(
               eq(zoneGraduates.userId, session.user.id),
-              // eq(zoneGraduates.graduateFirstname, graduate.graduateFirstname),
-              // eq(zoneGraduates.graduateSurname, graduate.graduateSurname),
               eq(
                 zoneGraduates.graduatePhoneNumber,
                 graduate.graduatePhoneNumber
@@ -55,6 +76,19 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
+        // Validate required fields
+        if (!graduate.graduateFirstname || !graduate.graduateSurname) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: First name and surname are required`);
+          continue;
+        }
+
+        if (!graduate.chapterId) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: Chapter is required`);
+          continue;
+        }
+
         // Insert new record
         await db.insert(zoneGraduates).values({
           userId: session.user.id,
@@ -64,14 +98,13 @@ export async function POST(req: NextRequest) {
           graduatePhoneNumber: graduate.graduatePhoneNumber,
           nameOfUniversity: graduate.nameOfUniversity,
           courseOfStudy: graduate.courseOfStudy,
-          graduationYear: graduate.graduationYear,
+          graduationYear: parseInt(graduate.graduationYear) || new Date().getFullYear(),
           chapterId: graduate.chapterId,
           nameOfZonalPastor: graduate.nameOfZonalPastor,
           nameOfChapterPastor: graduate.nameOfChapterPastor,
           phoneNumberOfChapterPastor: graduate.phoneNumberOfChapterPastor,
-          // emailOfChapterPastor: graduate.emailOfChapterPastor,
           kingschatIDOfChapterPastor:
-            graduate.kingschatIDOfChapterPastor || null,
+            graduate.kingschatIDOfChapterPastor || "",
           isRegistered: false,
         });
 
@@ -87,6 +120,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Update upload history record with results
+    const finalStatus =
+      errorCount === graduates.length ? "failed" : "completed";
+
+    await db
+      .update(uploadHistory)
+      .set({
+        successfulRecords: successCount,
+        failedRecords: errorCount,
+        duplicateRecords: duplicateCount,
+        status: finalStatus,
+        errors: errors.length > 0 ? JSON.stringify(errors.slice(0, 50)) : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(uploadHistory.id, historyRecord.id));
+
     return NextResponse.json({
       success: true,
       message: `Upload completed: ${successCount} records added, ${duplicateCount} duplicates skipped, ${errorCount} errors`,
@@ -95,6 +144,7 @@ export async function POST(req: NextRequest) {
       errorCount,
       errors: errors.slice(0, 10), // Limit errors shown
       filename,
+      historyId: historyRecord.id,
     });
   } catch (error) {
     console.error("Graduate upload error:", error);

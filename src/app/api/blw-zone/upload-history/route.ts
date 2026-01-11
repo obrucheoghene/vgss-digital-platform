@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { zoneGraduates } from "@/lib/db/schema";
+import { uploadHistory, zoneGraduates } from "@/lib/db/schema";
 import { eq, desc, count } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -14,41 +14,42 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get upload statistics grouped by date
-    const uploadStats = await db
+    // Get upload history from the upload_history table
+    const history = await db
       .select({
-        uploadDate: zoneGraduates.createdAt,
-        totalRecords: count(),
+        id: uploadHistory.id,
+        filename: uploadHistory.filename,
+        totalRecords: uploadHistory.totalRecords,
+        successfulRecords: uploadHistory.successfulRecords,
+        failedRecords: uploadHistory.failedRecords,
+        duplicateRecords: uploadHistory.duplicateRecords,
+        status: uploadHistory.status,
+        errors: uploadHistory.errors,
+        createdAt: uploadHistory.createdAt,
       })
-      .from(zoneGraduates)
-      .where(eq(zoneGraduates.userId, session.user.id))
-      .groupBy(zoneGraduates.createdAt)
-      .orderBy(desc(zoneGraduates.createdAt))
-      .limit(10);
-
-    // Get recent uploads with detailed info
-    const recentUploads = await db
-      .select({
-        id: zoneGraduates.id,
-        graduateFirstname: zoneGraduates.graduateFirstname,
-        graduateLastname: zoneGraduates.graduateSurname,
-        nameOfFellowship: zoneGraduates.chapterId,
-        chapterId: zoneGraduates.chapterId,
-        isRegistered: zoneGraduates.isRegistered,
-        registeredAt: zoneGraduates.registeredAt,
-        createdAt: zoneGraduates.createdAt,
-      })
-      .from(zoneGraduates)
-      .where(eq(zoneGraduates.userId, session.user.id))
-      .orderBy(desc(zoneGraduates.createdAt))
+      .from(uploadHistory)
+      .where(eq(uploadHistory.userId, session.user.id))
+      .orderBy(desc(uploadHistory.createdAt))
       .limit(50);
+
+    // Parse errors JSON for each record
+    const historyWithParsedErrors = history.map((record) => ({
+      ...record,
+      errors: record.errors ? JSON.parse(record.errors) : [],
+    }));
+
+    // Get total counts for summary
+    const [totalStats] = await db
+      .select({
+        totalUploaded: count(),
+      })
+      .from(zoneGraduates)
+      .where(eq(zoneGraduates.userId, session.user.id));
 
     return NextResponse.json({
       success: true,
-      uploadStats,
-      recentUploads,
-      totalUploaded: recentUploads.length,
-      totalRegistered: recentUploads.filter((u) => u.isRegistered).length,
+      history: historyWithParsedErrors,
+      totalUploaded: totalStats?.totalUploaded || 0,
     });
   } catch (error) {
     console.error("Upload history error:", error);

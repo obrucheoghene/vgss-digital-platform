@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
           nameOfChapterPastor: zoneGraduates.nameOfChapterPastor,
           phoneNumberOfChapterPastor: zoneGraduates.phoneNumberOfChapterPastor,
           kingschatIDOfChapterPastor: zoneGraduates.kingschatIDOfChapterPastor,
+          isRegistered: zoneGraduates.isRegistered,
           registeredAt: zoneGraduates.registeredAt,
+          createdAt: zoneGraduates.createdAt,
           chapter: chapters.name,
         })
         .from(zoneGraduates)

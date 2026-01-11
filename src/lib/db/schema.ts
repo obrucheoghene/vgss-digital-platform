@@ -58,6 +58,13 @@ export const staffRequestUrgencyEnum = pgEnum("staff_request_urgency", [
   "Urgent",
 ]);
 
+// Upload History Enum
+export const uploadStatusEnum = pgEnum("upload_status", [
+  "processing",
+  "completed",
+  "failed",
+]);
+
 // Zone Graduates table - Data uploaded by BLW Zones before graduate registration
 export const zoneGraduates = pgTable("zone_graduates", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -312,6 +319,23 @@ export const staffRequestAssignments = pgTable("staff_request_assignments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Upload History table - Tracks bulk uploads by BLW Zones
+export const uploadHistory = pgTable("upload_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(), // BLW Zone who uploaded
+  filename: varchar("filename", { length: 255 }).notNull(),
+  totalRecords: integer("total_records").default(0).notNull(),
+  successfulRecords: integer("successful_records").default(0).notNull(),
+  failedRecords: integer("failed_records").default(0).notNull(),
+  duplicateRecords: integer("duplicate_records").default(0).notNull(),
+  status: uploadStatusEnum("status").default("processing").notNull(),
+  errors: text("errors"), // JSON string of error messages
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations - Updated to remove interview questions relationships
 export const usersRelations = relations(users, ({ one, many }) => ({
   // User as graduate
@@ -336,6 +360,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   // Zone uploaded graduates
   uploadedGraduates: many(zoneGraduates, { relationName: "zoneUploader" }),
+  // Upload history
+  uploadHistory: many(uploadHistory, { relationName: "uploaderHistory" }),
   // Staff requests made by service department
   staffRequests: many(staffRequests, { relationName: "departmentRequests" }),
   // Staff requests approved by user
@@ -446,6 +472,14 @@ export const staffRequestAssignmentsRelations = relations(
   })
 );
 
+export const uploadHistoryRelations = relations(uploadHistory, ({ one }) => ({
+  uploadedByZone: one(users, {
+    fields: [uploadHistory.userId],
+    references: [users.id],
+    relationName: "uploaderHistory",
+  }),
+}));
+
 // Type exports for better TypeScript support
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -491,3 +525,8 @@ export type StaffRequestStatus =
   | "Fulfilled"
   | "Cancelled";
 export type StaffRequestUrgency = "Low" | "Medium" | "High" | "Urgent";
+
+// Upload History types
+export type UploadHistory = typeof uploadHistory.$inferSelect;
+export type NewUploadHistory = typeof uploadHistory.$inferInsert;
+export type UploadStatus = "processing" | "completed" | "failed";

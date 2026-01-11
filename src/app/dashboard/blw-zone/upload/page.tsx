@@ -1,7 +1,7 @@
 // src/app/dashboard/blw-zone/upload/page.tsx
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Upload,
   FileText,
@@ -32,12 +40,15 @@ import {
   CheckCircle,
   AlertCircle,
   X,
-  Users,
   Loader2,
   Eye,
-  Trash2,
+  FileSpreadsheet,
+  UserPlus,
+  History,
+  RefreshCw,
 } from "lucide-react";
 import UploadGraduateForm from "@/components/forms/upload-graduate";
+import { formatDistanceToNow } from "date-fns";
 
 interface GraduateUploadData {
   graduateFirstname: string;
@@ -47,24 +58,30 @@ interface GraduateUploadData {
   nameOfUniversity: string;
   courseOfStudy: string;
   graduationYear: string;
-  nameOfFellowship: string;
+  chapterId: string;
   nameOfZonalPastor: string;
   nameOfChapterPastor: string;
   phoneNumberOfChapterPastor: string;
-  emailOfChapterPastor: string;
   kingschatIDOfChapterPastor: string;
   errors?: string[];
   isValid?: boolean;
 }
 
-interface UploadHistory {
+interface UploadHistoryItem {
   id: string;
   filename: string;
-  uploadDate: string;
   totalRecords: number;
   successfulRecords: number;
   failedRecords: number;
+  duplicateRecords: number;
   status: "processing" | "completed" | "failed";
+  errors: string[];
+  createdAt: string;
+}
+
+interface Chapter {
+  id: string;
+  name: string;
 }
 
 export default function ZoneUploadPage() {
@@ -77,39 +94,48 @@ export default function ZoneUploadPage() {
   const [success, setSuccess] = useState("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<string>("");
+  const [uploadHistory, setUploadHistory] = useState<UploadHistoryItem[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Mock upload history - replace with real data
-  const uploadHistory: UploadHistory[] = [
-    {
-      id: "1",
-      filename: "graduates_january_2024.xlsx",
-      uploadDate: "2024-01-15",
-      totalRecords: 45,
-      successfulRecords: 43,
-      failedRecords: 2,
-      status: "completed",
-    },
-    {
-      id: "2",
-      filename: "new_graduates_february.csv",
-      uploadDate: "2024-02-01",
-      totalRecords: 23,
-      successfulRecords: 23,
-      failedRecords: 0,
-      status: "completed",
-    },
-    {
-      id: "3",
-      filename: "march_batch_graduates.xlsx",
-      uploadDate: "2024-03-10",
-      totalRecords: 31,
-      successfulRecords: 28,
-      failedRecords: 3,
-      status: "processing",
-    },
-  ];
+  // Fetch chapters on mount
+  useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        const response = await fetch("/api/blw-zone/chapters");
+        const data = await response.json();
+        if (data.success) {
+          setChapters(data.chapters || []);
+        }
+      } catch (error) {
+        console.error("Error fetching chapters:", error);
+      }
+    };
+    fetchChapters();
+  }, []);
+
+  // Fetch upload history
+  const fetchUploadHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const response = await fetch("/api/blw-zone/upload-history");
+      const data = await response.json();
+      if (data.success) {
+        setUploadHistory(data.history || []);
+      }
+    } catch (error) {
+      console.error("Error fetching upload history:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadHistory();
+  }, []);
 
   const requiredColumns = [
     "graduateFirstname",
@@ -119,11 +145,9 @@ export default function ZoneUploadPage() {
     "nameOfUniversity",
     "courseOfStudy",
     "graduationYear",
-    "nameOfFellowship",
     "nameOfZonalPastor",
     "nameOfChapterPastor",
     "phoneNumberOfChapterPastor",
-    "emailOfChapterPastor",
     "kingschatIDOfChapterPastor",
   ];
 
@@ -132,37 +156,31 @@ export default function ZoneUploadPage() {
       graduateFirstname: "John",
       graduateSurname: "Doe",
       graduateGender: "MALE",
-      graduatePhoneNumber: "+234 803 567 8594",
+      graduatePhoneNumber: "+2348035678594",
       nameOfUniversity: "Ambrose Ali University",
       courseOfStudy: "Computer Science",
       graduationYear: "2023",
-      nameOfFellowship: "Victory Fellowship",
       nameOfZonalPastor: "Pastor James Wilson",
       nameOfChapterPastor: "Pastor Mary Johnson",
-      phoneNumberOfChapterPastor: "+234 801 234 5678",
-      emailOfChapterPastor: "mary.johnson@loveworld.org",
+      phoneNumberOfChapterPastor: "+2348012345678",
       kingschatIDOfChapterPastor: "maryjohnson_lw",
     },
     {
       graduateFirstname: "Jane",
       graduateSurname: "Smith",
       graduateGender: "FEMALE",
-      graduatePhoneNumber: "+234 801 456 8038",
+      graduatePhoneNumber: "+2348014568038",
       nameOfUniversity: "University of Benin",
       courseOfStudy: "Electrical and Electronics Engineering",
       graduationYear: "2024",
-      nameOfFellowship: "Campus Fellowship",
       nameOfZonalPastor: "Pastor David Brown",
       nameOfChapterPastor: "Pastor Sarah Davis",
-      phoneNumberOfChapterPastor: "+234 802 345 6789",
-      emailOfChapterPastor: "sarah.davis@loveworld.org",
+      phoneNumberOfChapterPastor: "+2348023456789",
       kingschatIDOfChapterPastor: "sarahdavis_lw",
     },
   ];
 
   const validateData = (data: GraduateUploadData[]): GraduateUploadData[] => {
-    const errors: string[] = [];
-
     return data.map((row, index) => {
       const rowErrors: string[] = [];
 
@@ -184,31 +202,33 @@ export default function ZoneUploadPage() {
         rowErrors.push("Gender must be MALE or FEMALE");
       }
 
-      // Validate email format
-      if (row.emailOfChapterPastor) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(row.emailOfChapterPastor)) {
-          rowErrors.push("Invalid email format");
-        }
-      }
-
-      // Validate phone number format
+      // Validate phone number starts with +234
       if (row.graduatePhoneNumber) {
-        const phoneRegex = /^\+[\d\s\-\(\)]+$/;
-        if (!phoneRegex.test(row.graduatePhoneNumber)) {
-          rowErrors.push("Invalid phone number format");
+        if (!row.graduatePhoneNumber.startsWith("+234")) {
+          rowErrors.push("Phone number must start with +234");
+        } else {
+          // Check if it has enough digits (should be +234 followed by 10 digits)
+          const phoneDigits = row.graduatePhoneNumber.replace(/\D/g, "");
+          if (phoneDigits.length < 13) {
+            rowErrors.push("Phone number should have at least 13 digits (including 234)");
+          }
         }
       }
 
+      // Validate pastor phone number starts with +234
       if (row.phoneNumberOfChapterPastor) {
-        const pastorPhoneRegex = /^\+[\d\s\-\(\)]+$/;
-        if (!pastorPhoneRegex.test(row.phoneNumberOfChapterPastor)) {
-          rowErrors.push("Invalid phone number format");
+        if (!row.phoneNumberOfChapterPastor.startsWith("+234")) {
+          rowErrors.push("Pastor phone number must start with +234");
         }
       }
 
-      if (rowErrors.length > 0) {
-        errors.push(`Row ${index + 1}: ${rowErrors.join(", ")}`);
+      // Validate graduation year
+      if (row.graduationYear) {
+        const year = parseInt(row.graduationYear);
+        const currentYear = new Date().getFullYear();
+        if (isNaN(year) || year < 1990 || year > currentYear + 5) {
+          rowErrors.push("Invalid graduation year");
+        }
       }
 
       return {
@@ -305,6 +325,11 @@ export default function ZoneUploadPage() {
       return;
     }
 
+    if (!selectedChapter) {
+      setError("Please select a chapter for the graduates");
+      return;
+    }
+
     const validRecords = uploadData.filter((row) => row.isValid);
     if (validRecords.length === 0) {
       setError(
@@ -330,13 +355,19 @@ export default function ZoneUploadPage() {
         });
       }, 200);
 
+      // Add chapterId to all valid records
+      const recordsWithChapter = validRecords.map((record) => ({
+        ...record,
+        chapterId: selectedChapter,
+      }));
+
       const response = await fetch("/api/blw-zone/upload-graduates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          graduates: validRecords,
+          graduates: recordsWithChapter,
           filename: selectedFile?.name,
         }),
       });
@@ -351,10 +382,11 @@ export default function ZoneUploadPage() {
       }
 
       setSuccess(
-        `Upload completed successfully! ${
-          result.successCount
-        } records uploaded, ${result.duplicateCount || 0} duplicates skipped.`
+        `Upload completed! ${result.successCount} records uploaded, ${result.duplicateCount || 0} duplicates skipped, ${result.errorCount || 0} errors.`
       );
+
+      // Refresh upload history
+      fetchUploadHistory();
 
       // Reset form
       setTimeout(() => {
@@ -362,6 +394,7 @@ export default function ZoneUploadPage() {
         setSelectedFile(null);
         setPreviewMode(false);
         setUploadProgress(0);
+        setSelectedChapter("");
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -403,6 +436,7 @@ export default function ZoneUploadPage() {
     setSuccess("");
     setValidationErrors([]);
     setUploadProgress(0);
+    setSelectedChapter("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -429,34 +463,38 @@ export default function ZoneUploadPage() {
           <div>
             <h1 className="text-2xl font-bold">Upload Graduate Records</h1>
             <p className="text-muted-foreground">
-              Upload graduate information from your zone
+              Upload graduate information from your zone - single or bulk upload
             </p>
-            {/* <p className="text-muted-foreground">
-              Upload graduate information from your zone via CSV or Excel files
-            </p> */}
           </div>
-          <Button
-            onClick={downloadTemplate}
-            variant="outline"
-            className=" hidden"
-          >
+          <Button onClick={downloadTemplate} variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Download Template
           </Button>
         </div>
 
-        <Tabs defaultValue="addrecord" className="space-y-6">
-          {/* <TabsList>
-            <TabsTrigger value="addrecord">Add Record</TabsTrigger>
-            <TabsTrigger value="upload">Upload Data</TabsTrigger>
-            <TabsTrigger value="history">Upload History</TabsTrigger>
-          </TabsList> */}
+        <Tabs defaultValue="single" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="single" className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4" />
+              Single Upload
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="flex items-center gap-2">
+              <FileSpreadsheet className="w-4 h-4" />
+              Bulk Upload
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="w-4 h-4" />
+              Upload History
+            </TabsTrigger>
+          </TabsList>
 
-          <TabsContent value="addrecord" className="space-y-6">
+          {/* Single Upload Tab */}
+          <TabsContent value="single" className="space-y-6">
             <UploadGraduateForm />
           </TabsContent>
 
-          <TabsContent value="upload" className="space-y-6">
+          {/* Bulk Upload Tab */}
+          <TabsContent value="bulk" className="space-y-6">
             {/* File Upload Section */}
             <Card>
               <CardHeader>
@@ -465,7 +503,8 @@ export default function ZoneUploadPage() {
                   Upload File
                 </CardTitle>
                 <CardDescription>
-                  Select a CSV or Excel file containing graduate information
+                  Select a CSV or Excel file containing graduate information.
+                  Phone numbers must start with +234.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -508,6 +547,31 @@ export default function ZoneUploadPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Chapter Selection for Bulk Upload */}
+                {previewMode && (
+                  <div className="space-y-2">
+                    <Label htmlFor="chapter">Select Chapter for All Records *</Label>
+                    <Select
+                      value={selectedChapter}
+                      onValueChange={setSelectedChapter}
+                    >
+                      <SelectTrigger className="w-full md:w-[300px]">
+                        <SelectValue placeholder="Select a chapter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {chapters.map((chapter) => (
+                          <SelectItem key={chapter.id} value={chapter.id}>
+                            {chapter.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      All uploaded graduates will be assigned to this chapter
+                    </p>
+                  </div>
+                )}
 
                 {isProcessing && (
                   <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
@@ -573,6 +637,7 @@ export default function ZoneUploadPage() {
                         onClick={handleUpload}
                         disabled={
                           isUploading ||
+                          !selectedChapter ||
                           uploadData.filter((row) => row.isValid).length === 0
                         }
                       >
@@ -623,13 +688,9 @@ export default function ZoneUploadPage() {
                             <TableHead>Phone Number</TableHead>
                             <TableHead>University</TableHead>
                             <TableHead>Course</TableHead>
-                            <TableHead>Graduation Year</TableHead>
-                            <TableHead>Fellowship</TableHead>
+                            <TableHead>Year</TableHead>
                             <TableHead>Zonal Pastor</TableHead>
                             <TableHead>Chapter Pastor</TableHead>
-                            <TableHead>Pastor Phone Number</TableHead>
-                            <TableHead>Pastor Email</TableHead>
-                            <TableHead>Pastor KingsChatId</TableHead>
                             <TableHead>Errors</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -663,16 +724,8 @@ export default function ZoneUploadPage() {
                               <TableCell>{row.nameOfUniversity}</TableCell>
                               <TableCell>{row.courseOfStudy}</TableCell>
                               <TableCell>{row.graduationYear}</TableCell>
-                              <TableCell>{row.nameOfFellowship}</TableCell>
                               <TableCell>{row.nameOfZonalPastor}</TableCell>
                               <TableCell>{row.nameOfChapterPastor}</TableCell>
-                              <TableCell>
-                                {row.phoneNumberOfChapterPastor}
-                              </TableCell>
-                              <TableCell>{row.emailOfChapterPastor}</TableCell>
-                              <TableCell>
-                                {row.kingschatIDOfChapterPastor}
-                              </TableCell>
                               <TableCell>
                                 {row.errors && row.errors.length > 0 && (
                                   <div className="text-xs text-red-600">
@@ -736,106 +789,122 @@ export default function ZoneUploadPage() {
                       ))}
                     </ul>
                   </div>
-                  {/* <div>
-                    <h4 className="font-medium mb-2">Optional Columns</h4>
+                  <div>
+                    <h4 className="font-medium mb-2">Important Notes</h4>
                     <ul className="text-sm space-y-1 text-muted-foreground">
-                      <li>• kingschatIDOfChapterPastor</li>
+                      <li>• Gender must be &quot;MALE&quot; or &quot;FEMALE&quot; (case sensitive)</li>
+                      <li className="text-primary font-medium">• Phone numbers must start with +234</li>
+                      <li>• Duplicate phone numbers will be automatically skipped</li>
+                      <li>• You will select a chapter for all records after upload</li>
+                      <li>• Maximum file size is 5MB</li>
                     </ul>
-                  </div> */}
+                  </div>
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <h4 className="font-medium text-blue-900 mb-2">
-                    Important Notes
+                    Phone Number Format
                   </h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>
-                      • Gender must be either {`"MALE" or "FEMALE"`} (case
-                      sensitive)
-                    </li>
-                    <li>• Email addresses must be valid format</li>
-                    <li>
-                      • Phone numbers should include country code (+234 for
-                      Nigeria)
-                    </li>
-                    <li>• Duplicate records will be automatically skipped</li>
-                    <li>• Maximum file size is 5MB</li>
-                  </ul>
+                  <p className="text-sm text-blue-800">
+                    All phone numbers must start with +234 (Nigeria country code).
+                    <br />
+                    Example: <code className="bg-blue-100 px-1 rounded">+2348012345678</code>
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Upload History Tab */}
           <TabsContent value="history" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="w-5 h-5 mr-2" />
-                  Upload History
-                </CardTitle>
-                <CardDescription>
-                  Previous graduate data uploads from your zone
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center">
+                      <History className="w-5 h-5 mr-2" />
+                      Upload History
+                    </CardTitle>
+                    <CardDescription>
+                      Previous bulk uploads from your zone
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchUploadHistory}
+                    disabled={isLoadingHistory}
+                  >
+                    {isLoadingHistory ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Filename</TableHead>
-                        <TableHead>Upload Date</TableHead>
-                        <TableHead>Total Records</TableHead>
-                        <TableHead>Successful</TableHead>
-                        <TableHead>Failed</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {uploadHistory.map((upload) => (
-                        <TableRow key={upload.id}>
-                          <TableCell className="font-medium">
-                            {upload.filename}
-                          </TableCell>
-                          <TableCell>
-                            {new Date(upload.uploadDate).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>{upload.totalRecords}</TableCell>
-                          <TableCell>
-                            <span className="text-green-600 font-medium">
-                              {upload.successfulRecords}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-red-600 font-medium">
-                              {upload.failedRecords}
-                            </span>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(upload.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
-                                <Eye className="w-3 h-3" />
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Download className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                {isLoadingHistory ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : uploadHistory.length > 0 ? (
+                  <div className="rounded-lg border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Filename</TableHead>
+                          <TableHead>Upload Date</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Successful</TableHead>
+                          <TableHead>Duplicates</TableHead>
+                          <TableHead>Failed</TableHead>
+                          <TableHead>Status</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {uploadHistory.length === 0 && (
+                      </TableHeader>
+                      <TableBody>
+                        {uploadHistory.map((upload) => (
+                          <TableRow key={upload.id}>
+                            <TableCell className="font-medium">
+                              {upload.filename}
+                            </TableCell>
+                            <TableCell>
+                              {formatDistanceToNow(new Date(upload.createdAt), {
+                                addSuffix: true,
+                              })}
+                            </TableCell>
+                            <TableCell>{upload.totalRecords}</TableCell>
+                            <TableCell>
+                              <span className="text-green-600 font-medium">
+                                {upload.successfulRecords}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-orange-600 font-medium">
+                                {upload.duplicateRecords}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-red-600 font-medium">
+                                {upload.failedRecords}
+                              </span>
+                            </TableCell>
+                            <TableCell>{getStatusBadge(upload.status)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
                   <div className="text-center py-8">
-                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <History className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-foreground mb-2">
                       No Upload History
                     </h3>
                     <p className="text-muted-foreground">
-                      Upload your first batch of graduates to see history here.
+                      Upload your first batch of graduates using the Bulk Upload tab.
                     </p>
                   </div>
                 )}
