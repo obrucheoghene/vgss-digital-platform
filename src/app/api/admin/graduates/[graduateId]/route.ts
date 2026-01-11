@@ -152,13 +152,20 @@ export async function PATCH(
         break;
 
       case "approve":
+        // Get current graduate to preserve status if not specified
+        const [currentGraduate] = await db
+          .select({ status: graduateData.status })
+          .from(graduateData)
+          .where(eq(graduateData.id, graduateId));
+
         updatedGraduate = await db
           .update(graduateData)
           .set({
             isApproved: true,
             approvedBy: session.user.id,
             approvedAt: new Date(),
-            status: updateData.status || "Approved",
+            // Keep current status or use provided valid status, default to "Interviewed" for approved graduates
+            status: updateData.status || currentGraduate?.status || "Interviewed",
             comments: updateData.comments || null,
             updatedAt: new Date(),
           })

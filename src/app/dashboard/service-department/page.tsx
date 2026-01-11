@@ -1,4 +1,6 @@
 // src/app/dashboard/service-department/page.tsx
+"use client";
+
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import {
   Card,
@@ -10,221 +12,132 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
   UserPlus,
-  DollarSign,
-  MessageSquare,
-  TrendingUp,
-  Calendar,
-  CheckCircle,
   Clock,
-  Star,
+  CheckCircle,
   FileText,
   ArrowRight,
   AlertCircle,
+  ClipboardList,
 } from "lucide-react";
+import Link from "next/link";
+import {
+  useServiceDepartmentDashboard,
+  type AssignedStaff,
+  type StaffRequest,
+} from "@/hooks/use-service-department-dashboard";
+import { formatDistanceToNow, format } from "date-fns";
 
-export default function MinistryOfficeDashboard() {
-  // Mock data - replace with real data from your database
-  const stats = [
-    {
-      title: "VGSS Staff Assigned",
-      value: "8",
-      change: "+2",
-      trend: "up",
-      icon: Users,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      title: "Pending Requests",
-      value: "3",
-      change: "0",
-      trend: "neutral",
-      icon: Clock,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
-    },
-    {
-      title: "Monthly Salary Budget",
-      value: "₦240,000",
-      change: "+15%",
-      trend: "up",
-      icon: DollarSign,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      title: "Performance Rating",
-      value: "4.8/5.0",
-      change: "+0.2",
-      trend: "up",
-      icon: Star,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-  ];
-
-  const currentStaff = [
-    {
-      id: 1,
-      name: "John Doe",
-      position: "Administrative Assistant",
-      startDate: "Jan 2024",
-      performance: 4.9,
-      status: "active",
-      completionRate: 95,
-      department: "Administration",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      position: "Ministry Coordinator",
-      startDate: "Feb 2024",
-      performance: 4.7,
-      status: "active",
-      completionRate: 88,
-      department: "Ministry Operations",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      position: "Media Assistant",
-      startDate: "Mar 2024",
-      performance: 4.8,
-      status: "active",
-      completionRate: 92,
-      department: "Media & Communications",
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      position: "Event Coordinator",
-      startDate: "Apr 2024",
-      performance: 4.6,
-      status: "completing",
-      completionRate: 78,
-      department: "Events",
-    },
-  ];
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: "salary",
-      staff: "John Doe",
-      action: "Salary processed via Espees",
-      amount: "₦60,000",
-      time: "2 hours ago",
-      status: "completed",
-    },
-    {
-      id: 2,
-      type: "feedback",
-      staff: "Jane Smith",
-      action: "Monthly evaluation submitted",
-      rating: "4.7/5",
-      time: "1 day ago",
-      status: "completed",
-    },
-    {
-      id: 3,
-      type: "request",
-      staff: "New Request",
-      action: "Requested 2 additional staff members",
-      department: "Youth Ministry",
-      time: "3 days ago",
-      status: "pending",
-    },
-    {
-      id: 4,
-      type: "completion",
-      staff: "David Brown",
-      action: "Successfully completed VGSS service",
-      time: "1 week ago",
-      status: "completed",
-    },
-  ];
-
-  const upcomingTasks = [
-    {
-      id: 1,
-      title: "Submit Monthly Evaluations",
-      dueDate: "Tomorrow",
-      priority: "high",
-      staffCount: 4,
-      completed: 2,
-    },
-    {
-      id: 2,
-      title: "Process Salary Payments",
-      dueDate: "End of Week",
-      priority: "high",
-      staffCount: 8,
-      completed: 6,
-    },
-    {
-      id: 3,
-      title: "Review Staff Assignments",
-      dueDate: "Next Week",
-      priority: "medium",
-      staffCount: 3,
-      completed: 0,
-    },
-    {
-      id: 4,
-      title: "Plan Training Sessions",
-      dueDate: "Next Month",
-      priority: "low",
-      staffCount: 8,
-      completed: 1,
-    },
-  ];
+export default function ServiceDepartmentDashboard() {
+  const { data, isLoading, error } = useServiceDepartmentDashboard();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "active":
+      case "Serving":
         return (
           <Badge className="bg-green-100 text-green-800 border-green-200">
             Active
           </Badge>
         );
-      case "completing":
+      case "Sighting":
         return (
           <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-            Completing
+            Sighting
           </Badge>
         );
-      case "completed":
+      case "Interviewed":
         return (
           <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-            Completed
+            Interviewed
           </Badge>
         );
-      case "pending":
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getRequestStatusBadge = (status: string) => {
+    switch (status) {
+      case "Pending":
         return (
           <Badge className="bg-orange-100 text-orange-800 border-orange-200">
             Pending
           </Badge>
         );
+      case "Approved":
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            Approved
+          </Badge>
+        );
+      case "Fulfilled":
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Fulfilled
+          </Badge>
+        );
+      case "Rejected":
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Rejected
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "border-l-red-500 bg-red-50";
-      case "medium":
-        return "border-l-yellow-500 bg-yellow-50";
-      case "low":
-        return "border-l-green-500 bg-green-50";
+  const getUrgencyBadge = (urgency: string) => {
+    switch (urgency) {
+      case "Urgent":
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Urgent
+          </Badge>
+        );
+      case "High":
+        return (
+          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+            High
+          </Badge>
+        );
+      case "Medium":
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            Medium
+          </Badge>
+        );
+      case "Low":
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Low
+          </Badge>
+        );
       default:
-        return "border-l-gray-500 bg-gray-50";
+        return <Badge variant="outline">{urgency}</Badge>;
     }
   };
+
+  if (error) {
+    return (
+      <DashboardLayout title="Service Department Dashboard">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">
+              Error Loading Dashboard
+            </h2>
+            <p className="text-muted-foreground">
+              Please try refreshing the page.
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Service Department Dashboard">
@@ -234,7 +147,11 @@ export default function MinistryOfficeDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold mb-2">
-                Welcome, Service Department!
+                {isLoading ? (
+                  <Skeleton className="h-8 w-64 bg-white/20" />
+                ) : (
+                  `Welcome, ${data?.department?.name || "Service Department"}!`
+                )}
               </h2>
               <p className="opacity-90">
                 Manage your VGSS staff assignments and track their service
@@ -242,65 +159,106 @@ export default function MinistryOfficeDashboard() {
               </p>
             </div>
             <div className="hidden md:block">
-              <Button
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/20"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Request New Staff
-              </Button>
+              <Link href="/dashboard/service-department/staff-requests">
+                <Button
+                  variant="secondary"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Request New Staff
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card
-                key={stat.title}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${stat.bgColor}`}
-                  >
-                    <Icon className={`w-4 h-4 ${stat.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <TrendingUp
-                      className={`w-3 h-3 mr-1 ${
-                        stat.trend === "up"
-                          ? "text-green-500"
-                          : stat.trend === "neutral"
-                          ? "text-gray-500"
-                          : "text-red-500"
-                      }`}
-                    />
-                    <span
-                      className={
-                        stat.trend === "up"
-                          ? "text-green-600"
-                          : stat.trend === "neutral"
-                          ? "text-gray-600"
-                          : "text-red-600"
-                      }
-                    >
-                      {stat.change}
-                    </span>
-                    <span className="ml-1">from last month</span>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total VGSS Staff
+              </CardTitle>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-100">
+                <Users className="w-4 h-4 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {data?.stats?.totalStaff || 0}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Assigned to your department
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Active Staff
+              </CardTitle>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                <CheckCircle className="w-4 h-4 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {data?.stats?.activeStaff || 0}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Currently serving</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Pending Requests
+              </CardTitle>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-orange-100">
+                <Clock className="w-4 h-4 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {data?.stats?.pendingRequests || 0}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Awaiting approval</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Requests
+              </CardTitle>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-100">
+                <ClipboardList className="w-4 h-4 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {data?.stats?.totalRequests || 0}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">All time requests</p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -312,206 +270,199 @@ export default function MinistryOfficeDashboard() {
                 Current VGSS Staff
               </CardTitle>
               <CardDescription>
-                Your assigned graduates and their performance
+                Your assigned graduates and their service progress
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {currentStaff.map((staff) => (
-                <div
-                  key={staff.id}
-                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium">{staff.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {staff.position}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {getStatusBadge(staff.status)}
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Since {staff.startDate}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-muted-foreground">
-                          Performance
-                        </span>
-                        <span className="font-medium">
-                          {staff.performance}/5.0
-                        </span>
+              {isLoading ? (
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <Skeleton className="h-5 w-32 mb-1" />
+                          <Skeleton className="h-4 w-48" />
+                        </div>
+                        <Skeleton className="h-6 w-20" />
                       </div>
-                      <div className="flex items-center space-x-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < Math.floor(staff.performance)
-                                ? "text-yellow-500 fill-yellow-500"
-                                : "text-gray-300"
-                            }`}
+                      <Skeleton className="h-2 w-full mt-4" />
+                    </div>
+                  ))}
+                </>
+              ) : data?.staff && data.staff.length > 0 ? (
+                <>
+                  {data.staff.slice(0, 4).map((staff: AssignedStaff) => (
+                    <div
+                      key={staff.id}
+                      className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium">
+                            {staff.graduateFirstname} {staff.graduateSurname}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {staff.courseOfStudy || "N/A"} -{" "}
+                            {staff.nameOfUniversity || "N/A"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {getStatusBadge(staff.status)}
+                          {staff.serviceStartedDate && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Since{" "}
+                              {format(
+                                new Date(staff.serviceStartedDate),
+                                "MMM yyyy"
+                              )}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground text-xs mb-1">
+                            Contact
+                          </p>
+                          <p className="text-sm truncate">{staff.email}</p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-muted-foreground text-xs">
+                              Service Progress
+                            </span>
+                            <span className="font-medium text-xs">
+                              {staff.serviceProgress}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={staff.serviceProgress}
+                            className="h-2"
                           />
-                        ))}
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-muted-foreground">
-                          Service Progress
-                        </span>
-                        <span className="font-medium">
-                          {staff.completionRate}%
-                        </span>
-                      </div>
-                      <Progress value={staff.completionRate} className="h-2" />
+                      {staff.chapterName && (
+                        <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
+                          Chapter: {staff.chapterName}
+                        </p>
+                      )}
                     </div>
-                  </div>
+                  ))}
 
-                  <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
-                    Department: {staff.department}
+                  {data.staff.length > 4 && (
+                    <div className="pt-4 border-t">
+                      <Link href="/dashboard/service-department/staff">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-between"
+                        >
+                          View All Staff ({data.staff.length})
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h4 className="font-medium mb-2">No Staff Assigned Yet</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Request staff members to get started.
                   </p>
+                  <Link href="/dashboard/service-department/staff-requests">
+                    <Button>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Request Staff
+                    </Button>
+                  </Link>
                 </div>
-              ))}
-
-              <div className="pt-4 border-t">
-                <Button variant="ghost" className="w-full justify-between">
-                  View All Staff
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Upcoming Tasks */}
+          {/* Recent Staff Requests */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2" />
-                Upcoming Tasks
+                <FileText className="w-5 h-5 mr-2" />
+                Recent Requests
               </CardTitle>
-              <CardDescription>Tasks requiring your attention</CardDescription>
+              <CardDescription>Your latest staff requests</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {upcomingTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-3 rounded-lg border-l-4 ${getPriorityColor(
-                    task.priority
-                  )}`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-sm">{task.title}</h4>
-                    <Badge variant="outline" className="text-xs">
-                      {task.priority}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Due: {task.dueDate}</span>
-                      <span>
-                        {task.completed}/{task.staffCount} completed
-                      </span>
+              {isLoading ? (
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-3 border rounded-lg">
+                      <Skeleton className="h-4 w-32 mb-2" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
+                  ))}
+                </>
+              ) : data?.recentRequests && data.recentRequests.length > 0 ? (
+                <>
+                  {data.recentRequests.map((request: StaffRequest) => (
+                    <div
+                      key={request.id}
+                      className="p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-sm">
+                          {request.positionTitle}
+                        </h4>
+                        {getUrgencyBadge(request.urgency)}
+                      </div>
 
-                    <div className="space-y-1">
-                      <Progress
-                        value={(task.completed / task.staffCount) * 100}
-                        className="h-1.5"
-                      />
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          {request.fulfilledCount}/{request.numberOfStaff}{" "}
+                          filled
+                        </span>
+                        {getRequestStatusBadge(request.status)}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {formatDistanceToNow(new Date(request.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </p>
                     </div>
+                  ))}
+
+                  <div className="pt-4 border-t">
+                    <Link href="/dashboard/service-department/staff-requests">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-between"
+                      >
+                        View All Requests
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
                   </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h4 className="font-medium mb-2">No Requests Yet</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Create your first staff request.
+                  </p>
+                  <Link href="/dashboard/service-department/staff-requests">
+                    <Button size="sm">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      New Request
+                    </Button>
+                  </Link>
                 </div>
-              ))}
-
-              <div className="pt-4 border-t">
-                <Button variant="ghost" className="w-full justify-between">
-                  View All Tasks
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
-
-        {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
-              Recent Activities
-            </CardTitle>
-            <CardDescription>
-              Latest staff management activities
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        activity.type === "salary"
-                          ? "bg-blue-100"
-                          : activity.type === "feedback"
-                          ? "bg-purple-100"
-                          : activity.type === "request"
-                          ? "bg-orange-100"
-                          : "bg-green-100"
-                      }`}
-                    >
-                      {activity.type === "salary" && (
-                        <DollarSign className="w-4 h-4 text-blue-600" />
-                      )}
-                      {activity.type === "feedback" && (
-                        <MessageSquare className="w-4 h-4 text-purple-600" />
-                      )}
-                      {activity.type === "request" && (
-                        <UserPlus className="w-4 h-4 text-orange-600" />
-                      )}
-                      {activity.type === "completion" && (
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      )}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium text-sm">
-                          {activity.staff}
-                        </span>
-                        <span className="text-muted-foreground text-sm">
-                          {activity.action}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-                        <span>{activity.time}</span>
-                        {activity.amount && <span>• {activity.amount}</span>}
-                        {activity.rating && <span>• {activity.rating}</span>}
-                        {activity.department && (
-                          <span>• {activity.department}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(activity.status)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Quick Actions */}
         <Card>
@@ -523,22 +474,42 @@ export default function MinistryOfficeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <UserPlus className="w-6 h-6" />
-                <span>Request Staff</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <DollarSign className="w-6 h-6" />
-                <span>Process Salary</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <MessageSquare className="w-6 h-6" />
-                <span>Submit Feedback</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <FileText className="w-6 h-6" />
-                <span>Generate Reports</span>
-              </Button>
+              <Link href="/dashboard/service-department/staff-requests">
+                <Button
+                  variant="outline"
+                  className="h-20 w-full flex-col space-y-2"
+                >
+                  <UserPlus className="w-6 h-6" />
+                  <span>Request Staff</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/service-department/staff">
+                <Button
+                  variant="outline"
+                  className="h-20 w-full flex-col space-y-2"
+                >
+                  <Users className="w-6 h-6" />
+                  <span>View My Staff</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/service-department/staff-requests">
+                <Button
+                  variant="outline"
+                  className="h-20 w-full flex-col space-y-2"
+                >
+                  <ClipboardList className="w-6 h-6" />
+                  <span>View Requests</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/service-department/settings">
+                <Button
+                  variant="outline"
+                  className="h-20 w-full flex-col space-y-2"
+                >
+                  <FileText className="w-6 h-6" />
+                  <span>Settings</span>
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

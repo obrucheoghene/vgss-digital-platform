@@ -305,12 +305,8 @@ function GraduateRegisterForm() {
           formData.familyResidence
         );
       case "education":
-        return !!(
-          formData.nameOfUniversity &&
-          formData.courseOfStudy &&
-          formData.graduationYear &&
-          formData.grade
-        );
+        // Only validate grade - other fields are readonly from graduateRecord
+        return !!formData.grade;
       case "test":
         return !!(
           formData.visionMissionPurpose &&

@@ -1,7 +1,7 @@
 // src/app/dashboard/vgss-office/graduates/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import {
   Card,
@@ -46,24 +46,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   GraduationCap,
   Search,
-  Filter,
   MoreHorizontal,
   Eye,
   Edit,
@@ -82,99 +69,53 @@ import {
   Star,
   FileText,
   MessageSquare,
-  Users,
-  Award,
   BookOpen,
+  Award,
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Graduate {
-  id: string;
-  userId: string;
-  graduateName: string;
-  graduateFirstname: string;
-  graduateLastname: string;
-  email: string;
-  graduatePhoneNumber: string;
-  graduateGender: "MALE" | "FEMALE";
-  maritalStatus: "SINGLE" | "MARRIED";
-  dateOfBirth: string;
-  stateOfOrigin: string;
-  nameOfZone: string;
-  nameOfFellowship: string;
-  nameOfChapterPastor: string;
-  nameOfUniversity: string;
-  courseOfStudy: string;
-  graduationYear: number;
-  grade: string;
-  nyscStatus: "COMPLETED" | "IN_PROGRESS" | "NOT_STARTED" | "EXEMPTED";
-  preferredCityOfPosting?: string;
-  status:
-    | "Under Review"
-    | "Invited For Interview"
-    | "Interviewed"
-    | "Sighting"
-    | "Serving"
-    | "Not Accepted";
-  isApproved: boolean;
-  approvedBy?: string;
-  approvedAt?: string;
-  serviceStartedDate?: string;
-  serviceCompletedDate?: string;
-  createdAt: string;
-  updatedAt: string;
-  // Test questions preview
-  visionMissionPurpose?: string;
-  whyVgss?: string;
-  plansAfterVgss?: string;
-}
-
-interface GraduateStats {
-  total: number;
-  underReview: number;
-  interviewed: number;
-  serving: number;
-  completed: number;
-  notAccepted: number;
-  byGender: {
-    MALE: number;
-    FEMALE: number;
-  };
-  byStatus: {
-    "Under Review": number;
-    "Invited For Interview": number;
-    Interviewed: number;
-    Sighting: number;
-    Serving: number;
-    "Not Accepted": number;
-  };
-}
+import {
+  useVGSSGraduates,
+  useGraduateDetail,
+  useUpdateGraduateStatus,
+  useApproveGraduate,
+  useRejectGraduate,
+} from "@/hooks/use-vgss-graduates";
 
 export default function GraduateManagementPage() {
-  const [graduates, setGraduates] = useState<Graduate[]>([]);
-  const [filteredGraduates, setFilteredGraduates] = useState<Graduate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedGender, setSelectedGender] = useState<string>("all");
-  const [selectedGraduate, setSelectedGraduate] = useState<Graduate | null>(
+  const [selectedGraduateId, setSelectedGraduateId] = useState<string | null>(
     null
   );
   const [selectedGraduates, setSelectedGraduates] = useState<string[]>([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Mock stats - replace with real data
-  const [stats, setStats] = useState<GraduateStats>({
+  // Fetch graduates data
+  const { data, isLoading, isError, refetch, isFetching } = useVGSSGraduates({
+    page: currentPage,
+    limit: itemsPerPage,
+    search: searchQuery,
+    status: selectedStatus,
+    gender: selectedGender,
+  });
+
+  // Fetch selected graduate details
+  const { data: graduateDetailData, isLoading: isLoadingDetail } =
+    useGraduateDetail(selectedGraduateId);
+
+  // Mutations
+  const updateStatus = useUpdateGraduateStatus();
+  const approveGraduate = useApproveGraduate();
+  const rejectGraduate = useRejectGraduate();
+
+  const graduates = data?.graduates || [];
+  const stats = data?.stats || {
     total: 0,
-    underReview: 0,
-    interviewed: 0,
-    serving: 0,
-    completed: 0,
-    notAccepted: 0,
-    byGender: { MALE: 0, FEMALE: 0 },
+    approved: 0,
+    pending: 0,
     byStatus: {
       "Under Review": 0,
       "Invited For Interview": 0,
@@ -183,236 +124,11 @@ export default function GraduateManagementPage() {
       Serving: 0,
       "Not Accepted": 0,
     },
-  });
+    byGender: { MALE: 0, FEMALE: 0 },
+  };
+  const pagination = data?.pagination;
 
-  // Mock data - replace with API call
-  useEffect(() => {
-    const loadGraduates = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Mock graduate data
-        const mockGraduates: Graduate[] = [
-          {
-            id: "1",
-            userId: "user1",
-            graduateName: "John Adeyemi Doe",
-            graduateFirstname: "John",
-            graduateLastname: "Doe",
-            email: "john.doe@email.com",
-            graduatePhoneNumber: "+234 801 234 5678",
-            graduateGender: "MALE",
-            maritalStatus: "SINGLE",
-            dateOfBirth: "1998-05-15",
-            stateOfOrigin: "Lagos",
-            nameOfZone: "Lagos Zone 1",
-            nameOfFellowship: "Victory Fellowship",
-            nameOfChapterPastor: "Pastor Mary Johnson",
-            nameOfUniversity: "University of Lagos",
-            courseOfStudy: "Computer Science",
-            graduationYear: 2023,
-            grade: "Second Class Upper",
-            nyscStatus: "COMPLETED",
-            preferredCityOfPosting: "Lagos",
-            status: "Under Review",
-            isApproved: false,
-            createdAt: "2024-01-15T10:30:00Z",
-            updatedAt: "2024-01-15T10:30:00Z",
-            visionMissionPurpose: "To reach the world with God's love...",
-            whyVgss: "I want to serve God with my first working year...",
-            plansAfterVgss: "Continue in ministry while building my career...",
-          },
-          {
-            id: "2",
-            userId: "user2",
-            graduateName: "Sarah Okafor",
-            graduateFirstname: "Sarah",
-            graduateLastname: "Okafor",
-            email: "sarah.okafor@email.com",
-            graduatePhoneNumber: "+234 802 345 6789",
-            graduateGender: "FEMALE",
-            maritalStatus: "SINGLE",
-            dateOfBirth: "1999-03-22",
-            stateOfOrigin: "Abuja",
-            nameOfZone: "Abuja Zone 2",
-            nameOfFellowship: "Faith Chapel",
-            nameOfChapterPastor: "Pastor David Wilson",
-            nameOfUniversity: "University of Abuja",
-            courseOfStudy: "Mass Communication",
-            graduationYear: 2023,
-            grade: "First Class",
-            nyscStatus: "IN_PROGRESS",
-            preferredCityOfPosting: "Abuja",
-            status: "Interviewed",
-            isApproved: true,
-            approvedBy: "admin1",
-            approvedAt: "2024-01-20T14:30:00Z",
-            createdAt: "2024-01-10T09:15:00Z",
-            updatedAt: "2024-01-20T14:30:00Z",
-            visionMissionPurpose: "To impact lives through media ministry...",
-            whyVgss: "Called to dedicate my first fruits to God...",
-            plansAfterVgss: "Establish a Christian media company...",
-          },
-          {
-            id: "3",
-            userId: "user3",
-            graduateName: "Michael Eze",
-            graduateFirstname: "Michael",
-            graduateLastname: "Eze",
-            email: "michael.eze@email.com",
-            graduatePhoneNumber: "+234 803 456 7890",
-            graduateGender: "MALE",
-            maritalStatus: "MARRIED",
-            dateOfBirth: "1997-11-08",
-            stateOfOrigin: "Port Harcourt",
-            nameOfZone: "Port Harcourt Zone 1",
-            nameOfFellowship: "Grace Assembly",
-            nameOfChapterPastor: "Pastor Emmanuel Kings",
-            nameOfUniversity: "University of Port Harcourt",
-            courseOfStudy: "Electrical Engineering",
-            graduationYear: 2022,
-            grade: "Second Class Upper",
-            nyscStatus: "COMPLETED",
-            preferredCityOfPosting: "Port Harcourt",
-            status: "Serving",
-            isApproved: true,
-            approvedBy: "admin1",
-            approvedAt: "2023-12-15T11:00:00Z",
-            serviceStartedDate: "2024-01-01T00:00:00Z",
-            createdAt: "2023-12-01T08:45:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-            visionMissionPurpose:
-              "To demonstrate God's power through engineering...",
-            whyVgss: "Obedience to God's calling for first fruit service...",
-            plansAfterVgss: "Start an engineering consulting firm...",
-          },
-          {
-            id: "4",
-            userId: "user4",
-            graduateName: "Grace Adebayo",
-            graduateFirstname: "Grace",
-            graduateLastname: "Adebayo",
-            email: "grace.adebayo@email.com",
-            graduatePhoneNumber: "+234 804 567 8901",
-            graduateGender: "FEMALE",
-            maritalStatus: "SINGLE",
-            dateOfBirth: "1998-09-12",
-            stateOfOrigin: "Ibadan",
-            nameOfZone: "Ibadan Zone 3",
-            nameOfFellowship: "Hope Center",
-            nameOfChapterPastor: "Pastor Ruth Akinola",
-            nameOfUniversity: "University of Ibadan",
-            courseOfStudy: "Medicine",
-            graduationYear: 2023,
-            grade: "First Class",
-            nyscStatus: "EXEMPTED",
-            preferredCityOfPosting: "Ibadan",
-            status: "Invited For Interview",
-            isApproved: false,
-            createdAt: "2024-01-05T12:20:00Z",
-            updatedAt: "2024-01-18T16:45:00Z",
-            visionMissionPurpose: "To heal bodies and souls for Christ...",
-            whyVgss: "To combine medical practice with ministry...",
-            plansAfterVgss: "Establish a Christian medical center...",
-          },
-        ];
-
-        setGraduates(mockGraduates);
-
-        // Calculate stats
-        const calculatedStats: GraduateStats = {
-          total: mockGraduates.length,
-          underReview: mockGraduates.filter((g) => g.status === "Under Review")
-            .length,
-          interviewed: mockGraduates.filter((g) => g.status === "Interviewed")
-            .length,
-          serving: mockGraduates.filter((g) => g.status === "Serving").length,
-          completed: mockGraduates.filter((g) => g.serviceCompletedDate).length,
-          notAccepted: mockGraduates.filter((g) => g.status === "Not Accepted")
-            .length,
-          byGender: {
-            MALE: mockGraduates.filter((g) => g.graduateGender === "MALE")
-              .length,
-            FEMALE: mockGraduates.filter((g) => g.graduateGender === "FEMALE")
-              .length,
-          },
-          byStatus: {
-            "Under Review": mockGraduates.filter(
-              (g) => g.status === "Under Review"
-            ).length,
-            "Invited For Interview": mockGraduates.filter(
-              (g) => g.status === "Invited For Interview"
-            ).length,
-            Interviewed: mockGraduates.filter((g) => g.status === "Interviewed")
-              .length,
-            Sighting: mockGraduates.filter((g) => g.status === "Sighting")
-              .length,
-            Serving: mockGraduates.filter((g) => g.status === "Serving").length,
-            "Not Accepted": mockGraduates.filter(
-              (g) => g.status === "Not Accepted"
-            ).length,
-          },
-        };
-
-        setStats(calculatedStats);
-      } catch (error) {
-        toast.error("Failed to load graduates");
-        console.error("Error loading graduates:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadGraduates();
-  }, []);
-
-  // Filter graduates based on search and filters
-  useEffect(() => {
-    let filtered = graduates;
-
-    // Search filter
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (graduate) =>
-          graduate.graduateName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          graduate.nameOfUniversity
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.courseOfStudy
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.nameOfZone
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          graduate.nameOfFellowship
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Status filter
-    if (selectedStatus !== "all") {
-      filtered = filtered.filter(
-        (graduate) => graduate.status === selectedStatus
-      );
-    }
-
-    // Gender filter
-    if (selectedGender !== "all") {
-      filtered = filtered.filter(
-        (graduate) => graduate.graduateGender === selectedGender
-      );
-    }
-
-    setFilteredGraduates(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-    setSelectedGraduates([]); // Clear selections
-  }, [graduates, searchQuery, selectedStatus, selectedGender]);
+  const selectedGraduate = graduateDetailData?.graduate;
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -449,95 +165,31 @@ export default function GraduateManagementPage() {
   };
 
   const handleStatusUpdate = async (graduateId: string, newStatus: string) => {
-    setIsUpdating(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setGraduates((prev) =>
-        prev.map((grad) =>
-          grad.id === graduateId
-            ? {
-                ...grad,
-                status: newStatus as Graduate["status"],
-                updatedAt: new Date().toISOString(),
-              }
-            : grad
-        )
-      );
-
+      await updateStatus.mutateAsync({ graduateId, status: newStatus });
       toast.success(`Graduate status updated to ${newStatus}`);
     } catch (error) {
       toast.error("Failed to update status");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
   const handleApproval = async (graduateId: string, approved: boolean) => {
-    setIsUpdating(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setGraduates((prev) =>
-        prev.map((grad) =>
-          grad.id === graduateId
-            ? {
-                ...grad,
-                isApproved: approved,
-                approvedBy: approved ? "current-admin" : undefined,
-                approvedAt: approved ? new Date().toISOString() : undefined,
-                updatedAt: new Date().toISOString(),
-              }
-            : grad
-        )
-      );
-
-      toast.success(
-        `Graduate ${approved ? "approved" : "approval revoked"} successfully`
-      );
+      if (approved) {
+        await approveGraduate.mutateAsync({ graduateId });
+        toast.success("Graduate approved successfully");
+      } else {
+        await rejectGraduate.mutateAsync({ graduateId });
+        toast.success("Graduate rejected");
+      }
     } catch (error) {
-      toast.error(`Failed to ${approved ? "approve" : "revoke approval"}`);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleBulkStatusUpdate = async (status: string) => {
-    if (selectedGraduates.length === 0) return;
-
-    setIsUpdating(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      setGraduates((prev) =>
-        prev.map((grad) =>
-          selectedGraduates.includes(grad.id)
-            ? {
-                ...grad,
-                status: status as Graduate["status"],
-                updatedAt: new Date().toISOString(),
-              }
-            : grad
-        )
-      );
-
-      setSelectedGraduates([]);
-      toast.success(
-        `${selectedGraduates.length} graduates updated to ${status}`
-      );
-    } catch (error) {
-      toast.error("Failed to update graduates");
-    } finally {
-      setIsUpdating(false);
+      toast.error(`Failed to ${approved ? "approve" : "reject"} graduate`);
     }
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedGraduates(paginatedGraduates.map((grad) => grad.id));
+      setSelectedGraduates(graduates.map((grad) => grad.id));
     } else {
       setSelectedGraduates([]);
     }
@@ -551,20 +203,42 @@ export default function GraduateManagementPage() {
     }
   };
 
-  // Pagination
-  const totalPages = Math.ceil(filteredGraduates.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedGraduates = filteredGraduates.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const handleViewDetails = (graduateId: string) => {
+    setSelectedGraduateId(graduateId);
+    setIsDetailModalOpen(true);
+  };
 
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilter = (value: string) => {
+    setSelectedStatus(value);
+    setCurrentPage(1);
+  };
+
+  const handleGenderFilter = (value: string) => {
+    setSelectedGender(value);
+    setCurrentPage(1);
+  };
+
+  const getInitials = (firstName: string, surname: string) => {
+    return `${firstName?.charAt(0) || ""}${surname?.charAt(0) || ""}`.toUpperCase();
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-NG", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const totalPages = pagination?.totalPages || 1;
   const isAllSelected =
-    paginatedGraduates.length > 0 &&
-    selectedGraduates.length === paginatedGraduates.length;
-  const isSomeSelected =
-    selectedGraduates.length > 0 &&
-    selectedGraduates.length < paginatedGraduates.length;
+    graduates.length > 0 && selectedGraduates.length === graduates.length;
 
   return (
     <DashboardLayout title="Graduate Management">
@@ -582,12 +256,9 @@ export default function GraduateManagementPage() {
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
-            <Button
-              onClick={() => window.location.reload()}
-              disabled={isLoading}
-            >
+            <Button onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw
-                className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                className={`w-4 h-4 mr-2 ${isFetching ? "animate-spin" : ""}`}
               />
               Refresh
             </Button>
@@ -616,7 +287,9 @@ export default function GraduateManagementPage() {
                 <Clock className="w-5 h-5 text-yellow-600" />
                 <div>
                   <p className="text-sm text-muted-foreground">Under Review</p>
-                  <p className="text-2xl font-bold">{stats.underReview}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.byStatus["Under Review"]}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -630,7 +303,9 @@ export default function GraduateManagementPage() {
                   <p className="text-sm text-muted-foreground">
                     Currently Serving
                   </p>
-                  <p className="text-2xl font-bold">{stats.serving}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.byStatus["Serving"]}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -642,7 +317,9 @@ export default function GraduateManagementPage() {
                 <CheckCircle className="w-5 h-5 text-purple-600" />
                 <div>
                   <p className="text-sm text-muted-foreground">Interviewed</p>
-                  <p className="text-2xl font-bold">{stats.interviewed}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.byStatus["Interviewed"]}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -652,7 +329,7 @@ export default function GraduateManagementPage() {
         {/* Status Tabs */}
         <Tabs
           value={selectedStatus}
-          onValueChange={setSelectedStatus}
+          onValueChange={handleStatusFilter}
           className="space-y-4"
         >
           <TabsList className="grid w-full grid-cols-7">
@@ -704,37 +381,14 @@ export default function GraduateManagementPage() {
                         <DropdownMenuContent>
                           <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleBulkStatusUpdate("Invited For Interview")
-                            }
-                          >
+                          <DropdownMenuItem>
                             Invite for Interview
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleBulkStatusUpdate("Interviewed")
-                            }
-                          >
-                            Mark as Interviewed
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleBulkStatusUpdate("Sighting")}
-                          >
-                            Move to Sighting
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleBulkStatusUpdate("Serving")}
-                          >
-                            Start Service
-                          </DropdownMenuItem>
+                          <DropdownMenuItem>Mark as Interviewed</DropdownMenuItem>
+                          <DropdownMenuItem>Move to Sighting</DropdownMenuItem>
+                          <DropdownMenuItem>Start Service</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() =>
-                              handleBulkStatusUpdate("Not Accepted")
-                            }
-                          >
+                          <DropdownMenuItem className="text-red-600">
                             Mark as Not Accepted
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -754,18 +408,15 @@ export default function GraduateManagementPage() {
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="search"
-                        placeholder="Search by name, email, university, course, zone, or fellowship..."
+                        placeholder="Search by name, email, university, zone..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => handleSearch(e.target.value)}
                         className="pl-10"
                       />
                     </div>
                   </div>
 
-                  <Select
-                    value={selectedGender}
-                    onValueChange={setSelectedGender}
-                  >
+                  <Select value={selectedGender} onValueChange={handleGenderFilter}>
                     <SelectTrigger className="w-full sm:w-48">
                       <SelectValue placeholder="Gender" />
                     </SelectTrigger>
@@ -790,14 +441,11 @@ export default function GraduateManagementPage() {
                           <Checkbox
                             checked={isAllSelected}
                             onCheckedChange={handleSelectAll}
-                            ref={(ref) => {
-                              // if (ref) ref.indeterminate = isSomeSelected;
-                            }}
                           />
                         </TableHead>
                         <TableHead>Graduate</TableHead>
                         <TableHead>Education</TableHead>
-                        <TableHead>Ministry Info</TableHead>
+                        <TableHead>Zone</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Approval</TableHead>
                         <TableHead>Registered</TableHead>
@@ -812,7 +460,24 @@ export default function GraduateManagementPage() {
                             Loading graduates...
                           </TableCell>
                         </TableRow>
-                      ) : paginatedGraduates.length === 0 ? (
+                      ) : isError ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8">
+                            <XCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+                            <p className="text-muted-foreground">
+                              Failed to load graduates
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={() => refetch()}
+                            >
+                              Retry
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ) : graduates.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={8} className="text-center py-8">
                             <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -820,12 +485,14 @@ export default function GraduateManagementPage() {
                               No graduates found
                             </h3>
                             <p className="text-muted-foreground">
-                              Try adjusting your search or filter criteria.
+                              {searchQuery || selectedStatus !== "all"
+                                ? "Try adjusting your search or filter criteria."
+                                : "No graduates have registered yet."}
                             </p>
                           </TableCell>
                         </TableRow>
                       ) : (
-                        paginatedGraduates.map((graduate) => {
+                        graduates.map((graduate) => {
                           const isSelected = selectedGraduates.includes(
                             graduate.id
                           );
@@ -846,63 +513,58 @@ export default function GraduateManagementPage() {
                                 />
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                      <User className="w-4 h-4 text-primary" />
-                                    </div>
-                                    <div>
-                                      <p className="font-medium">
-                                        {graduate.graduateName}
-                                      </p>
-                                      <p className="text-sm text-muted-foreground">
-                                        {graduate.email}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                    <span>{graduate.graduateGender}</span>
-                                    <span>•</span>
-                                    <span>{graduate.maritalStatus}</span>
-                                    <span>•</span>
-                                    <span>{graduate.stateOfOrigin}</span>
+                                <div className="flex items-center space-x-3">
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                      {getInitials(
+                                        graduate.graduateFirstname,
+                                        graduate.graduateSurname
+                                      )}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="font-medium">
+                                      {graduate.graduateFirstname}{" "}
+                                      {graduate.graduateSurname}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {graduate.email}
+                                    </p>
+                                    <span className="text-xs text-muted-foreground">
+                                      {graduate.graduateGender}
+                                    </span>
                                   </div>
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="space-y-1">
                                   <p className="font-medium text-sm">
-                                    {graduate.nameOfUniversity}
+                                    {graduate.nameOfUniversity || "N/A"}
                                   </p>
                                   <p className="text-sm text-muted-foreground">
-                                    {graduate.courseOfStudy}
+                                    {graduate.courseOfStudy || "N/A"}
                                   </p>
                                   <div className="flex items-center space-x-2 text-xs">
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {graduate.graduationYear}
-                                    </Badge>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {graduate.grade}
-                                    </Badge>
+                                    {graduate.graduationYear && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {graduate.graduationYear}
+                                      </Badge>
+                                    )}
+                                    {graduate.grade && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {graduate.grade}
+                                      </Badge>
+                                    )}
                                   </div>
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="space-y-1">
                                   <p className="font-medium text-sm">
-                                    {graduate.nameOfZone}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {graduate.nameOfFellowship}
+                                    {graduate.nameOfZone || "N/A"}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {graduate.nameOfChapterPastor}
+                                    {graduate.nameOfChapterPastor || "N/A"}
                                   </p>
                                 </div>
                               </TableCell>
@@ -927,16 +589,7 @@ export default function GraduateManagementPage() {
                               </TableCell>
                               <TableCell>
                                 <div className="text-sm">
-                                  <p>
-                                    {new Date(
-                                      graduate.createdAt
-                                    ).toLocaleDateString()}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {new Date(
-                                      graduate.createdAt
-                                    ).toLocaleTimeString()}
-                                  </p>
+                                  <p>{formatDate(graduate.createdAt)}</p>
                                 </div>
                               </TableCell>
                               <TableCell className="text-right">
@@ -952,91 +605,48 @@ export default function GraduateManagementPage() {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                      onClick={() => {
-                                        setSelectedGraduate(graduate);
-                                        setIsDetailModalOpen(true);
-                                      }}
+                                      onClick={() => handleViewDetails(graduate.id)}
                                     >
                                       <Eye className="w-4 h-4 mr-2" />
                                       View Details
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                      <Edit className="w-4 h-4 mr-2" />
-                                      Edit Information
-                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator />
 
-                                    {/* Status Update Submenu */}
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger className="flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent">
-                                        <FileText className="w-4 h-4 mr-2" />
-                                        Update Status
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent side="left">
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Under Review"
-                                            )
-                                          }
-                                        >
-                                          Under Review
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Invited For Interview"
-                                            )
-                                          }
-                                        >
-                                          Invite for Interview
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Interviewed"
-                                            )
-                                          }
-                                        >
-                                          Interviewed
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Sighting"
-                                            )
-                                          }
-                                        >
-                                          Sighting
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Serving"
-                                            )
-                                          }
-                                        >
-                                          Start Service
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                          className="text-red-600"
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              graduate.id,
-                                              "Not Accepted"
-                                            )
-                                          }
-                                        >
-                                          Not Accepted
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    {/* Status Updates */}
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusUpdate(
+                                          graduate.id,
+                                          "Invited For Interview"
+                                        )
+                                      }
+                                    >
+                                      Invite for Interview
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusUpdate(
+                                          graduate.id,
+                                          "Interviewed"
+                                        )
+                                      }
+                                    >
+                                      Mark as Interviewed
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusUpdate(graduate.id, "Sighting")
+                                      }
+                                    >
+                                      Move to Sighting
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusUpdate(graduate.id, "Serving")
+                                      }
+                                    >
+                                      Start Service
+                                    </DropdownMenuItem>
 
                                     <DropdownMenuSeparator />
                                     {graduate.isApproved ? (
@@ -1047,7 +657,7 @@ export default function GraduateManagementPage() {
                                         className="text-red-600"
                                       >
                                         <XCircle className="w-4 h-4 mr-2" />
-                                        Revoke Approval
+                                        Reject
                                       </DropdownMenuItem>
                                     ) : (
                                       <DropdownMenuItem
@@ -1072,15 +682,16 @@ export default function GraduateManagementPage() {
                 </div>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {pagination && totalPages > 1 && (
                   <div className="flex items-center justify-between pt-4">
                     <p className="text-sm text-muted-foreground">
-                      Showing {startIndex + 1} to{" "}
+                      Showing{" "}
+                      {(pagination.page - 1) * pagination.limit + 1} to{" "}
                       {Math.min(
-                        startIndex + itemsPerPage,
-                        filteredGraduates.length
+                        pagination.page * pagination.limit,
+                        pagination.total
                       )}{" "}
-                      of {filteredGraduates.length} graduates
+                      of {pagination.total} graduates
                       {selectedGraduates.length > 0 && (
                         <span className="ml-2 font-medium">
                           ({selectedGraduates.length} selected)
@@ -1109,9 +720,7 @@ export default function GraduateManagementPage() {
                               <Button
                                 key={pageNum}
                                 variant={
-                                  currentPage === pageNum
-                                    ? "default"
-                                    : "outline"
+                                  currentPage === pageNum ? "default" : "outline"
                                 }
                                 size="sm"
                                 onClick={() => setCurrentPage(pageNum)}
@@ -1149,70 +758,56 @@ export default function GraduateManagementPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center">
                 <GraduationCap className="w-5 h-5 mr-2" />
-                Graduate Profile: {selectedGraduate?.graduateName}
+                Graduate Profile
               </DialogTitle>
               <DialogDescription>
                 Complete graduate information and service details
               </DialogDescription>
             </DialogHeader>
 
-            {selectedGraduate && (
+            {isLoadingDetail ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="ml-2">Loading graduate details...</span>
+              </div>
+            ) : selectedGraduate ? (
               <ScrollArea className="max-h-[70vh] pr-4">
                 <div className="space-y-6">
-                  {/* Status and Approval Section */}
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-3 flex items-center">
-                          <FileText className="w-4 h-4 mr-2" />
-                          Current Status
-                        </h3>
-                        <div className="space-y-2">
-                          {getStatusBadge(selectedGraduate.status)}
-                          <div className="text-sm text-muted-foreground">
-                            Last updated:{" "}
-                            {new Date(
-                              selectedGraduate.updatedAt
-                            ).toLocaleString()}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-3 flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Approval Status
-                        </h3>
-                        <div className="space-y-2">
-                          {selectedGraduate.isApproved ? (
-                            <div>
-                              <Badge className="bg-green-100 text-green-800 mb-2">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Approved
-                              </Badge>
-                              {selectedGraduate.approvedAt && (
-                                <p className="text-sm text-muted-foreground">
-                                  Approved on{" "}
-                                  {new Date(
-                                    selectedGraduate.approvedAt
-                                  ).toLocaleString()}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <Badge
-                              variant="outline"
-                              className="text-orange-600"
-                            >
-                              <Clock className="w-3 h-3 mr-1" />
-                              Pending Approval
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                  {/* Header with Photo */}
+                  <div className="flex items-start gap-6">
+                    <Avatar className="w-20 h-20">
+                      {selectedGraduate.photo ? (
+                        <AvatarImage src={selectedGraduate.photo} />
+                      ) : null}
+                      <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                        {getInitials(
+                          selectedGraduate.graduateFirstname,
+                          selectedGraduate.graduateLastname || ""
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h2 className="text-xl font-bold">
+                        {selectedGraduate.graduateFirstname}{" "}
+                        {selectedGraduate.graduateLastname}
+                      </h2>
+                      <p className="text-muted-foreground">
+                        {selectedGraduate.courseOfStudy} -{" "}
+                        {selectedGraduate.nameOfUniversity}
+                      </p>
+                      <div className="flex items-center gap-3 mt-2">
+                        {getStatusBadge(selectedGraduate.status)}
+                        {selectedGraduate.isApproved ? (
+                          <Badge className="bg-green-100 text-green-800">
+                            Approved
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-orange-600">
+                            Pending Approval
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Personal Information */}
@@ -1223,56 +818,50 @@ export default function GraduateManagementPage() {
                         Personal Information
                       </h3>
                       <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Full Name
-                            </Label>
-                            <p className="font-medium">
-                              {selectedGraduate.graduateName}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Email
-                            </Label>
-                            <p className="flex items-center">
-                              <Mail className="w-4 h-4 mr-1" />
-                              {selectedGraduate.email}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Phone
-                            </Label>
-                            <p className="flex items-center">
-                              <Phone className="w-4 h-4 mr-1" />
-                              {selectedGraduate.graduatePhoneNumber}
-                            </p>
-                          </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Email
+                          </Label>
+                          <p className="flex items-center">
+                            <Mail className="w-4 h-4 mr-1" />
+                            {selectedGraduate.email}
+                          </p>
                         </div>
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Gender
-                            </Label>
-                            <p>{selectedGraduate.graduateGender}</p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Marital Status
-                            </Label>
-                            <p>{selectedGraduate.maritalStatus}</p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              State of Origin
-                            </Label>
-                            <p className="flex items-center">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {selectedGraduate.stateOfOrigin}
-                            </p>
-                          </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Phone
+                          </Label>
+                          <p className="flex items-center">
+                            <Phone className="w-4 h-4 mr-1" />
+                            {selectedGraduate.graduatePhoneNumber || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Gender
+                          </Label>
+                          <p>{selectedGraduate.graduateGender}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Marital Status
+                          </Label>
+                          <p>{selectedGraduate.maritalStatus || "N/A"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Date of Birth
+                          </Label>
+                          <p>{formatDate(selectedGraduate.dateOfBirth)}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            State of Origin
+                          </Label>
+                          <p className="flex items-center">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            {selectedGraduate.stateOfOrigin || "N/A"}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -1286,40 +875,42 @@ export default function GraduateManagementPage() {
                         Education Information
                       </h3>
                       <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              University
-                            </Label>
-                            <p className="font-medium">
-                              {selectedGraduate.nameOfUniversity}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Course of Study
-                            </Label>
-                            <p>{selectedGraduate.courseOfStudy}</p>
-                          </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            University
+                          </Label>
+                          <p className="font-medium">
+                            {selectedGraduate.nameOfUniversity || "N/A"}
+                          </p>
                         </div>
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Graduation Year
-                            </Label>
-                            <p className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-1" />
-                              {selectedGraduate.graduationYear}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Grade
-                            </Label>
-                            <Badge variant="outline">
-                              {selectedGraduate.grade}
-                            </Badge>
-                          </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Course of Study
+                          </Label>
+                          <p>{selectedGraduate.courseOfStudy || "N/A"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Graduation Year
+                          </Label>
+                          <p className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            {selectedGraduate.graduationYear || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Grade
+                          </Label>
+                          <Badge variant="outline">
+                            {selectedGraduate.grade || "N/A"}
+                          </Badge>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            NYSC Status
+                          </Label>
+                          <p>{selectedGraduate.nyscStatus || "N/A"}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -1333,49 +924,38 @@ export default function GraduateManagementPage() {
                         Ministry Information
                       </h3>
                       <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Zone
-                            </Label>
-                            <p className="font-medium">
-                              {selectedGraduate.nameOfZone}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Fellowship
-                            </Label>
-                            <p>{selectedGraduate.nameOfFellowship}</p>
-                          </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Zone
+                          </Label>
+                          <p className="font-medium">
+                            {selectedGraduate.nameOfZone || "N/A"}
+                          </p>
                         </div>
-                        <div className="space-y-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Chapter Pastor
-                            </Label>
-                            <p>{selectedGraduate.nameOfChapterPastor}</p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">
-                              Preferred Posting
-                            </Label>
-                            <p>
-                              {selectedGraduate.preferredCityOfPosting ||
-                                "Not specified"}
-                            </p>
-                          </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Chapter Pastor
+                          </Label>
+                          <p>{selectedGraduate.nameOfChapterPastor || "N/A"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">
+                            Preferred City of Posting
+                          </Label>
+                          <p>
+                            {selectedGraduate.preferredCityOfPosting || "N/A"}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Test Questions Preview */}
+                  {/* Test Questions */}
                   <Card>
                     <CardContent className="p-4">
                       <h3 className="font-semibold mb-3 flex items-center">
                         <MessageSquare className="w-4 h-4 mr-2" />
-                        Test Questions Preview
+                        Test Questions
                       </h3>
                       <div className="space-y-4">
                         <div>
@@ -1383,8 +963,7 @@ export default function GraduateManagementPage() {
                             Vision, Mission & Purpose
                           </Label>
                           <p className="text-sm bg-muted/50 p-3 rounded-lg">
-                            {selectedGraduate.visionMissionPurpose ||
-                              "No response"}
+                            {selectedGraduate.visionMissionPurpose || "N/A"}
                           </p>
                         </div>
                         <div>
@@ -1392,7 +971,7 @@ export default function GraduateManagementPage() {
                             Why VGSS?
                           </Label>
                           <p className="text-sm bg-muted/50 p-3 rounded-lg">
-                            {selectedGraduate.whyVgss || "No response"}
+                            {selectedGraduate.whyVgss || "N/A"}
                           </p>
                         </div>
                         <div>
@@ -1400,7 +979,7 @@ export default function GraduateManagementPage() {
                             Plans After VGSS
                           </Label>
                           <p className="text-sm bg-muted/50 p-3 rounded-lg">
-                            {selectedGraduate.plansAfterVgss || "No response"}
+                            {selectedGraduate.plansAfterVgss || "N/A"}
                           </p>
                         </div>
                       </div>
@@ -1423,9 +1002,7 @@ export default function GraduateManagementPage() {
                                 Service Started
                               </Label>
                               <p>
-                                {new Date(
-                                  selectedGraduate.serviceStartedDate
-                                ).toLocaleDateString()}
+                                {formatDate(selectedGraduate.serviceStartedDate)}
                               </p>
                             </div>
                           )}
@@ -1435,9 +1012,9 @@ export default function GraduateManagementPage() {
                                 Service Completed
                               </Label>
                               <p>
-                                {new Date(
+                                {formatDate(
                                   selectedGraduate.serviceCompletedDate
-                                ).toLocaleDateString()}
+                                )}
                               </p>
                             </div>
                           )}
@@ -1454,20 +1031,16 @@ export default function GraduateManagementPage() {
                     >
                       Close
                     </Button>
-                    <Button variant="outline">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Graduate
-                    </Button>
                     {!selectedGraduate.isApproved ? (
                       <Button
                         onClick={() => {
                           handleApproval(selectedGraduate.id, true);
                           setIsDetailModalOpen(false);
                         }}
-                        disabled={isUpdating}
+                        disabled={approveGraduate.isPending}
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        {isUpdating && (
+                        {approveGraduate.isPending && (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         )}
                         <CheckCircle className="w-4 h-4 mr-2" />
@@ -1480,19 +1053,19 @@ export default function GraduateManagementPage() {
                           handleApproval(selectedGraduate.id, false);
                           setIsDetailModalOpen(false);
                         }}
-                        disabled={isUpdating}
+                        disabled={rejectGraduate.isPending}
                       >
-                        {isUpdating && (
+                        {rejectGraduate.isPending && (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         )}
                         <XCircle className="w-4 h-4 mr-2" />
-                        Revoke Approval
+                        Reject
                       </Button>
                     )}
                   </div>
                 </div>
               </ScrollArea>
-            )}
+            ) : null}
           </DialogContent>
         </Dialog>
       </div>

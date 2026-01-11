@@ -151,24 +151,6 @@ const navigationItems = {
       badge: null,
     },
     {
-      title: "Salary Management",
-      icon: FileText,
-      href: "/dashboard/service-department/salary",
-      badge: null,
-    },
-    {
-      title: "Staff Feedback",
-      icon: MessageSquare,
-      href: "/dashboard/service-department/feedback",
-      badge: null,
-    },
-    {
-      title: "Reports",
-      icon: BarChart3,
-      href: "/dashboard/service-department/reports",
-      badge: null,
-    },
-    {
       title: "Settings",
       icon: Settings,
       href: "/dashboard/service-department/settings",
@@ -183,33 +165,9 @@ const navigationItems = {
       badge: null,
     },
     {
-      title: "My Profile",
-      icon: Users,
-      href: "/dashboard/graduate/profile",
-      badge: null,
-    },
-    {
-      title: "Interview Questions",
-      icon: MessageSquare,
-      href: "/dashboard/graduate/interview",
-      badge: "New",
-    },
-    {
-      title: "Training Modules",
-      icon: BookOpen,
-      href: "/dashboard/graduate/training",
-      badge: "2",
-    },
-    {
       title: "Service Assignment",
       icon: Calendar,
       href: "/dashboard/graduate/assignment",
-      badge: null,
-    },
-    {
-      title: "KingsChat Integration",
-      icon: MessageSquare,
-      href: "/dashboard/graduate/kingschat",
       badge: null,
     },
     {

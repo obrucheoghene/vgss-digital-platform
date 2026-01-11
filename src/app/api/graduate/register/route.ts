@@ -63,10 +63,7 @@ export async function POST(req: NextRequest) {
       "whatPositionInFamily",
       "familyResidence",
 
-      // Education Information
-      "nameOfUniversity",
-      "courseOfStudy",
-      "graduationYear",
+      // Education Information (nameOfUniversity, courseOfStudy, graduationYear come from zoneGraduates)
       "grade",
       "nyscStatus",
 
@@ -129,20 +126,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. VALIDATE NUMERIC FIELDS
-    const graduationYear = parseInt(formData.graduationYear);
     const howManyInFamily = parseInt(formData.howManyInFamily);
     const whatPositionInFamily = parseInt(formData.whatPositionInFamily);
-
-    if (
-      isNaN(graduationYear) ||
-      graduationYear < 1990 ||
-      graduationYear > new Date().getFullYear() + 5
-    ) {
-      return NextResponse.json(
-        { error: "Invalid graduation year" },
-        { status: 400 }
-      );
-    }
 
     if (isNaN(howManyInFamily) || howManyInFamily < 1) {
       return NextResponse.json(
@@ -306,7 +291,7 @@ export async function POST(req: NextRequest) {
             nameOfZonalPastor: record.nameOfZonalPastor,
             nameOfChapterPastor: record.nameOfChapterPastor,
             phoneNumberOfChapterPastor: record.phoneNumberOfChapterPastor,
-            emailOfChapterPastor: formData.emailOfChapterPastor,
+            emailOfChapterPastor: formData.emailOfChapterPastor || "N/A",
 
             // Spiritual Journey
             whereWhenChrist: formData.whereWhenChrist,
@@ -335,10 +320,10 @@ export async function POST(req: NextRequest) {
             parentsAwareOfVgssIntention:
               formData.parentsAwareOfVgssIntention || false,
 
-            // Education Information
-            nameOfUniversity: formData.nameOfUniversity,
-            courseOfStudy: formData.courseOfStudy,
-            graduationYear: graduationYear,
+            // Education Information (from zone record + form)
+            nameOfUniversity: record.nameOfUniversity,
+            courseOfStudy: record.courseOfStudy,
+            graduationYear: record.graduationYear,
             grade: formData.grade,
             nyscStatus: formData.nyscStatus,
 
