@@ -31,15 +31,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import {
   Settings,
@@ -51,11 +42,8 @@ import {
   Clock,
   Save,
   RefreshCw,
-  Download,
-  Upload,
   Eye,
   Activity,
-  FileText,
   Users,
   Building,
   GraduationCap,
@@ -121,8 +109,6 @@ export default function VGSSOfficeSettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
 
   // Settings state
   const [settings, setSettings] = useState<SystemSettings>({
@@ -227,18 +213,6 @@ export default function VGSSOfficeSettingsPage() {
   };
 
 
-  // Handle backup
-  const handleBackup = async () => {
-    try {
-      toast.info("Starting backup process...");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      toast.success("Backup completed successfully");
-      setIsBackupDialogOpen(false);
-    } catch (error) {
-      toast.error("Backup failed");
-    }
-  };
-
   return (
     <DashboardLayout title="System Settings">
       <div className="space-y-6">
@@ -250,49 +224,14 @@ export default function VGSSOfficeSettingsPage() {
               Configure platform settings, security, and system preferences
             </p>
           </div>
-          <div className="flex space-x-2">
-            <Dialog
-              open={isBackupDialogOpen}
-              onOpenChange={setIsBackupDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Create Backup
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create System Backup</DialogTitle>
-                  <DialogDescription>
-                    This will create a complete backup of the system including
-                    all user data, settings, and configurations.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsBackupDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleBackup}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Start Backup
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            <Button onClick={handleSaveSettings} disabled={isSaving}>
-              {isSaving ? (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
+          <Button onClick={handleSaveSettings} disabled={isSaving}>
+            {isSaving ? (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
         </div>
 
         {/* System Status Overview */}
@@ -941,37 +880,6 @@ export default function VGSSOfficeSettingsPage() {
           </TabsContent>
 
         </Tabs>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Common administrative tasks and system operations
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <Download className="w-6 h-6" />
-                <span>System Backup</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <Upload className="w-6 h-6" />
-                <span>Import Data</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <RefreshCw className="w-6 h-6" />
-                <span>Clear Cache</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <FileText className="w-6 h-6" />
-                <span>Generate Report</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
       </div>
     </DashboardLayout>
   );
