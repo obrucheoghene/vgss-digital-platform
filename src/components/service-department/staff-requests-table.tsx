@@ -29,6 +29,31 @@ import {
 import { useServiceDepartmentRequests, StaffRequest } from "@/hooks/use-staff-requests";
 import { StaffRequestFormDialog } from "./staff-request-form-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Plus,
   Search,
   RefreshCw,
@@ -37,6 +62,11 @@ import {
   XCircle,
   AlertCircle,
   Users,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Loader2,
+  Eye,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -68,14 +98,41 @@ export function StaffRequestsTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [editingRequest, setEditingRequest] = useState<StaffRequest | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [requestToCancel, setRequestToCancel] = useState<StaffRequest | null>(null);
+  const [viewingRequest, setViewingRequest] = useState<StaffRequest | null>(null);
 
-  const { requests, stats, pagination, isLoading, refetch } =
+  const { requests, stats, pagination, isLoading, refetch, cancelRequest, isCancelling } =
     useServiceDepartmentRequests({
       status: statusFilter,
       search: searchQuery,
       page,
       limit: 10,
     });
+
+  const handleEditClick = (request: StaffRequest) => {
+    setEditingRequest(request);
+    setIsFormOpen(true);
+  };
+
+  const handleCancelClick = (request: StaffRequest) => {
+    setRequestToCancel(request);
+    setCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = () => {
+    if (requestToCancel) {
+      cancelRequest(requestToCancel.id);
+      setCancelDialogOpen(false);
+      setRequestToCancel(null);
+    }
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingRequest(null);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,18 +241,19 @@ export function StaffRequestsTable() {
                 <TableHead>Status</TableHead>
                 <TableHead>Progress</TableHead>
                 <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : requests.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Users className="h-8 w-8" />
                       <p>No staff requests found</p>
@@ -256,6 +314,43 @@ export function StaffRequestsTable() {
                     <TableCell>
                       {format(new Date(request.createdAt), "MMM d, yyyy")}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setViewingRequest(request)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          {request.status === "Pending" && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => handleEditClick(request)}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Request
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleCancelClick(request)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Cancel Request
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -292,9 +387,175 @@ export function StaffRequestsTable() {
       {/* Form Dialog */}
       <StaffRequestFormDialog
         open={isFormOpen}
-        setOpen={setIsFormOpen}
-        onSuccess={() => refetch()}
+        setOpen={handleFormClose}
+        editingRequest={editingRequest}
+        onSuccess={() => {
+          refetch();
+          setEditingRequest(null);
+        }}
       />
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Staff Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel the request for &quot;{requestToCancel?.positionTitle}&quot;?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancelling}>
+              Keep Request
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancel}
+              disabled={isCancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                "Cancel Request"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* View Request Dialog */}
+      <Dialog open={!!viewingRequest} onOpenChange={(open) => !open && setViewingRequest(null)}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Staff Request Details</DialogTitle>
+            <DialogDescription>
+              View the details of this staff request.
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewingRequest && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="secondary"
+                  className={`${statusColors[viewingRequest.status]} flex items-center gap-1`}
+                >
+                  {statusIcons[viewingRequest.status]}
+                  {viewingRequest.status}
+                </Badge>
+                <Badge
+                  variant="secondary"
+                  className={urgencyColors[viewingRequest.urgency]}
+                >
+                  {viewingRequest.urgency} Priority
+                </Badge>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Position Title</p>
+                  <p className="font-medium">{viewingRequest.positionTitle}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Position Description</p>
+                  <p className="text-sm">{viewingRequest.positionDescription}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Number of Staff</p>
+                    <p>{viewingRequest.numberOfStaff}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Progress</p>
+                    <p>{viewingRequest.fulfilledCount} / {viewingRequest.numberOfStaff} assigned</p>
+                  </div>
+                </div>
+
+                {viewingRequest.preferredGender && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Preferred Gender</p>
+                    <p>{viewingRequest.preferredGender === "MALE" ? "Male" : "Female"}</p>
+                  </div>
+                )}
+
+                {viewingRequest.skillsRequired && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Skills Required</p>
+                    <p className="text-sm">{viewingRequest.skillsRequired}</p>
+                  </div>
+                )}
+
+                {viewingRequest.qualificationsRequired && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Qualifications Required</p>
+                    <p className="text-sm">{viewingRequest.qualificationsRequired}</p>
+                  </div>
+                )}
+
+                {viewingRequest.rejectionReason && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Rejection Reason</p>
+                    <p className="text-sm text-red-600">{viewingRequest.rejectionReason}</p>
+                  </div>
+                )}
+
+                {viewingRequest.notes && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Notes</p>
+                    <p className="text-sm">{viewingRequest.notes}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Created</p>
+                    <p className="text-sm">{format(new Date(viewingRequest.createdAt), "PPp")}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
+                    <p className="text-sm">{format(new Date(viewingRequest.updatedAt), "PPp")}</p>
+                  </div>
+                </div>
+
+                {viewingRequest.approvedAt && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {viewingRequest.status === "Approved" || viewingRequest.status === "Fulfilled"
+                        ? "Approved At"
+                        : "Processed At"}
+                    </p>
+                    <p className="text-sm">{format(new Date(viewingRequest.approvedAt), "PPp")}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                {viewingRequest.status === "Pending" && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setViewingRequest(null);
+                      handleEditClick(viewingRequest);
+                    }}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Request
+                  </Button>
+                )}
+                <Button variant="secondary" onClick={() => setViewingRequest(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

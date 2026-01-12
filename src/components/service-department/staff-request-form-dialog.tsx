@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,7 +24,7 @@ import { Dispatch, SetStateAction } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateStaffRequest } from "@/hooks/use-staff-requests";
+import { useCreateStaffRequest, useUpdateStaffRequest, StaffRequest } from "@/hooks/use-staff-requests";
 
 // Validation schema
 const staffRequestSchema = z.object({
@@ -49,16 +50,20 @@ type StaffRequestFormValues = z.infer<typeof staffRequestSchema>;
 
 interface StaffRequestFormDialogProps {
   open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+  setOpen: (open: boolean) => void;
+  editingRequest?: StaffRequest | null;
   onSuccess?: () => void;
 }
 
 export function StaffRequestFormDialog({
   open,
   setOpen,
+  editingRequest,
   onSuccess,
 }: StaffRequestFormDialogProps) {
   const createRequest = useCreateStaffRequest();
+  const updateRequest = useUpdateStaffRequest();
+  const isEditMode = !!editingRequest;
 
   const {
     register,
@@ -79,26 +84,68 @@ export function StaffRequestFormDialog({
     },
   });
 
+  // Reset form when dialog opens or editingRequest changes
+  React.useEffect(() => {
+    if (open) {
+      if (editingRequest) {
+        reset({
+          positionTitle: editingRequest.positionTitle,
+          positionDescription: editingRequest.positionDescription,
+          numberOfStaff: editingRequest.numberOfStaff,
+          skillsRequired: editingRequest.skillsRequired || "",
+          qualificationsRequired: editingRequest.qualificationsRequired || "",
+          preferredGender: editingRequest.preferredGender || "none",
+          urgency: editingRequest.urgency,
+        });
+      } else {
+        reset({
+          positionTitle: "",
+          positionDescription: "",
+          numberOfStaff: 1,
+          skillsRequired: "",
+          qualificationsRequired: "",
+          preferredGender: "none",
+          urgency: "Medium",
+        });
+      }
+    }
+  }, [open, editingRequest, reset]);
+
   const onSubmit = async (data: StaffRequestFormValues) => {
     try {
-      await createRequest.mutateAsync({
+      const payload = {
         positionTitle: data.positionTitle,
         positionDescription: data.positionDescription,
         numberOfStaff: data.numberOfStaff,
-        skillsRequired: data.skillsRequired || undefined,
-        qualificationsRequired: data.qualificationsRequired || undefined,
+        skillsRequired: data.skillsRequired || null,
+        qualificationsRequired: data.qualificationsRequired || null,
         preferredGender:
           data.preferredGender === "none"
-            ? undefined
+            ? null
             : (data.preferredGender as "MALE" | "FEMALE"),
         urgency: data.urgency,
-      });
+      };
+
+      if (isEditMode && editingRequest) {
+        await updateRequest.mutateAsync({
+          requestId: editingRequest.id,
+          data: payload,
+        });
+      } else {
+        await createRequest.mutateAsync({
+          ...payload,
+          skillsRequired: payload.skillsRequired || undefined,
+          qualificationsRequired: payload.qualificationsRequired || undefined,
+          preferredGender: payload.preferredGender || undefined,
+        });
+      }
+
       reset();
       setOpen(false);
       onSuccess?.();
     } catch (error) {
       // Error is handled by the hook
-      console.error("Error creating staff request:", error);
+      console.error("Error saving staff request:", error);
     }
   };
 
@@ -107,9 +154,13 @@ export function StaffRequestFormDialog({
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-4">
           <DialogHeader>
-            <DialogTitle>Request New Staff</DialogTitle>
+            <DialogTitle>
+              {isEditMode ? "Edit Staff Request" : "Request New Staff"}
+            </DialogTitle>
             <DialogDescription>
-              Submit a request for VGSS staff to be assigned to your department.
+              {isEditMode
+                ? "Update the details of your staff request."
+                : "Submit a request for VGSS staff to be assigned to your department."}
             </DialogDescription>
           </DialogHeader>
 
@@ -253,7 +304,13 @@ export function StaffRequestFormDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Request"}
+              {isSubmitting
+                ? isEditMode
+                  ? "Updating..."
+                  : "Submitting..."
+                : isEditMode
+                ? "Update Request"
+                : "Submit Request"}
             </Button>
           </DialogFooter>
         </form>

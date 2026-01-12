@@ -40,28 +40,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Settings,
   User,
   Bell,
   Shield,
-  Database,
-  Mail,
-  Globe,
-  Key,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -69,14 +53,7 @@ import {
   RefreshCw,
   Download,
   Upload,
-  Trash2,
   Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Server,
-  HardDrive,
-  Wifi,
   Activity,
   FileText,
   Users,
@@ -95,7 +72,6 @@ interface SystemSettings {
     supportPhone: string;
     timezone: string;
     dateFormat: string;
-    currency: string;
   };
   notifications: {
     emailEnabled: boolean;
@@ -115,48 +91,29 @@ interface SystemSettings {
     requirePasswordChange: boolean;
     passwordExpiryDays: number;
   };
-  system: {
-    maintenanceMode: boolean;
-    debugMode: boolean;
-    logLevel: string;
-    backupEnabled: boolean;
-    backupFrequency: string;
-    maxFileSize: number;
-    allowedFileTypes: string[];
-  };
-}
-
-interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  permissions: string[];
-  lastLogin: string;
-  isActive: boolean;
-}
-
-interface ActivityLog {
-  id: string;
-  userId: string;
-  userName: string;
-  action: string;
-  details: string;
-  timestamp: string;
-  ipAddress: string;
-  userAgent: string;
 }
 
 interface SystemMetrics {
   totalUsers: number;
   activeUsers: number;
   totalGraduates: number;
+  totalZoneGraduates: number;
   totalZones: number;
-  totalOffices: number;
-  systemUptime: string;
-  diskUsage: number;
-  memoryUsage: number;
-  cpuUsage: number;
+  totalServiceDepartments: number;
+  pendingStaffRequests: number;
+  graduatesByStatus: Record<string, number>;
+  staffRequestsByStatus: Record<string, number>;
+}
+
+interface AdminUserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  accountStatus: string;
+  lastLogin: string | null;
+  createdAt: string;
 }
 
 export default function VGSSOfficeSettingsPage() {
@@ -177,7 +134,6 @@ export default function VGSSOfficeSettingsPage() {
       supportPhone: "+234 1 234 5678",
       timezone: "Africa/Lagos",
       dateFormat: "DD/MM/YYYY",
-      currency: "NGN",
     },
     notifications: {
       emailEnabled: true,
@@ -197,112 +153,48 @@ export default function VGSSOfficeSettingsPage() {
       requirePasswordChange: true,
       passwordExpiryDays: 90,
     },
-    system: {
-      maintenanceMode: false,
-      debugMode: false,
-      logLevel: "info",
-      backupEnabled: true,
-      backupFrequency: "daily",
-      maxFileSize: 5,
-      allowedFileTypes: ["pdf", "doc", "docx", "jpg", "png", "csv", "xlsx"],
-    },
   });
 
   // Admin users state
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([
-    {
-      id: "1",
-      name: "System Administrator",
-      email: "admin@vgss.loveworld.org",
-      role: "Super Admin",
-      permissions: ["all"],
-      lastLogin: "2024-01-25T09:30:00Z",
-      isActive: true,
-    },
-    {
-      id: "2",
-      name: "John Smith",
-      email: "john.smith@vgss.loveworld.org",
-      role: "Admin",
-      permissions: ["user_management", "graduate_management"],
-      lastLogin: "2024-01-24T14:20:00Z",
-      isActive: true,
-    },
-    {
-      id: "3",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@vgss.loveworld.org",
-      role: "Moderator",
-      permissions: ["graduate_management"],
-      lastLogin: "2024-01-23T11:45:00Z",
-      isActive: false,
-    },
-  ]);
-
-  // Activity logs state
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([
-    {
-      id: "1",
-      userId: "1",
-      userName: "System Administrator",
-      action: "User Created",
-      details: "Created new BLW Zone account: Lagos Zone 5",
-      timestamp: "2024-01-25T10:30:00Z",
-      ipAddress: "192.168.1.100",
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    },
-    {
-      id: "2",
-      userId: "2",
-      userName: "John Smith",
-      action: "Graduate Approved",
-      details: "Approved graduate: Michael Eze for service",
-      timestamp: "2024-01-25T09:15:00Z",
-      ipAddress: "192.168.1.101",
-      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-    },
-    {
-      id: "3",
-      userId: "1",
-      userName: "System Administrator",
-      action: "Settings Updated",
-      details: "Updated notification settings",
-      timestamp: "2024-01-24T16:45:00Z",
-      ipAddress: "192.168.1.100",
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    },
-  ]);
+  const [adminUsers, setAdminUsers] = useState<AdminUserData[]>([]);
 
   // System metrics state
   const [metrics, setMetrics] = useState<SystemMetrics>({
-    totalUsers: 234,
-    activeUsers: 187,
-    totalGraduates: 1456,
-    totalZones: 45,
-    totalOffices: 28,
-    systemUptime: "15 days, 4 hours",
-    diskUsage: 65,
-    memoryUsage: 72,
-    cpuUsage: 45,
+    totalUsers: 0,
+    activeUsers: 0,
+    totalGraduates: 0,
+    totalZoneGraduates: 0,
+    totalZones: 0,
+    totalServiceDepartments: 0,
+    pendingStaffRequests: 0,
+    graduatesByStatus: {},
+    staffRequestsByStatus: {},
   });
 
-  // Load settings
+  // Load settings and metrics from API
   useEffect(() => {
-    // In a real app, load settings from API
-    const loadSettings = async () => {
+    const loadData = async () => {
       setIsLoading(true);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        // Settings are already initialized in state
+        const response = await fetch("/api/vgss-office/settings");
+        if (!response.ok) {
+          throw new Error("Failed to load settings");
+        }
+        const data = await response.json();
+
+        if (data.success) {
+          setMetrics(data.metrics);
+          setAdminUsers(data.adminUsers);
+        }
       } catch (error) {
-        toast.error("Failed to load settings");
+        toast.error("Failed to load settings data");
+        console.error("Settings load error:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadSettings();
+    loadData();
   }, []);
 
   // Save settings
@@ -334,15 +226,6 @@ export default function VGSSOfficeSettingsPage() {
     }));
   };
 
-  // Toggle user status
-  const toggleUserStatus = (userId: string) => {
-    setAdminUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId ? { ...user, isActive: !user.isActive } : user
-      )
-    );
-    toast.success("User status updated");
-  };
 
   // Handle backup
   const handleBackup = async () => {
@@ -423,44 +306,79 @@ export default function VGSSOfficeSettingsPage() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">System Status</p>
-                  <p className="font-semibold text-green-600">Operational</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                   <Users className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Users</p>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
                   <p className="font-semibold">
-                    {metrics.activeUsers}/{metrics.totalUsers}
+                    {metrics.activeUsers} active / {metrics.totalUsers} total
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <GraduationCap className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Graduates</p>
+                  <p className="font-semibold">
+                    {metrics.totalGraduates} registered
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Server className="w-5 h-5 text-purple-600" />
+                  <Building className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Uptime</p>
-                  <p className="font-semibold">{metrics.systemUptime}</p>
+                  <p className="text-sm text-muted-foreground">BLW Zones</p>
+                  <p className="font-semibold">{metrics.totalZones}</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <HardDrive className="w-5 h-5 text-orange-600" />
+                  <Building className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Disk Usage</p>
-                  <p className="font-semibold">{metrics.diskUsage}%</p>
+                  <p className="text-sm text-muted-foreground">Service Depts</p>
+                  <p className="font-semibold">{metrics.totalServiceDepartments}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Stats Row */}
+            <div className="grid gap-4 md:grid-cols-3 mt-4 pt-4 border-t">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Pending Staff Requests</p>
+                  <p className="font-semibold">{metrics.pendingStaffRequests}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                  <Users className="w-5 h-5 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Zone Graduates</p>
+                  <p className="font-semibold">{metrics.totalZoneGraduates} uploaded</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">System Status</p>
+                  <p className="font-semibold text-green-600">Operational</p>
                 </div>
               </div>
             </div>
@@ -473,7 +391,7 @@ export default function VGSSOfficeSettingsPage() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="general" className="flex items-center">
               <Settings className="w-4 h-4 mr-2" />
               General
@@ -486,17 +404,9 @@ export default function VGSSOfficeSettingsPage() {
               <Shield className="w-4 h-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="system" className="flex items-center">
-              <Server className="w-4 h-4 mr-2" />
-              System
-            </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center">
               <Users className="w-4 h-4 mr-2" />
               Admin Users
-            </TabsTrigger>
-            <TabsTrigger value="logs" className="flex items-center">
-              <FileText className="w-4 h-4 mr-2" />
-              Activity Logs
             </TabsTrigger>
           </TabsList>
 
@@ -561,7 +471,7 @@ export default function VGSSOfficeSettingsPage() {
                   />
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="supportPhone">Support Phone</Label>
                     <Input
@@ -594,25 +504,6 @@ export default function VGSSOfficeSettingsPage() {
                         </SelectItem>
                         <SelectItem value="GMT">GMT</SelectItem>
                         <SelectItem value="UTC">UTC</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="currency">Currency</Label>
-                    <Select
-                      value={settings.general.currency}
-                      onValueChange={(value) =>
-                        updateSettings("general", "currency", value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NGN">Nigerian Naira (₦)</SelectItem>
-                        <SelectItem value="USD">US Dollar ($)</SelectItem>
-                        <SelectItem value="EUR">Euro (€)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -922,456 +813,133 @@ export default function VGSSOfficeSettingsPage() {
             </Card>
           </TabsContent>
 
-          {/* System Settings */}
-          <TabsContent value="system" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Configuration</CardTitle>
-                <CardDescription>
-                  Configure system behavior and maintenance settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="flex items-center">
-                        <AlertCircle className="w-4 h-4 mr-2 text-orange-500" />
-                        Maintenance Mode
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable maintenance mode to restrict access
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.system.maintenanceMode}
-                      onCheckedChange={(checked) =>
-                        updateSettings("system", "maintenanceMode", checked)
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label>Debug Mode</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable detailed logging for troubleshooting
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.system.debugMode}
-                      onCheckedChange={(checked) =>
-                        updateSettings("system", "debugMode", checked)
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label>Automatic Backups</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable automated system backups
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.system.backupEnabled}
-                      onCheckedChange={(checked) =>
-                        updateSettings("system", "backupEnabled", checked)
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="logLevel">Log Level</Label>
-                    <Select
-                      value={settings.system.logLevel}
-                      onValueChange={(value) =>
-                        updateSettings("system", "logLevel", value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="error">Error</SelectItem>
-                        <SelectItem value="warn">Warning</SelectItem>
-                        <SelectItem value="info">Info</SelectItem>
-                        <SelectItem value="debug">Debug</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="backupFrequency">Backup Frequency</Label>
-                    <Select
-                      value={settings.system.backupFrequency}
-                      onValueChange={(value) =>
-                        updateSettings("system", "backupFrequency", value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hourly">Hourly</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="maxFileSize">Max File Size (MB)</Label>
-                    <Input
-                      id="maxFileSize"
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={settings.system.maxFileSize}
-                      onChange={(e) =>
-                        updateSettings(
-                          "system",
-                          "maxFileSize",
-                          parseInt(e.target.value)
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Allowed File Types</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {settings.system.allowedFileTypes.map((type, index) => (
-                      <Badge key={index} variant="secondary">
-                        .{type}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    File types allowed for uploads across the platform
-                  </p>
-                </div>
-
-                <Separator />
-
-                {/* System Metrics */}
-                <div className="space-y-4">
-                  <h4 className="font-medium">System Resources</h4>
-
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm">CPU Usage</Label>
-                        <span className="text-sm font-medium">
-                          {metrics.cpuUsage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${
-                            metrics.cpuUsage > 80
-                              ? "bg-red-500"
-                              : metrics.cpuUsage > 60
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                          }`}
-                          style={{ width: `${metrics.cpuUsage}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm">Memory Usage</Label>
-                        <span className="text-sm font-medium">
-                          {metrics.memoryUsage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${
-                            metrics.memoryUsage > 80
-                              ? "bg-red-500"
-                              : metrics.memoryUsage > 60
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                          }`}
-                          style={{ width: `${metrics.memoryUsage}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm">Disk Usage</Label>
-                        <span className="text-sm font-medium">
-                          {metrics.diskUsage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${
-                            metrics.diskUsage > 80
-                              ? "bg-red-500"
-                              : metrics.diskUsage > 60
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                          }`}
-                          style={{ width: `${metrics.diskUsage}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* Admin Users */}
           <TabsContent value="users" className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Administrator Users</CardTitle>
+                    <CardTitle>VGSS Office Users</CardTitle>
                     <CardDescription>
-                      Manage system administrators and their permissions
+                      Manage VGSS Office administrator accounts
                     </CardDescription>
                   </div>
-                  <Button>
+                  <Button onClick={() => window.location.href = "/dashboard/vgss-office/create-account"}>
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Add Administrator
+                    Create Account
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Administrator</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Permissions</TableHead>
-                        <TableHead>Last Login</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {adminUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                <User className="w-4 h-4 text-primary" />
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Loading users...</p>
+                  </div>
+                ) : adminUsers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No administrators found</h3>
+                    <p className="text-muted-foreground">
+                      Create a new VGSS Office account to get started.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Administrator</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Account Status</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {adminUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                  <User className="w-4 h-4 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{user.name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {user.email}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium">{user.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {user.email}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{user.role}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {user.permissions
-                                .slice(0, 2)
-                                .map((permission, index) => (
-                                  <Badge
-                                    key={index}
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {permission === "all"
-                                      ? "All Permissions"
-                                      : permission.replace("_", " ")}
-                                  </Badge>
-                                ))}
-                              {user.permissions.length > 2 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{user.permissions.length - 2} more
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{user.role}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={
+                                  user.accountStatus === "active"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }
+                              >
+                                {user.accountStatus === "active"
+                                  ? "Activated"
+                                  : "Pending Activation"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {user.lastLogin ? (
+                                <div className="text-sm">
+                                  <p>
+                                    {new Date(user.lastLogin).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    {new Date(user.lastLogin).toLocaleTimeString()}
+                                  </p>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">
+                                  Never
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {user.isActive ? (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Active
+                                </Badge>
+                              ) : (
+                                <Badge variant="destructive">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  Inactive
                                 </Badge>
                               )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              <p>
-                                {new Date(user.lastLogin).toLocaleDateString()}
-                              </p>
-                              <p className="text-muted-foreground">
-                                {new Date(user.lastLogin).toLocaleTimeString()}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {user.isActive ? (
-                              <Badge className="bg-green-100 text-green-800">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Active
-                              </Badge>
-                            ) : (
-                              <Badge variant="destructive">
-                                <AlertCircle className="w-3 h-3 mr-1" />
-                                Inactive
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end space-x-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Key className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleUserStatus(user.id)}
-                              >
-                                {user.isActive ? (
-                                  <Lock className="w-4 h-4" />
-                                ) : (
-                                  <Unlock className="w-4 h-4" />
-                                )}
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Activity Logs */}
-          <TabsContent value="logs" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Activity Logs</CardTitle>
-                    <CardDescription>
-                      Monitor system activities and administrator actions
-                    </CardDescription>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Logs
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Clear Logs
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Clear Activity Logs
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete all activity logs. This
-                            action cannot be undone. Are you sure you want to
-                            continue?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction className="bg-red-600 hover:bg-red-700">
-                            Clear Logs
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {activityLogs.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium mb-2">
-                        No activity logs found
-                      </h3>
-                      <p className="text-muted-foreground">
-                        System activities will appear here when they occur.
-                      </p>
-                    </div>
-                  ) : (
-                    activityLogs.map((log) => (
-                      <div
-                        key={log.id}
-                        className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <Activity className="w-4 h-4 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <p className="font-medium">{log.action}</p>
-                                <Badge variant="outline" className="text-xs">
-                                  {log.userName}
-                                </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.location.href = `/dashboard/vgss-office/users`}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {log.details}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right text-sm text-muted-foreground">
-                            <p>
-                              {new Date(log.timestamp).toLocaleDateString()}
-                            </p>
-                            <p>
-                              {new Date(log.timestamp).toLocaleTimeString()}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                          <div className="flex items-center space-x-4">
-                            <span className="flex items-center">
-                              <Wifi className="w-3 h-3 mr-1" />
-                              {log.ipAddress}
-                            </span>
-                            <span className="flex items-center">
-                              <Globe className="w-3 h-3 mr-1" />
-                              {log.userAgent.split(" ")[0]}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {activityLogs.length > 0 && (
-                  <div className="flex items-center justify-center pt-4">
-                    <Button variant="outline" size="sm">
-                      Load More Logs
-                    </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
+
         </Tabs>
 
         {/* Quick Actions */}
@@ -1404,40 +972,6 @@ export default function VGSSOfficeSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* System Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>System Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  Platform Version
-                </Label>
-                <p className="font-medium">v2.1.0</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  Database Version
-                </Label>
-                <p className="font-medium">PostgreSQL 14.2</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  Node.js Version
-                </Label>
-                <p className="font-medium">v18.17.0</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  Last Updated
-                </Label>
-                <p className="font-medium">January 15, 2024</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );

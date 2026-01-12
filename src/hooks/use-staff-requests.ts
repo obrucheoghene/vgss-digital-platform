@@ -310,10 +310,90 @@ export function useAvailableGraduates(
   });
 }
 
+// Hook to update a staff request (Service Department)
+export function useUpdateStaffRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      requestId,
+      data,
+    }: {
+      requestId: string;
+      data: {
+        positionTitle: string;
+        positionDescription: string;
+        numberOfStaff: number;
+        skillsRequired?: string | null;
+        qualificationsRequired?: string | null;
+        preferredGender?: "MALE" | "FEMALE" | null;
+        urgency: "Low" | "Medium" | "High" | "Urgent";
+      };
+    }) => {
+      const response = await fetch(
+        `/api/service-department/staff-requests/${requestId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update staff request");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-requests"] });
+      toast.success("Staff request updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update request: ${error.message}`);
+    },
+  });
+}
+
+// Hook to cancel a staff request (Service Department)
+export function useCancelStaffRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (requestId: string) => {
+      const response = await fetch(
+        `/api/service-department/staff-requests/${requestId}`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to cancel staff request");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-requests"] });
+      toast.success("Staff request cancelled successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to cancel request: ${error.message}`);
+    },
+  });
+}
+
 // Combined hook for Service Department staff request management
 export function useServiceDepartmentRequests(filters: StaffRequestFilters = {}) {
   const requestsQuery = useStaffRequests(filters, false);
   const createRequest = useCreateStaffRequest();
+  const updateRequest = useUpdateStaffRequest();
+  const cancelRequest = useCancelStaffRequest();
 
   return {
     // Data
@@ -332,9 +412,13 @@ export function useServiceDepartmentRequests(filters: StaffRequestFilters = {}) 
     // Actions
     refetch: requestsQuery.refetch,
     createRequest: createRequest.mutate,
+    updateRequest: updateRequest.mutate,
+    cancelRequest: cancelRequest.mutate,
 
     // Action states
     isCreating: createRequest.isPending,
+    isUpdating: updateRequest.isPending,
+    isCancelling: cancelRequest.isPending,
   };
 }
 
