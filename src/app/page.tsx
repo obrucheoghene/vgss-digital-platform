@@ -225,6 +225,26 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link
+                href="/blog"
+                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              >
+                Blog
+              </Link>
+              <Link
+                href="/gallery"
+                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              >
+                Gallery
+              </Link>
+              <Link
+                href="/graduate/search"
+                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              >
+                Search Records
+              </Link>
+            </nav>
             <div className="flex items-center space-x-4">
               <Link href="/auth/login">
                 <Button
@@ -883,11 +903,8 @@ export default function HomePage() {
                     { label: "Registration Guide", href: "/graduate/guide" },
                     { label: "Requirements", href: "/graduate/requirements" },
                     { label: "FAQ", href: "/graduate/faq" },
-                    { label: "Training Modules", href: "/graduate/training" },
-                    {
-                      label: "Success Stories",
-                      href: "/graduate/testimonials",
-                    },
+                    { label: "Blog", href: "/blog" },
+                    { label: "Gallery", href: "/gallery" },
                   ].map((item, index) => (
                     <li key={index}>
                       <Link
