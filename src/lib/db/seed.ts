@@ -17,7 +17,7 @@ async function seed() {
       .insert(users)
       .values({
         name: "VGSS Administrator",
-        email: "admin@vgss.loveworld.org", // Change this to your preferred admin email
+        email: "admin@vgss.online", // Change this to your preferred admin email
         type: "VGSS_OFFICE",
         password: hashedPassword,
         accountStatus: "active", // Admin is immediately active
