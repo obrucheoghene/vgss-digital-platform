@@ -165,10 +165,7 @@ export default function BlogPage() {
               >
                 Home
               </Link>
-              <Link
-                href="/blog"
-                className="text-primary font-semibold"
-              >
+              <Link href="/blog" className="text-primary font-semibold">
                 Blog
               </Link>
               <Link
@@ -449,8 +446,8 @@ export default function BlogPage() {
             Have a Story to Share?
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto mb-8">
-            We'd love to hear about your VGSS experience. Share your journey and
-            inspire others to take the leap of faith.
+            {`We'd`} love to hear about your VGSS experience. Share your journey
+            and inspire others to take the leap of faith.
           </p>
           <Button
             size="lg"
