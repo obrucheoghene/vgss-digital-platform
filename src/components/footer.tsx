@@ -35,9 +35,6 @@ export function Footer() {
                   <div className="w-14 h-14 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
                     <GraduationCap className="w-7 h-7 text-white" />
                   </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-2 h-2 text-white" />
-                  </div>
                 </div>
                 <div>
                   <h3 className="text-2xl font-black bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
