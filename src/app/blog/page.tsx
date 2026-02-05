@@ -14,26 +14,18 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  GraduationCap,
   ArrowRight,
   Search,
-  Globe,
-  BookOpen,
   Calendar,
   Clock,
   User,
   Tag,
   ChevronRight,
-  Sparkles,
   Mail,
-  Phone,
-  MapPin,
-  Building,
   Heart,
   TrendingUp,
   FileText,
 } from "lucide-react";
-import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 

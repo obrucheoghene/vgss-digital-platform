@@ -7,7 +7,6 @@ import {
   Phone,
   Mail,
   Clock,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
