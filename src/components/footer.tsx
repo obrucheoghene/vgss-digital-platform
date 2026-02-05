@@ -2,7 +2,6 @@ import {
   GraduationCap,
   ArrowRight,
   Globe,
-  Building,
   MapPin,
   Phone,
   Mail,
@@ -26,7 +25,7 @@ export function Footer() {
       <div className="relative">
         {/* Main Footer Content */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid gap-12 lg:grid-cols-4 md:grid-cols-2">
+          <div className="grid gap-12 lg:grid-cols-3 md:grid-cols-2">
             {/* Brand Section */}
             <div className="lg:col-span-1">
               <Link href="/" className="flex items-center space-x-4 mb-6">
@@ -76,34 +75,6 @@ export function Footer() {
                   { label: "FAQ", href: "/graduate/faq" },
                   { label: "Blog", href: "/blog" },
                   { label: "Gallery", href: "/gallery" },
-                ].map((item, index) => (
-                  <li key={index}>
-                    <Link
-                      href={item.href}
-                      className="text-gray-400 hover:text-primary transition-colors duration-300 flex items-center group"
-                    >
-                      <ArrowRight className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* For Organizations */}
-            <div>
-              <h4 className="text-lg font-bold mb-6 text-white flex items-center">
-                <Building className="w-5 h-5 mr-2 text-primary" />
-                For Organizations
-              </h4>
-              <ul className="space-y-4">
-                {[
-                  { label: "Staff Login", href: "/auth/login" },
-                  { label: "Zone Management", href: "/zones" },
-                  { label: "Service Departments", href: "/departments" },
-                  { label: "Admin Portal", href: "/admin" },
-                  { label: "Reports & Analytics", href: "/reports" },
-                  { label: "Support Center", href: "/support" },
                 ].map((item, index) => (
                   <li key={index}>
                     <Link
