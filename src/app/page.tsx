@@ -37,6 +37,7 @@ import {
   Flame,
 } from "lucide-react";
 import Link from "next/link";
+import { Navbar } from "@/components/navbar";
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -193,7 +194,7 @@ export default function HomePage() {
   const handleSearch = () => {
     if (searchTerm.trim()) {
       window.location.href = `/graduate/search?q=${encodeURIComponent(
-        searchTerm
+        searchTerm,
       )}`;
     }
   };
@@ -203,62 +204,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Enhanced Header */}
-      <header className="relative z-50 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                  VGSS
-                </h1>
-                <p className="text-xs text-muted-foreground font-medium">
-                  LoveWorld Inc.
-                </p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link
-                href="/blog"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                Blog
-              </Link>
-              <Link
-                href="/gallery"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                Gallery
-              </Link>
-              <Link
-                href="/graduate/search"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                Search Records
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
-                <Button
-                  variant="outline"
-                  className="hover:bg-primary/10 transition-all duration-300"
-                >
-                  <Shield className="w-4 h-4 mr-2" />
-                  Staff Login
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Revolutionary Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -301,9 +247,6 @@ export default function HomePage() {
               <div className="relative">
                 <div className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center shadow-2xl border border-white/20">
                   <HeroIcon className="w-12 h-12 text-white" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-3 h-3 text-yellow-800" />
                 </div>
               </div>
             </div>
@@ -1018,7 +961,8 @@ export default function HomePage() {
                 {/* Copyright */}
                 <div className="text-center md:text-left">
                   <p className="text-gray-400 text-sm">
-                    © 2024 LoveWorld Inc. All rights reserved.
+                    © {new Date().getFullYear()} LoveWorld Inc. All rights
+                    reserved.
                   </p>
                   <p className="text-gray-500 text-xs mt-1">
                     Volunteer Graduate Service Scheme Platform

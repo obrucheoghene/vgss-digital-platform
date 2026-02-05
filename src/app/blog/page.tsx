@@ -15,7 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   GraduationCap,
-  Shield,
   ArrowRight,
   Search,
   Globe,
@@ -35,6 +34,7 @@ import {
   FileText,
 } from "lucide-react";
 import Link from "next/link";
+import { Navbar } from "@/components/navbar";
 
 // Sample blog posts data
 const blogPosts = [
@@ -136,65 +136,7 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Header */}
-      <header className="relative z-50 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                  VGSS
-                </h1>
-                <p className="text-xs text-muted-foreground font-medium">
-                  LoveWorld Inc.
-                </p>
-              </div>
-            </Link>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link
-                href="/"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                Home
-              </Link>
-              <Link href="/blog" className="text-primary font-semibold">
-                Blog
-              </Link>
-              <Link
-                href="/gallery"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                Gallery
-              </Link>
-              <Link
-                href="/graduate/search"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                Search Records
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
-                <Button
-                  variant="outline"
-                  className="hover:bg-primary/10 transition-all duration-300"
-                >
-                  <Shield className="w-4 h-4 mr-2" />
-                  Staff Login
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-br from-primary via-purple-600 to-blue-600 text-white overflow-hidden">
