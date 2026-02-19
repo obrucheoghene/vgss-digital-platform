@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,11 @@ import { useKingsChat } from "./kingschat-context";
 
 export function KingsChatBanner() {
   const { resolved, linked } = useKingsChat();
+  const [mounted, setMounted] = useState(false);
 
-  if (!resolved || linked) return null;
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted || !resolved || linked) return null;
 
   return (
     <div className="border-b bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">

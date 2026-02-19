@@ -99,8 +99,8 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
             <h1 className="text-lg font-semibold text-foreground">
               {title || "Dashboard"}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {getWelcomeMessage(session.user.type)}
+            <p className="text-sm text-muted-foreground" suppressHydrationWarning>
+              {mounted ? getWelcomeMessage(session.user.type) : ""}
             </p>
           </div>
         </div>
