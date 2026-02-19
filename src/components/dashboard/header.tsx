@@ -26,8 +26,6 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
-import { Avatar } from "../ui/avatar";
-import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -182,21 +180,12 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <Avatar>
-                  <AvatarImage
-                    src="https://github.com/shadcn.png"
-                    alt="@shadcn"
-                  />
-                  <AvatarFallback>
-                    {session.user.name?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {/* <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-primary-foreground text-sm font-medium">
-                   
+                    {session.user.name?.charAt(0).toUpperCase()}
                   </span>
-                </div> */}
+                </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

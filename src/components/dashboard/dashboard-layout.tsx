@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Sidebar } from "./sidebar";
 import { DashboardHeader } from "./header";
 import { KingsChatBanner } from "./kingschat-banner";
+import { KingsChatProvider } from "./kingschat-context";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -17,6 +18,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    <KingsChatProvider>
     <div className="min-h-screen bg-background">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
@@ -75,5 +77,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
         />
       </button>
     </div>
+    </KingsChatProvider>
   );
 }

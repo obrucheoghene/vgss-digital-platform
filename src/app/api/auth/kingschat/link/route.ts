@@ -45,7 +45,7 @@ export async function DELETE(req: NextRequest) {
 
   await db
     .update(users)
-    .set({ kingshatId: null, updatedAt: new Date() })
+    .set({ kingshatId: null, kingshatProfile: null, updatedAt: new Date() })
     .where(eq(users.id, session.user.id));
 
   return NextResponse.json({ success: true });

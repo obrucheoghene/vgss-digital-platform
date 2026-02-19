@@ -26,8 +26,10 @@ import {
   Church,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useKingsChat } from "./kingschat-context";
 
 const navigationItems = {
   VGSS_OFFICE: [
@@ -187,6 +189,7 @@ interface SidebarProps {
 export function Sidebar({ className, isCollapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { profile: kingsProfile } = useKingsChat();
 
   if (!session?.user) return null;
 
@@ -285,9 +288,10 @@ export function Sidebar({ className, isCollapsed = false }: SidebarProps) {
         {/* User Info & Logout */}
         <div className="px-3 pt-4 mt-auto border-t">
           {!isCollapsed && (
-            <div className="mb-4">
+            <div className="mb-3 space-y-2">
+              {/* VGSS account */}
               <div className="flex items-center space-x-3 p-2 rounded-lg bg-muted/50">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shrink-0">
                   <span className="text-primary-foreground text-sm font-medium">
                     {session.user.name?.charAt(0).toUpperCase()}
                   </span>
@@ -301,6 +305,49 @@ export function Sidebar({ className, isCollapsed = false }: SidebarProps) {
                   </p>
                 </div>
               </div>
+
+              {/* KingsChat account — only shown when linked */}
+              {kingsProfile && (
+                <div className="flex items-center space-x-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900">
+                  <div className="shrink-0">
+                    {kingsProfile.avatarUrl ? (
+                      <Image
+                        src={kingsProfile.avatarUrl}
+                        alt={kingsProfile.name}
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">
+                          {kingsProfile.name?.charAt(0).toUpperCase() || "K"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <Image
+                        src="/kingschat-logo.png"
+                        alt="KingsChat"
+                        width={12}
+                        height={12}
+                        className="shrink-0"
+                      />
+                      <p className="text-xs font-medium text-blue-900 dark:text-blue-100 truncate">
+                        {kingsProfile.name}
+                      </p>
+                    </div>
+                    {kingsProfile.username && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 truncate">
+                        @{kingsProfile.username}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

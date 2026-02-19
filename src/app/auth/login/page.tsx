@@ -36,6 +36,7 @@ import {
   Globe,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -325,14 +326,13 @@ export default function LoginPage() {
                     }}
                     className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 font-bold text-base hover:scale-105 flex items-center justify-center gap-3"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 7.5h-2.25v5.25h-1.5V9.5H10.5V8h6v1.5z" />
-                    </svg>
+                    <Image
+                      src="/kingschat-logo.png"
+                      alt="KingsChat"
+                      width={24}
+                      height={24}
+                      className="shrink-0"
+                    />
                     Continue with KingsChat
                   </Button>
 
