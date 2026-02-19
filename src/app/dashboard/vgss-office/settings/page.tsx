@@ -51,6 +51,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { KingsChatConnectCard } from "@/components/settings/kingschat-connect-card";
 
 interface SystemSettings {
   general: {
@@ -330,7 +331,7 @@ export default function VGSSOfficeSettingsPage() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="general" className="flex items-center">
               <Settings className="w-4 h-4 mr-2" />
               General
@@ -346,6 +347,10 @@ export default function VGSSOfficeSettingsPage() {
             <TabsTrigger value="users" className="flex items-center">
               <Users className="w-4 h-4 mr-2" />
               Admin Users
+            </TabsTrigger>
+            <TabsTrigger value="connected" className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Connected
             </TabsTrigger>
           </TabsList>
 
@@ -877,6 +882,11 @@ export default function VGSSOfficeSettingsPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Connected Accounts Tab */}
+          <TabsContent value="connected" className="space-y-6">
+            <KingsChatConnectCard />
           </TabsContent>
 
         </Tabs>

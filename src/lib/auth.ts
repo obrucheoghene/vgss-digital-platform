@@ -5,6 +5,25 @@ import { db } from "./db";
 import { users, type User } from "./db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
+function verifyExchangeToken(token: string): string | null {
+  try {
+    const [data, sig] = token.split(".");
+    if (!data || !sig) return null;
+    const expected = crypto
+      .createHmac("sha256", process.env.AUTH_SECRET!)
+      .update(data)
+      .digest("base64url");
+    if (sig !== expected) return null;
+    const [userId, expStr] = Buffer.from(data, "base64url").toString().split("|");
+    if (!userId || !expStr) return null;
+    if (Date.now() > parseInt(expStr)) return null;
+    return userId;
+  } catch {
+    return null;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -14,8 +33,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
+        kc_token: { label: "KingsChat Token", type: "text" },
       },
       async authorize(credentials) {
+        // KingsChat exchange token flow
+        if (credentials?.kc_token) {
+          const userId = verifyExchangeToken(credentials.kc_token as string);
+          if (!userId) return null;
+
+          const [foundUser] = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+
+          if (!foundUser || foundUser.isDeactivated) return null;
+
+          return {
+            id: foundUser.id,
+            email: foundUser.username,
+            name: foundUser.name,
+            type: foundUser.type,
+            accountStatus: foundUser.accountStatus,
+            isDeactivated: foundUser.isDeactivated,
+            lastLoginAt: new Date(),
+          };
+        }
+
         if (!credentials?.username || !credentials?.password) {
           return null;
         }

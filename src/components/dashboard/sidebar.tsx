@@ -124,12 +124,12 @@ const navigationItems = {
     //   href: "/dashboard/blw-zone/reports",
     //   badge: null,
     // },
-    // {
-    //   title: "Settings",
-    //   icon: Settings,
-    //   href: "/dashboard/blw-zone/settings",
-    //   badge: null,
-    // },
+    {
+      title: "Settings",
+      icon: Settings,
+      href: "/dashboard/blw-zone/settings",
+      badge: null,
+    },
   ],
   SERVICE_DEPARTMENT: [
     {

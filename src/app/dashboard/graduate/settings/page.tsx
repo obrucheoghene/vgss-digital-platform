@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 import { useGraduateDashboard } from "@/hooks/use-graduate-dashboard";
 import { format } from "date-fns";
+import { KingsChatConnectCard } from "@/components/settings/kingschat-connect-card";
 
 interface NotificationSettings {
   emailNotifications: boolean;
@@ -173,7 +174,7 @@ export default function GraduateSettingsPage() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+          <TabsList className="grid w-full grid-cols-4 lg:w-[530px]">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Profile
@@ -188,6 +189,10 @@ export default function GraduateSettingsPage() {
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Lock className="w-4 h-4" />
               Security
+            </TabsTrigger>
+            <TabsTrigger value="connected" className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              Connected
             </TabsTrigger>
           </TabsList>
 
@@ -688,6 +693,11 @@ export default function GraduateSettingsPage() {
                 </ul>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Connected Accounts Tab */}
+          <TabsContent value="connected" className="space-y-6">
+            <KingsChatConnectCard />
           </TabsContent>
         </Tabs>
       </div>

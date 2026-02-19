@@ -134,7 +134,8 @@ export const users = pgTable("users", {
     .default("pending_activation")
     .notNull(),
   createdBy: uuid("created_by"),
-  lastLoginAt: timestamp("last_login_at"), // NEW FIELD
+  lastLoginAt: timestamp("last_login_at"),
+  kingshatId: varchar("kingschat_id", { length: 255 }).unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
