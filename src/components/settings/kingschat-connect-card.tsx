@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -14,11 +15,39 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Link2, Link2Off, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
+type KingsProfile = { name: string; username: string; avatarUrl: string } | null;
+
+// Avatar with fallback initials
+function KingsAvatar({ profile }: { profile: NonNullable<KingsProfile> }) {
+  const [imgError, setImgError] = useState(false);
+  const initials = profile.name?.charAt(0)?.toUpperCase() || "K";
+
+  if (profile.avatarUrl && !imgError) {
+    return (
+      <Image
+        src={profile.avatarUrl}
+        alt={profile.name}
+        width={44}
+        height={44}
+        className="rounded-full object-cover shrink-0"
+        onError={() => setImgError(true)}
+        unoptimized
+      />
+    );
+  }
+
+  return (
+    <div className="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+      <span className="text-white text-base font-semibold">{initials}</span>
+    </div>
+  );
+}
+
 // Inner component that uses useSearchParams — must be inside <Suspense>
 function KingsChatConnectInner() {
   const searchParams = useSearchParams();
   const [linked, setLinked] = useState<boolean | null>(null);
-  const [kingshatId, setKingshatId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<KingsProfile>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUnlinking, setIsUnlinking] = useState(false);
 
@@ -28,7 +57,7 @@ function KingsChatConnectInner() {
       .then((r) => r.json())
       .then((data) => {
         setLinked(data.linked);
-        setKingshatId(data.kingshatId);
+        setProfile(data.profile ?? null);
       })
       .catch(() => setLinked(false))
       .finally(() => setIsLoading(false));
@@ -42,6 +71,10 @@ function KingsChatConnectInner() {
     if (success === "kingschat_linked") {
       toast.success("KingsChat account linked successfully!");
       setLinked(true);
+      // Re-fetch to get the saved profile
+      fetch("/api/auth/kingschat/status")
+        .then((r) => r.json())
+        .then((data) => setProfile(data.profile ?? null));
       const url = new URL(window.location.href);
       url.searchParams.delete("success");
       window.history.replaceState({}, "", url.toString());
@@ -72,7 +105,7 @@ function KingsChatConnectInner() {
       const res = await fetch("/api/auth/kingschat/link", { method: "DELETE" });
       if (!res.ok) throw new Error();
       setLinked(false);
-      setKingshatId(null);
+      setProfile(null);
       toast.success("KingsChat account unlinked.");
     } catch {
       toast.error("Failed to unlink KingsChat. Please try again.");
@@ -94,16 +127,24 @@ function KingsChatConnectInner() {
     return (
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+          {profile ? (
+            <KingsAvatar profile={profile} />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+          )}
           <div>
-            <p className="text-sm font-medium">Connected</p>
-            {kingshatId && (
-              <p className="text-xs text-muted-foreground">ID: {kingshatId}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">
+                {profile?.name || "KingsChat"}
+              </p>
+              <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                Connected
+              </Badge>
+            </div>
+            {profile?.username && (
+              <p className="text-xs text-muted-foreground">@{profile.username}</p>
             )}
           </div>
-          <Badge className="bg-green-100 text-green-800 border-green-200">
-            Active
-          </Badge>
         </div>
         <Button
           variant="outline"

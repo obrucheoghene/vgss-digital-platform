@@ -7,6 +7,7 @@ import {
   boolean,
   text,
   integer,
+  jsonb,
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -136,6 +137,11 @@ export const users = pgTable("users", {
   createdBy: uuid("created_by"),
   lastLoginAt: timestamp("last_login_at"),
   kingshatId: varchar("kingschat_id", { length: 255 }).unique(),
+  kingshatProfile: jsonb("kingschat_profile").$type<{
+    name: string;
+    username: string;
+    avatarUrl: string;
+  }>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

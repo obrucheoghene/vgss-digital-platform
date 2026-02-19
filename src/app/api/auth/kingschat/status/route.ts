@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   const [user] = await db
-    .select({ kingshatId: users.kingshatId })
+    .select({ kingshatId: users.kingshatId, kingshatProfile: users.kingshatProfile })
     .from(users)
     .where(eq(users.id, session.user.id))
     .limit(1);
@@ -20,5 +20,6 @@ export async function GET() {
   return NextResponse.json({
     linked: !!user?.kingshatId,
     kingshatId: user?.kingshatId ?? null,
+    profile: user?.kingshatProfile ?? null,
   });
 }

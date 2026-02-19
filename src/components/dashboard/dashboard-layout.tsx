@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { Sidebar } from "./sidebar";
 import { DashboardHeader } from "./header";
+import { KingsChatBanner } from "./kingschat-banner";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -47,6 +48,8 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           title={title}
         />
+
+        <KingsChatBanner />
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-6">
