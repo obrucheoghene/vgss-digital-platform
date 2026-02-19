@@ -17,7 +17,7 @@ async function seed() {
       .insert(users)
       .values({
         name: "VGSS Administrator",
-        email: "admin@vgss.online", // Change this to your preferred admin email
+        username: "admin@vgss.online", // Change this to your preferred admin username
         type: "VGSS_OFFICE",
         password: hashedPassword,
         accountStatus: "active", // Admin is immediately active
@@ -26,7 +26,7 @@ async function seed() {
       .returning();
 
     console.log("✅ Admin user created successfully:");
-    console.log("Email:", adminUser[0].email);
+    console.log("Username:", adminUser[0].username);
     console.log("Password: admin123"); // Remember to change this
     console.log("Type:", adminUser[0].type);
   } catch (error) {

@@ -1,14 +1,12 @@
 // src/lib/auth.ts - Updated with last login tracking
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "./db";
 import { users, type User } from "./db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: DrizzleAdapter(db),
   providers: [
     Credentials({
       id: "credentials",
@@ -31,6 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             .limit(1);
 
           if (!user || user.length === 0) {
+            console.error("[AUTH] No user found for username:", credentials.username);
             return null;
           }
 
@@ -50,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           if (!passwordMatch) {
+            console.error("[AUTH] Password mismatch for username:", credentials.username);
             return null;
           }
 
@@ -73,7 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             lastLoginAt: new Date(), // Include in session
           };
         } catch (error) {
-          console.error("Authentication error:", error);
+          console.error("[AUTH] Authentication error:", error);
           return null;
         }
       },
