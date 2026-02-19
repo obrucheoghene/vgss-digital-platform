@@ -5,7 +5,7 @@ import axios from "axios";
 export interface ServiceDepartment {
   id: string;
   name: string;
-  email: string;
+  username: string;
   type: string;
   accountStatus: "pending_activation" | "active";
   isDeactivated: boolean;

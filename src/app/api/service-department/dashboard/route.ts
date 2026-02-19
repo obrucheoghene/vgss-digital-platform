@@ -102,7 +102,7 @@ export async function GET() {
     const [departmentInfo] = await db
       .select({
         name: users.name,
-        email: users.email,
+        username: users.username,
         createdAt: users.createdAt,
       })
       .from(users)

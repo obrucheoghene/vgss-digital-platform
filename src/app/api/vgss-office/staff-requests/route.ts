@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
         createdAt: staffRequests.createdAt,
         updatedAt: staffRequests.updatedAt,
         departmentName: users.name,
-        departmentEmail: users.email,
+        departmentUsername: users.username,
       })
       .from(staffRequests)
       .leftJoin(users, eq(staffRequests.serviceDepartmentId, users.id))

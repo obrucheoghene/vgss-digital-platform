@@ -47,7 +47,7 @@ export async function GET(
         createdAt: staffRequests.createdAt,
         updatedAt: staffRequests.updatedAt,
         departmentName: users.name,
-        departmentEmail: users.email,
+        departmentUsername: users.username,
       })
       .from(staffRequests)
       .leftJoin(users, eq(staffRequests.serviceDepartmentId, users.id))
@@ -85,7 +85,7 @@ export async function GET(
     let approver = null;
     if (request.approvedBy) {
       const [approverResult] = await db
-        .select({ name: users.name, email: users.email })
+        .select({ name: users.name, username: users.username })
         .from(users)
         .where(eq(users.id, request.approvedBy));
       approver = approverResult;
@@ -96,7 +96,7 @@ export async function GET(
       request: {
         ...request,
         approverName: approver?.name,
-        approverEmail: approver?.email,
+        approverUsername: approver?.username,
       },
       assignments,
     });

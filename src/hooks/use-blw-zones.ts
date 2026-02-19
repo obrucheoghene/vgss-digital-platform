@@ -5,7 +5,7 @@ export interface BLWZoneUser {
   id: string;
   userId: string;
   name: string;
-  email: string;
+  username: string;
   accountStatus: "pending_activation" | "active";
   isDeactivated: boolean;
   createdAt: string;

@@ -165,16 +165,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 7. CHECK IF EMAIL IS ALREADY IN USE
+    // 7. CHECK IF EMAIL IS ALREADY IN USE (email is used as username for graduates)
     const existingUser = await db
       .select()
       .from(users)
-      .where(eq(users.email, formData.email))
+      .where(eq(users.username, formData.email))
       .limit(1);
 
     if (existingUser.length > 0) {
       return NextResponse.json(
-        { error: "Email address is already registered" },
+        { error: "This email is already associated with an account" },
         { status: 400 }
       );
     }
@@ -223,7 +223,7 @@ export async function POST(req: NextRequest) {
       .select({
         id: users.id,
         name: users.name,
-        email: users.email,
+        username: users.username,
       })
       .from(users)
       .where(eq(users.id, record.userId))
@@ -237,13 +237,13 @@ export async function POST(req: NextRequest) {
         // Hash the password
         const hashedPassword = await hashPassword(password);
 
-        // Create user account
+        // Create user account (email is used as username for graduates)
         const [newUser] = await tx
           .insert(users)
           .values({
             type: "GRADUATE",
             name: `${record.graduateFirstname} ${record.graduateSurname}`,
-            email: formData.email,
+            username: formData.email,
             password: hashedPassword,
             accountStatus: "active", // Graduates are immediately active
             isDeactivated: false,

@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       .select({
         id: zoneGraduates.id,
         zoneName: users.name,
-        zoneEmail: users.email,
+        zoneUsername: users.username,
         createdAt: zoneGraduates.createdAt,
         isRegistered: zoneGraduates.isRegistered,
         graduateFirstname: zoneGraduates.graduateFirstname,
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
         timestamp: upload.createdAt,
         status: upload.isRegistered ? "registered" : "pending_registration",
         metadata: {
-          zoneEmail: upload.zoneEmail,
+          zoneUsername: upload.zoneUsername,
           graduateName: `${upload.graduateFirstname} ${upload.graduateSurname}`,
         },
       });

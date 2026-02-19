@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
 
           // Zone info
           zoneName: users.name,
-          zoneEmail: users.email,
+          zoneUsername: users.username,
         })
         .from(graduateData)
         .leftJoin(users, eq(graduateData.blwZoneId, users.id))

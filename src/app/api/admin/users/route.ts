@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     // Search filter
     if (search) {
       conditions.push(
-        or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`))
+        or(ilike(users.name, `%${search}%`), ilike(users.username, `%${search}%`))
       );
     }
 
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
         .select({
           id: users.id,
           name: users.name,
-          email: users.email,
+          username: users.username,
           type: users.type,
           accountStatus: users.accountStatus,
           isDeactivated: users.isDeactivated,

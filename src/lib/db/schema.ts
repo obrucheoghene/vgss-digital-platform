@@ -65,6 +65,12 @@ export const uploadStatusEnum = pgEnum("upload_status", [
   "failed",
 ]);
 
+// Content Status Enum (for blog and gallery)
+export const contentStatusEnum = pgEnum("content_status", [
+  "draft",
+  "published",
+]);
+
 // Zone Graduates table - Data uploaded by BLW Zones before graduate registration
 export const zoneGraduates = pgTable("zone_graduates", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -121,7 +127,7 @@ export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   type: userTypeEnum("type").notNull(),
   name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).unique().notNull(),
+  username: varchar("username", { length: 255 }).unique().notNull(),
   password: varchar("password", { length: 255 }).notNull(),
   isDeactivated: boolean("is_deactivated").default(false).notNull(),
   accountStatus: accountStatusEnum("account_status")
@@ -336,6 +342,61 @@ export const uploadHistory = pgTable("upload_history", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Blog Categories table
+export const blogCategories = pgTable("blog_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).unique().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Gallery Categories table
+export const galleryCategories = pgTable("gallery_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).unique().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Blog Posts table
+export const blogPosts = pgTable("blog_posts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 500 }).notNull(),
+  slug: varchar("slug", { length: 500 }).unique().notNull(),
+  excerpt: text("excerpt"),
+  content: text("content"), // HTML content from rich text editor
+  coverImage: varchar("cover_image", { length: 1000 }), // Supabase Storage URL
+  authorId: uuid("author_id")
+    .references(() => users.id, { onDelete: "set null" }),
+  authorName: varchar("author_name", { length: 255 }).notNull(), // Denormalized for display
+  categoryId: uuid("category_id")
+    .references(() => blogCategories.id, { onDelete: "set null" }),
+  tags: text("tags"), // JSON array stored as text
+  status: contentStatusEnum("status").default("draft").notNull(),
+  featured: boolean("featured").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
+  readTime: integer("read_time"), // Minutes to read
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Gallery Items table
+export const galleryItems = pgTable("gallery_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 500 }).notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url", { length: 1000 }).notNull(), // Supabase Storage URL
+  categoryId: uuid("category_id")
+    .references(() => galleryCategories.id, { onDelete: "set null" }),
+  location: varchar("location", { length: 255 }),
+  date: varchar("date", { length: 100 }), // Flexible date format (e.g., "January 2025")
+  status: contentStatusEnum("status").default("draft").notNull(),
+  featured: boolean("featured").default(false).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations - Updated to remove interview questions relationships
 export const usersRelations = relations(users, ({ one, many }) => ({
   // User as graduate
@@ -368,6 +429,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   approvedStaffRequests: many(staffRequests, { relationName: "requestApprover" }),
   // Staff request assignments made by user
   staffAssignments: many(staffRequestAssignments, { relationName: "assigner" }),
+  // Blog posts authored by user
+  blogPosts: many(blogPosts, { relationName: "authorPosts" }),
 }));
 
 export const zoneGraduatesRelations = relations(
@@ -480,6 +543,39 @@ export const uploadHistoryRelations = relations(uploadHistory, ({ one }) => ({
   }),
 }));
 
+// Blog Categories Relations
+export const blogCategoriesRelations = relations(blogCategories, ({ many }) => ({
+  posts: many(blogPosts, { relationName: "categoryPosts" }),
+}));
+
+// Gallery Categories Relations
+export const galleryCategoriesRelations = relations(galleryCategories, ({ many }) => ({
+  items: many(galleryItems, { relationName: "categoryItems" }),
+}));
+
+// Blog Posts Relations
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+  author: one(users, {
+    fields: [blogPosts.authorId],
+    references: [users.id],
+    relationName: "authorPosts",
+  }),
+  category: one(blogCategories, {
+    fields: [blogPosts.categoryId],
+    references: [blogCategories.id],
+    relationName: "categoryPosts",
+  }),
+}));
+
+// Gallery Items Relations
+export const galleryItemsRelations = relations(galleryItems, ({ one }) => ({
+  category: one(galleryCategories, {
+    fields: [galleryItems.categoryId],
+    references: [galleryCategories.id],
+    relationName: "categoryItems",
+  }),
+}));
+
 // Type exports for better TypeScript support
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -530,3 +626,18 @@ export type StaffRequestUrgency = "Low" | "Medium" | "High" | "Urgent";
 export type UploadHistory = typeof uploadHistory.$inferSelect;
 export type NewUploadHistory = typeof uploadHistory.$inferInsert;
 export type UploadStatus = "processing" | "completed" | "failed";
+
+// Content Status type
+export type ContentStatus = "draft" | "published";
+
+// Blog types
+export type BlogCategory = typeof blogCategories.$inferSelect;
+export type NewBlogCategory = typeof blogCategories.$inferInsert;
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type NewBlogPost = typeof blogPosts.$inferInsert;
+
+// Gallery types
+export type GalleryCategory = typeof galleryCategories.$inferSelect;
+export type NewGalleryCategory = typeof galleryCategories.$inferInsert;
+export type GalleryItem = typeof galleryItems.$inferSelect;
+export type NewGalleryItem = typeof galleryItems.$inferInsert;

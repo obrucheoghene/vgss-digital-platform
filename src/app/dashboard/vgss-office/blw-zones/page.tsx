@@ -138,7 +138,7 @@ export default function BLWZoneManagementPage() {
       (blwzoneUsers?.data?.results || []).filter((zone: BLWZoneUser) => {
         const matchesSearch =
           zone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          zone.email.toLowerCase().includes(searchQuery.toLowerCase());
+          zone.username.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesStatus =
           selectedStatus === "all" ||
@@ -350,7 +350,7 @@ export default function BLWZoneManagementPage() {
                                   <p className="font-medium">{zone.name}</p>
                                   <p className="text-sm text-muted-foreground flex items-center">
                                     <Mail className="w-3 h-3 mr-1" />
-                                    {zone.email}
+                                    {zone.username}
                                   </p>
                                 </div>
                               </div>
@@ -587,11 +587,11 @@ export default function BLWZoneManagementPage() {
                           </div>
                           <div>
                             <Label className="text-xs text-muted-foreground">
-                              Email
+                              Username
                             </Label>
                             <p className="flex items-center">
                               <Mail className="w-4 h-4 mr-1" />
-                              {selectedZone.email}
+                              {selectedZone.username}
                             </p>
                           </div>
                           <div>

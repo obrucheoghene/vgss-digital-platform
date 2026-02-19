@@ -204,7 +204,7 @@ export function DashboardHeader({ onMenuClick, title }: DashboardHeaderProps) {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">{session.user.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {session.user.email}
+                    {session.user.username}
                   </p>
                   <Badge variant="outline" className="w-fit text-xs">
                     {session.user.accountStatus === "active"

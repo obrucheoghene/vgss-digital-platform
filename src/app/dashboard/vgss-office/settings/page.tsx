@@ -96,7 +96,7 @@ interface SystemMetrics {
 interface AdminUserData {
   id: string;
   name: string;
-  email: string;
+  username: string;
   role: string;
   isActive: boolean;
   accountStatus: string;
@@ -807,7 +807,7 @@ export default function VGSSOfficeSettingsPage() {
                                 <div>
                                   <p className="font-medium">{user.name}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {user.email}
+                                    {user.username}
                                   </p>
                                 </div>
                               </div>

@@ -518,7 +518,7 @@ export default function OptimizedUserManagementPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           id="search"
-                          placeholder="Search by name or email..."
+                          placeholder="Search by name or username..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="pl-10"
@@ -644,7 +644,7 @@ export default function OptimizedUserManagementPage() {
                                   <div>
                                     <p className="font-medium">{user.name}</p>
                                     <p className="text-sm text-muted-foreground">
-                                      {user.email}
+                                      {user.username}
                                     </p>
                                   </div>
                                 </div>

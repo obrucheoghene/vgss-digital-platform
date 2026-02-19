@@ -38,7 +38,7 @@ import {
 export default function CreateAccountPage() {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    username: "",
     type: "",
     password: "VgssTemp123", // Default password
     customPassword: false,
@@ -89,7 +89,7 @@ export default function CreateAccountPage() {
         },
         body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
+          username: formData.username,
           type: formData.type,
           password: formData.customPassword ? formData.password : "VgssTemp123",
         }),
@@ -111,7 +111,7 @@ export default function CreateAccountPage() {
       // Reset form
       setFormData({
         name: "",
-        email: "",
+        username: "",
         type: "",
         password: "VgssTemp123",
         customPassword: false,
@@ -256,16 +256,16 @@ export default function CreateAccountPage() {
                 />
               </div>
 
-              {/* Email */}
+              {/* Username */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="username">Username *</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email address"
-                  value={formData.email}
+                  id="username"
+                  type="text"
+                  placeholder="Enter username"
+                  value={formData.username}
                   onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                    setFormData({ ...formData, username: e.target.value })
                   }
                   required
                   disabled={isLoading}
@@ -376,7 +376,7 @@ export default function CreateAccountPage() {
                   onClick={() =>
                     setFormData({
                       name: "",
-                      email: "",
+                      username: "",
                       type: "",
                       password: "VgssTemp123",
                       customPassword: false,
@@ -391,7 +391,7 @@ export default function CreateAccountPage() {
                   disabled={
                     isLoading ||
                     !formData.name ||
-                    !formData.email ||
+                    !formData.username ||
                     !formData.type
                   }
                 >

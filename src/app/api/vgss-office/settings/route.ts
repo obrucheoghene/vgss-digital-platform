@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
         .select({
           id: users.id,
           name: users.name,
-          email: users.email,
+          username: users.username,
           isDeactivated: users.isDeactivated,
           accountStatus: users.accountStatus,
           lastLoginAt: users.lastLoginAt,
@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
     const adminUsers = adminUsersResult.map((user) => ({
       id: user.id,
       name: user.name,
-      email: user.email,
+      username: user.username,
       role: "Administrator",
       isActive: !user.isDeactivated && user.accountStatus === "active",
       accountStatus: user.accountStatus,

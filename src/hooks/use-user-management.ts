@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export interface User {
   id: string;
   name: string;
-  email: string;
+  username: string;
   type: "VGSS_OFFICE" | "BLW_ZONE" | "SERVICE_DEPARTMENT" | "GRADUATE";
   accountStatus: "pending_activation" | "active";
   isDeactivated: boolean;
@@ -206,7 +206,7 @@ export function useCreateUser() {
   return useMutation({
     mutationFn: async (userData: {
       name: string;
-      email: string;
+      username: string;
       type: string;
       password?: string;
     }) => {

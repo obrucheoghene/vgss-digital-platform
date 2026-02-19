@@ -12,21 +12,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, email, type, password } = await req.json();
+    const { name, username, type, password } = await req.json();
 
     // Validate required fields
-    if (!name || !email || !type) {
+    if (!name || !username || !type) {
       return NextResponse.json(
-        { error: "Name, email, and account type are required" },
+        { error: "Name, username, and account type are required" },
         { status: 400 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Validate username (no spaces, reasonable length)
+    if (username.trim().length < 3 || /\s/.test(username)) {
       return NextResponse.json(
-        { error: "Invalid email format" },
+        { error: "Username must be at least 3 characters and contain no spaces" },
         { status: 400 }
       );
     }
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
     // Create the account
     const result = await createUserAccount({
       name,
-      email,
+      username,
       type,
       password: password || "VgssTemp123",
       createdBy: session.user.id,

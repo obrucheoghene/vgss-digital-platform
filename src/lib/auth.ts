@@ -14,20 +14,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       id: "credentials",
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null;
         }
 
         try {
-          // Find user by email
+          // Find user by username
           const user = await db
             .select()
             .from(users)
-            .where(eq(users.email, credentials.email as string))
+            .where(eq(users.username, credentials.username as string))
             .limit(1);
 
           if (!user || user.length === 0) {
@@ -65,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Return user data for session
           return {
             id: foundUser.id,
-            email: foundUser.email,
+            email: foundUser.username, // NextAuth requires email field; map username here
             name: foundUser.name,
             type: foundUser.type,
             accountStatus: foundUser.accountStatus,
@@ -88,6 +88,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Add user data to token on login
       if (user) {
         token.id = user.id;
+        token.username = user.email; // email field carries the username value
         token.type = user.type;
         token.accountStatus = user.accountStatus;
         token.isDeactivated = user.isDeactivated;
@@ -99,6 +100,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Add user data to session
       if (token) {
         session.user.id = token.id as string;
+        session.user.username = token.username as string;
         session.user.type = token.type as string;
         session.user.accountStatus = token.accountStatus as string;
         session.user.isDeactivated = token.isDeactivated as boolean;
@@ -141,7 +143,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
-      email: string;
+      username: string;
       name: string;
       type: string;
       accountStatus: string;
@@ -152,7 +154,7 @@ declare module "next-auth" {
 
   interface User {
     id: string;
-    email: string;
+    email: string; // NextAuth internal; carries the username value
     name: string;
     type: string;
     accountStatus: string;

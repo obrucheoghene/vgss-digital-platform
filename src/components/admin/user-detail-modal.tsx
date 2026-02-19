@@ -49,7 +49,7 @@ import {
 interface UserData {
   id: string;
   name: string;
-  email: string;
+  username: string;
   type: "VGSS_OFFICE" | "BLW_ZONE" | "SERVICE_DEPARTMENT" | "GRADUATE";
   accountStatus: "pending_activation" | "active";
   isDeactivated: boolean;
@@ -78,7 +78,7 @@ export function UserDetailModal({
   const [success, setSuccess] = useState("");
   const [editForm, setEditForm] = useState({
     name: "",
-    email: "",
+    username: "",
   });
 
   // Reset state when user changes or modal opens/closes
@@ -86,7 +86,7 @@ export function UserDetailModal({
     if (user && isOpen) {
       setEditForm({
         name: user.name,
-        email: user.email,
+        username: user.username,
       });
       setIsEditing(false);
       setError("");
@@ -194,16 +194,15 @@ export function UserDetailModal({
         payload.isDeactivated = !user.isDeactivated;
       } else if (action === "update_details") {
         payload.name = editForm.name.trim();
-        payload.email = editForm.email.trim();
+        payload.username = editForm.username.trim();
 
         // Validate form data
-        if (!payload.name || !payload.email) {
-          throw new Error("Name and email are required");
+        if (!payload.name || !payload.username) {
+          throw new Error("Name and username are required");
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(payload.email)) {
-          throw new Error("Please enter a valid email address");
+        if (payload.username.length < 3 || /\s/.test(payload.username)) {
+          throw new Error("Username must be at least 3 characters and contain no spaces");
         }
       }
 
@@ -258,7 +257,7 @@ export function UserDetailModal({
   const handleCancelEdit = () => {
     setEditForm({
       name: user.name,
-      email: user.email,
+      username: user.username,
     });
     setIsEditing(false);
     setError("");
@@ -283,7 +282,7 @@ export function UserDetailModal({
             <div>
               <h2 className="text-xl font-semibold">{user.name}</h2>
               <p className="text-sm text-muted-foreground font-normal">
-                {user.email}
+                {user.username}
               </p>
             </div>
           </DialogTitle>
@@ -352,16 +351,16 @@ export function UserDetailModal({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="edit-email">Email Address *</Label>
+                      <Label htmlFor="edit-username">Username *</Label>
                       <Input
-                        id="edit-email"
-                        type="email"
-                        value={editForm.email}
+                        id="edit-username"
+                        type="text"
+                        value={editForm.username}
                         onChange={(e) =>
-                          handleFormChange("email", e.target.value)
+                          handleFormChange("username", e.target.value)
                         }
                         disabled={isLoading}
-                        placeholder="Enter email address"
+                        placeholder="Enter username"
                       />
                     </div>
                   </div>
@@ -380,7 +379,7 @@ export function UserDetailModal({
                       disabled={
                         isLoading ||
                         !editForm.name.trim() ||
-                        !editForm.email.trim()
+                        !editForm.username.trim()
                       }
                     >
                       {isLoading && (
@@ -403,11 +402,11 @@ export function UserDetailModal({
 
                     <div>
                       <Label className="text-sm font-medium text-muted-foreground">
-                        Email Address
+                        Username
                       </Label>
                       <div className="flex items-center space-x-2 mt-1">
                         <Mail className="w-4 h-4 text-muted-foreground" />
-                        <p className="text-base">{user.email}</p>
+                        <p className="text-base">{user.username}</p>
                       </div>
                     </div>
 

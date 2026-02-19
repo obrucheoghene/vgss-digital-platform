@@ -21,7 +21,7 @@ export async function GET(
       .select({
         id: users.id,
         name: users.name,
-        email: users.email,
+        username: users.username,
         type: users.type,
         accountStatus: users.accountStatus,
         isDeactivated: users.isDeactivated,
@@ -93,7 +93,7 @@ export async function PATCH(
           .update(users)
           .set({
             name: updateData.name,
-            email: updateData.email,
+            username: updateData.username,
             updatedAt: new Date(),
           })
           .where(eq(users.id, userId));
@@ -108,7 +108,7 @@ export async function PATCH(
       .select({
         id: users.id,
         name: users.name,
-        email: users.email,
+        username: users.username,
         type: users.type,
         accountStatus: users.accountStatus,
         isDeactivated: users.isDeactivated,

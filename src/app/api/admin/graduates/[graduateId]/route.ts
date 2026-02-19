@@ -93,7 +93,7 @@ export async function GET(
 
         // Zone Information
         zoneName: users.name,
-        zoneEmail: users.email,
+        zoneUsername: users.username,
       })
       .from(graduateData)
       .leftJoin(users, eq(graduateData.blwZoneId, users.id))

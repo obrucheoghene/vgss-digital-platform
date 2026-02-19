@@ -38,7 +38,7 @@ import {
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -57,13 +57,13 @@ export default function LoginPage() {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        username,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setError("Invalid username or password");
         setIsLoading(false);
         return;
       }
@@ -224,18 +224,18 @@ export default function LoginPage() {
 
                   <div className="space-y-2">
                     <Label
-                      htmlFor="email"
+                      htmlFor="username"
                       className="text-white font-medium flex items-center"
                     >
                       <Mail className="w-4 h-4 mr-2" />
-                      Email Address
+                      Username
                     </Label>
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="username"
+                      type="text"
+                      placeholder="Enter your username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                       disabled={isLoading}
                       className="h-12 px-4 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-white/20 backdrop-blur-sm"

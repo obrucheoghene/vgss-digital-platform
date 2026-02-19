@@ -6,13 +6,13 @@ import { eq } from "drizzle-orm";
 // Create a new user account (used by VGSS_OFFICE)
 export async function createUserAccount({
   name,
-  email,
+  username,
   type,
   password = "VgssTemp123", // Default password
   createdBy,
 }: {
   name: string;
-  email: string;
+  username: string;
   type: UserType;
   password?: string;
   createdBy: string;
@@ -22,11 +22,11 @@ export async function createUserAccount({
     const existingUser = await db
       .select()
       .from(users)
-      .where(eq(users.email, email))
+      .where(eq(users.username, username))
       .limit(1);
 
     if (existingUser.length > 0) {
-      return { success: false, error: "User with this email already exists" };
+      return { success: false, error: "User with this username already exists" };
     }
 
     // Hash the password
@@ -35,7 +35,7 @@ export async function createUserAccount({
     // Create the user
     const newUser: NewUser = {
       name,
-      email,
+      username,
       type,
       password: hashedPassword,
       accountStatus: type === "GRADUATE" ? "active" : "pending_activation", // Graduates are immediately active
@@ -50,7 +50,7 @@ export async function createUserAccount({
       user: {
         id: createdUser.id,
         name: createdUser.name,
-        email: createdUser.email,
+        username: createdUser.username,
         type: createdUser.type,
         accountStatus: createdUser.accountStatus,
       },
@@ -132,7 +132,7 @@ export async function getUsersByType(userType: UserType) {
       .select({
         id: users.id,
         name: users.name,
-        email: users.email,
+        username: users.username,
         type: users.type,
         accountStatus: users.accountStatus,
         isDeactivated: users.isDeactivated,
@@ -164,18 +164,18 @@ export async function getUserById(userId: string) {
   }
 }
 
-// Check if email exists
-export async function checkEmailExists(email: string): Promise<boolean> {
+// Check if username exists
+export async function checkUsernameExists(username: string): Promise<boolean> {
   try {
     const user = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.email, email))
+      .where(eq(users.username, username))
       .limit(1);
 
     return user.length > 0;
   } catch (error) {
-    console.error("Error checking email existence:", error);
+    console.error("Error checking username existence:", error);
     return false;
   }
 }

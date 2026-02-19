@@ -297,7 +297,7 @@ export function Sidebar({ className, isCollapsed = false }: SidebarProps) {
                     {session.user.name}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {session.user.email}
+                    {session.user.username}
                   </p>
                 </div>
               </div>

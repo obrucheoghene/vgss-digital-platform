@@ -116,7 +116,7 @@ export default function ServiceDepartmentManagementPage() {
     return departments.filter((dept) => {
       const matchesSearch =
         dept.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dept.email.toLowerCase().includes(searchQuery.toLowerCase());
+        dept.username.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus =
         selectedStatus === "all" ||
@@ -394,7 +394,7 @@ export default function ServiceDepartmentManagementPage() {
                               <p className="font-medium">{dept.name}</p>
                               <p className="text-sm text-muted-foreground flex items-center">
                                 <Mail className="w-3 h-3 mr-1" />
-                                {dept.email}
+                                {dept.username}
                               </p>
                             </div>
                           </div>
@@ -591,11 +591,11 @@ export default function ServiceDepartmentManagementPage() {
                         </div>
                         <div>
                           <Label className="text-xs text-muted-foreground">
-                            Email
+                            Username
                           </Label>
                           <p className="flex items-center">
                             <Mail className="w-4 h-4 mr-1" />
-                            {selectedDepartment.email}
+                            {selectedDepartment.username}
                           </p>
                         </div>
                         <div>
