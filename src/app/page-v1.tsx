@@ -106,7 +106,7 @@ export default function HomePage() {
       role: "VGSS Graduate 2023",
       location: "Abuja, Nigeria",
       quote:
-        "The training and mentorship I received prepared me for leadership in both ministry and my career.",
+        "The training and mentorship I received prepared me for leadership in both ministry and life.",
       rating: 5,
     },
     {
@@ -130,7 +130,7 @@ export default function HomePage() {
     if (searchTerm.trim()) {
       // Navigate to search page with query
       window.location.href = `/graduate/search?q=${encodeURIComponent(
-        searchTerm
+        searchTerm,
       )}`;
     }
   };

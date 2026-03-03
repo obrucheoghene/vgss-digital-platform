@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 
-export default function KingsChatCompletePage() {
+function KingsChatCompleteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
@@ -75,5 +75,19 @@ export default function KingsChatCompletePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function KingsChatCompletePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+      }
+    >
+      <KingsChatCompleteContent />
+    </Suspense>
   );
 }

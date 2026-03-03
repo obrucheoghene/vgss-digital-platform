@@ -33,7 +33,7 @@ import { Footer } from "@/components/footer";
 const blogPosts = [
   {
     id: 1,
-    title: "How VGSS Transformed My Career Path",
+    title: "How VGSS Shaped My Purpose and Service Journey",
     excerpt:
       "Discover how one graduate's decision to give their first year to God opened doors they never imagined possible. A story of faith, service, and professional growth.",
     author: "John Adeyemi",
@@ -42,7 +42,7 @@ const blogPosts = [
     category: "Success Stories",
     image: "JA",
     featured: true,
-    tags: ["Testimonials", "Career Growth"],
+    tags: ["Testimonials", "Purpose", "Growth"],
   },
   {
     id: 2,

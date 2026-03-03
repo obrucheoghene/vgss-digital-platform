@@ -49,7 +49,7 @@ export default function HomePage() {
       title: "Give Your First Year to God",
       subtitle: "Join the Volunteer Graduate Service Scheme",
       description:
-        "Transform your career while serving in LoveWorld ministries worldwide",
+        "Grow in purpose and excellence as you dedicate your first year to serving God.",
       gradient: "from-purple-600 via-blue-600 to-teal-500",
       icon: Crown,
     },
@@ -63,9 +63,9 @@ export default function HomePage() {
     },
     {
       title: "Build Your Future",
-      subtitle: "Professional Growth in Ministry",
+      subtitle: "Growth in Service & Leadership",
       description:
-        "Gain valuable work experience in various ministry departments globally",
+        "Develop practical ministry experience through active service.",
       gradient: "from-emerald-500 via-cyan-500 to-blue-600",
       icon: Zap,
     },
@@ -103,8 +103,9 @@ export default function HomePage() {
     },
     {
       icon: Award,
-      title: "Professional Growth",
-      description: "Gain valuable work experience while serving in ministry",
+      title: "Growth in Service & Leadership",
+      description:
+        "Develop practical ministry experience through active service.",
       color: "text-purple-500 bg-purple-50",
     },
   ];
